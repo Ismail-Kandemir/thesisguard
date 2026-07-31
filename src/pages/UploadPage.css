@@ -1,0 +1,8 @@
+.upload-page {
+  padding-block: 40px;
+}
+
+.upload-page__card {
+  display: grid;
+  gap: 24px;
+}

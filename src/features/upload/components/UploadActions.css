@@ -1,0 +1,10 @@
+.upload-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 480px) {
+  .upload-actions .button {
+    width: 100%;
+  }
+}

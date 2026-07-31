@@ -1,0 +1,41 @@
+.file-info {
+  border-top: 1px solid #e5e7eb;
+  display: grid;
+  gap: 14px;
+  padding-top: 20px;
+}
+
+.file-info__title {
+  color: #111827;
+  font-size: 18px;
+  margin: 0;
+}
+
+.file-info__list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+}
+
+.file-info__row {
+  display: grid;
+  gap: 4px;
+}
+
+.file-info__row dt {
+  color: #6b7280;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.file-info__row dd {
+  color: #111827;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.file-info__warning {
+  color: #b45309;
+  font-weight: 600;
+  margin: 0;
+}
