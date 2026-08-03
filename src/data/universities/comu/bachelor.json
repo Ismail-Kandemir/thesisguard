@@ -1,0 +1,86 @@
+{
+  "metadata": {
+    "university": "comu",
+    "programLevel": "bachelor",
+    "version": "1.0.0"
+  },
+  "rules": [
+    {
+      "id": "comu.bachelor.typography.font-family",
+      "title": "Yazı Tipi",
+      "description": "Tez metninde kullanılacak temel yazı tipini tanımlar.",
+      "category": "typography",
+      "expected": "Times New Roman",
+      "severity": "error",
+      "score": 10,
+      "message": "Yazı tipi beklenen tez formatı ile uyumlu değil.",
+      "solution": "Ana metin yazı tipini Times New Roman olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.typography.font-size",
+      "title": "Yazı Boyutu",
+      "description": "Tez metninde kullanılacak temel yazı boyutunu tanımlar.",
+      "category": "typography",
+      "expected": {
+        "value": 12,
+        "unit": "pt"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Yazı boyutu beklenen tez formatı ile uyumlu değil.",
+      "solution": "Ana metin yazı boyutunu 12 punto olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.spacing.line-height",
+      "title": "Satır Aralığı",
+      "description": "Tez metninde kullanılacak temel satır aralığını tanımlar.",
+      "category": "spacing",
+      "expected": {
+        "value": 1.5,
+        "unit": "line"
+      },
+      "severity": "warning",
+      "score": 8,
+      "message": "Satır aralığı beklenen tez formatı ile uyumlu değil.",
+      "solution": "Ana metin satır aralığını 1.5 olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.margin.left",
+      "title": "Sol Kenar Boşluğu",
+      "description": "Sayfa düzeninde kullanılacak sol kenar boşluğunu tanımlar.",
+      "category": "margin",
+      "expected": {
+        "value": 3,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Sol kenar boşluğu beklenen tez formatı ile uyumlu değil.",
+      "solution": "Sol kenar boşluğunu 3 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.margin.right",
+      "title": "Sağ Kenar Boşluğu",
+      "description": "Sayfa düzeninde kullanılacak sağ kenar boşluğunu tanımlar.",
+      "category": "margin",
+      "expected": {
+        "value": 2.5,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Sağ kenar boşluğu beklenen tez formatı ile uyumlu değil.",
+      "solution": "Sağ kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    }
+  ]
+}

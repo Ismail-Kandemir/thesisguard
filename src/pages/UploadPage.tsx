@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { analyzeDocxWithRuleEngine } from '../features/analysis/analysisService'
 import {
   FileInfo,
   UploadActions,
@@ -25,8 +26,27 @@ export function UploadPage() {
     setSelectedFile(createSelectedUploadFile(file))
   }
 
-  function handleAnalyzeClick() {
-    console.log('Analyze clicked')
+  async function handleAnalyzeClick() {
+    if (!selectedFile) {
+      setErrorMessage('Dosya secilmeden analiz baslatilamaz.')
+      return
+    }
+
+    try {
+      setErrorMessage('')
+      const ruleResults = await analyzeDocxWithRuleEngine(selectedFile.file)
+
+      console.log('Rule engine results')
+      console.table(ruleResults)
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'DOCX paketi okunamadi: Bilinmeyen bir hata olustu.'
+
+      setErrorMessage(message)
+      console.error(message)
+    }
   }
 
   return (
