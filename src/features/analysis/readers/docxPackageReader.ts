@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import type { DocxPackageInspection } from "../types";
+import type { DocxAnalysisXmlParts, DocxPackageInspection } from "../types";
 
 const DOCUMENT_XML_PATH = "word/document.xml";
 const STYLES_XML_PATH = "word/styles.xml";
@@ -43,6 +43,20 @@ export async function readDocxDocumentXml(file: File): Promise<string> {
     const zip = await JSZip.loadAsync(file);
 
     return await readXmlPart(file, DOCUMENT_XML_PATH, zip);
+  } catch (error) {
+    throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
+  }
+}
+
+export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysisXmlParts> {
+  try {
+    const zip = await JSZip.loadAsync(file);
+    const documentXml = await readXmlPart(file, DOCUMENT_XML_PATH, zip);
+    const stylesXml = zip.file(STYLES_XML_PATH)
+      ? await readXmlPart(file, STYLES_XML_PATH, zip)
+      : null;
+
+    return { documentXml, stylesXml };
   } catch (error) {
     throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
   }

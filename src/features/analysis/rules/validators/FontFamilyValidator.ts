@@ -3,28 +3,25 @@ import type {
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
-  Run,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 
 export class FontFamilyValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedFontFamily = getExpectedFontFamily(rule.expected);
-    const mismatchedRuns = getMismatchedRuns(document, expectedFontFamily);
-    const passed = mismatchedRuns.length === 0;
+    const actualFontFamilies = getActualFontFamilies(document);
+    const passed = actualFontFamilies.every(
+      (fontFamily) => fontFamily === expectedFontFamily,
+    );
 
     return {
       ruleId: rule.id,
-      title: rule.title,
+      ruleName: rule.title,
       passed,
       severity: rule.severity,
-      score: passed ? rule.score : 0,
+      expected: expectedFontFamily,
+      actual: formatActualValues(actualFontFamilies),
       message: passed ? `${rule.title} kurali basarili.` : rule.message,
-      solution: passed ? "" : rule.solution,
-      details: mismatchedRuns.map(
-        ({ paragraphId, run }) =>
-          `${paragraphId}: "${run.text}" font="${run.fontFamily ?? "belirtilmemis"}"`,
-      ),
     };
   }
 }
@@ -41,16 +38,18 @@ function getExpectedFontFamily(expected: RuleExpectedValue): string {
   return String(expected);
 }
 
-function getMismatchedRuns(
-  document: NormalizedDocument,
-  expectedFontFamily: string,
-): Array<{ paragraphId: string; run: Run }> {
+function getActualFontFamilies(document: NormalizedDocument): Array<string | null> {
   return document.paragraphs.flatMap((paragraph) =>
-    paragraph.runs
-      .filter((run) => run.fontFamily !== expectedFontFamily)
-      .map((run) => ({
-        paragraphId: paragraph.id,
-        run,
-      })),
+    paragraph.runs.map((run) => run.fontFamily),
   );
+}
+
+function formatActualValues(values: Array<string | null>): string | null {
+  if (values.length === 0) {
+    return null;
+  }
+
+  const uniqueValues = new Set(values.map((value) => value ?? "belirtilmemis"));
+
+  return Array.from(uniqueValues).join(", ");
 }

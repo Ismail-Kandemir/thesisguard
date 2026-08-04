@@ -36,7 +36,6 @@ export function UploadPage() {
       setErrorMessage('')
       const ruleResults = await analyzeDocxWithRuleEngine(selectedFile.file)
 
-      console.log('Rule engine results')
       console.table(ruleResults)
     } catch (error) {
       const message =

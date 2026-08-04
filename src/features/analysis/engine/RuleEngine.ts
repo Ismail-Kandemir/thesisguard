@@ -1,8 +1,10 @@
 import type { NormalizedDocument, RuleDefinition, RuleResult } from "../types";
 import { ValidatorRegistry } from "../rules/ValidatorRegistry";
 import { FontFamilyValidator } from "../rules/validators/FontFamilyValidator";
+import { FontSizeValidator } from "../rules/validators/FontSizeValidator";
 
 const FONT_FAMILY_RULE_ID = "comu.bachelor.typography.font-family";
+const FONT_SIZE_RULE_ID = "comu.bachelor.typography.font-size";
 
 export class RuleEngine {
   private readonly validatorRegistry: ValidatorRegistry;
@@ -30,6 +32,7 @@ function createDefaultValidatorRegistry(): ValidatorRegistry {
   const registry = new ValidatorRegistry();
 
   registry.register(FONT_FAMILY_RULE_ID, new FontFamilyValidator());
+  registry.register(FONT_SIZE_RULE_ID, new FontSizeValidator());
 
   return registry;
 }
@@ -37,12 +40,15 @@ function createDefaultValidatorRegistry(): ValidatorRegistry {
 function createMissingValidatorResult(rule: RuleDefinition): RuleResult {
   return {
     ruleId: rule.id,
-    title: rule.title,
+    ruleName: rule.title,
     passed: false,
-    severity: "warning",
-    score: 0,
+    severity: rule.severity,
+    expected: getExpectedValue(rule.expected),
+    actual: null,
     message: "Bu kural icin kayitli validator bulunamadi.",
-    solution: "Ilgili validator eklendikten sonra kural calistirilabilir.",
-    details: [],
   };
+}
+
+function getExpectedValue(expected: RuleDefinition["expected"]): string | number | boolean {
+  return typeof expected === "object" ? expected.value : expected;
 }

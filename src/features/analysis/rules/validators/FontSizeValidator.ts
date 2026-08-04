@@ -1,0 +1,54 @@
+import type {
+  NormalizedDocument,
+  RuleDefinition,
+  RuleExpectedValue,
+  RuleResult,
+} from "../../types";
+import type { RuleValidator } from "./RuleValidator";
+
+export class FontSizeValidator implements RuleValidator {
+  validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
+    const expectedFontSize = getExpectedFontSize(rule.expected);
+    const actualFontSizes = getActualFontSizes(document);
+    const passed = actualFontSizes.every((fontSize) => fontSize === expectedFontSize);
+
+    return {
+      ruleId: rule.id,
+      ruleName: rule.title,
+      passed,
+      severity: rule.severity,
+      expected: expectedFontSize,
+      actual: formatActualFontSizes(actualFontSizes),
+      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+    };
+  }
+}
+
+function getExpectedFontSize(expected: RuleExpectedValue): number {
+  const value = typeof expected === "object" ? expected.value : expected;
+  const parsedValue = typeof value === "number" ? value : Number(value);
+
+  if (!Number.isFinite(parsedValue)) {
+    throw new Error("Font size kurali sayisal bir expected degeri icermelidir.");
+  }
+
+  return parsedValue;
+}
+
+function getActualFontSizes(document: NormalizedDocument): Array<number | null> {
+  return document.paragraphs.flatMap((paragraph) =>
+    paragraph.runs.map((run) => run.fontSize),
+  );
+}
+
+function formatActualFontSizes(fontSizes: Array<number | null>): string | null {
+  if (fontSizes.length === 0) {
+    return null;
+  }
+
+  const uniqueFontSizes = new Set(
+    fontSizes.map((fontSize) => (fontSize === null ? "belirtilmemis" : String(fontSize))),
+  );
+
+  return Array.from(uniqueFontSizes).join(", ");
+}

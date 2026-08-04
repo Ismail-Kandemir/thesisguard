@@ -54,35 +54,54 @@ export interface DocxPackageInspection {
   totalFileCount: number;
 }
 
+export interface DocxAnalysisXmlParts {
+  documentXml: string;
+  stylesXml: string | null;
+}
+
 export interface Run {
   text: string;
   bold: boolean;
   italic: boolean;
-  fontFamily?: string;
+  underline: boolean;
+  fontFamily: string | null;
+  fontSize: number | null;
+}
+
+export type ParagraphAlignment = "left" | "right" | "center" | "justify";
+
+export interface StyleDefinition {
+  id: string;
+  name: string | null;
+  basedOn: string | null;
+  nextStyle: string | null;
+  fontFamily: string | null;
+  fontSize: number | null;
+  bold: boolean | null;
+  italic: boolean | null;
+  underline: boolean | null;
+  lineSpacing: number | null;
+  alignment: ParagraphAlignment | null;
 }
 
 export interface Paragraph {
   id: string;
   text: string;
   runs: Run[];
+  alignment: ParagraphAlignment | null;
+  styleId: string | null;
+  isEmpty: boolean;
 }
 
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
-}
-
-export interface RuleResult {
-  ruleId: string;
-  title: string;
-  passed: boolean;
-  severity: RuleSeverity;
-  score: number;
-  message: string;
-  solution: string;
-  details: string[];
+  styles: StyleDefinition[];
 }
 
 export interface AnalysisReport {
   document: DocumentInfo;
   results: RuleResult[];
 }
+import type { RuleResult } from "./RuleResult";
+
+export type { RuleResult, RuleResultValue } from "./RuleResult";

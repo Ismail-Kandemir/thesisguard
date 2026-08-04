@@ -1,4 +1,9 @@
-import type { NormalizedDocument, Paragraph, Run } from "../types";
+import type {
+  NormalizedDocument,
+  Paragraph,
+  ParagraphAlignment,
+  Run,
+} from "../types";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
@@ -11,6 +16,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
 
   return {
     paragraphs: parseParagraphs(xmlDocument),
+    styles: [],
   };
 }
 
@@ -21,8 +27,11 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
 
       return {
         id: `paragraph-${index + 1}`,
-        text: runs.map((run) => run.text).join(""),
+        text: getParagraphText(runs),
         runs,
+        alignment: parseAlignment(paragraphElement),
+        styleId: parseParagraphStyleId(paragraphElement),
+        isEmpty: runs.every((run) => run.text.length === 0),
       };
     },
   );
@@ -30,16 +39,27 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
 
 function parseRuns(paragraphElement: Element): Run[] {
   return Array.from(paragraphElement.getElementsByTagNameNS(WORD_NAMESPACE, "r"))
-    .map(parseRun)
-    .filter((run) => run.text.length > 0);
+    .map(parseRun);
 }
 
 function parseRun(runElement: Element): Run {
+  const style = parseRunStyle(runElement);
+
   return {
     text: parseRunText(runElement),
-    bold: hasRunProperty(runElement, "b"),
-    italic: hasRunProperty(runElement, "i"),
-    fontFamily: parseRunFontFamily(runElement),
+    ...style,
+  };
+}
+
+function parseRunStyle(runElement: Element): Omit<Run, "text"> {
+  const runProperties = getFirstDescendant(runElement, "rPr");
+
+  return {
+    bold: parseToggleProperty(runProperties, "b"),
+    italic: parseToggleProperty(runProperties, "i"),
+    underline: parseUnderline(runProperties),
+    fontFamily: parseRunFontFamily(runProperties),
+    fontSize: parseRunFontSize(runProperties),
   };
 }
 
@@ -49,40 +69,101 @@ function parseRunText(runElement: Element): string {
     .join("");
 }
 
-function hasRunProperty(runElement: Element, propertyName: string): boolean {
-  const runProperties = runElement.getElementsByTagNameNS(WORD_NAMESPACE, "rPr").item(0);
-
+function parseToggleProperty(runProperties: Element | null, propertyName: string): boolean {
   if (!runProperties) {
     return false;
   }
 
-  const property = runProperties.getElementsByTagNameNS(WORD_NAMESPACE, propertyName).item(0);
+  const property = getFirstDescendant(runProperties, propertyName);
 
   if (!property) {
     return false;
   }
 
-  return property.getAttributeNS(WORD_NAMESPACE, "val") !== "false";
+  const value = getWordAttribute(property, "val")?.toLowerCase();
+
+  return value !== "false" && value !== "0" && value !== "off";
 }
 
-function parseRunFontFamily(runElement: Element): string | undefined {
-  const runProperties = runElement.getElementsByTagNameNS(WORD_NAMESPACE, "rPr").item(0);
-
+function parseUnderline(runProperties: Element | null): boolean {
   if (!runProperties) {
-    return undefined;
+    return false;
   }
 
-  const runFonts = runProperties.getElementsByTagNameNS(WORD_NAMESPACE, "rFonts").item(0);
+  const underline = getFirstDescendant(runProperties, "u");
+
+  if (!underline) {
+    return false;
+  }
+
+  const value = getWordAttribute(underline, "val")?.toLowerCase();
+
+  return value !== "none" && value !== "false" && value !== "0" && value !== "off";
+}
+
+function parseRunFontFamily(runProperties: Element | null): string | null {
+  const runFonts = runProperties ? getFirstDescendant(runProperties, "rFonts") : null;
 
   if (!runFonts) {
-    return undefined;
+    return null;
   }
 
   return (
-    runFonts.getAttributeNS(WORD_NAMESPACE, "ascii") ??
-    runFonts.getAttributeNS(WORD_NAMESPACE, "hAnsi") ??
-    runFonts.getAttributeNS(WORD_NAMESPACE, "cs") ??
-    runFonts.getAttributeNS(WORD_NAMESPACE, "eastAsia") ??
-    undefined
+    getWordAttribute(runFonts, "ascii") ??
+    getWordAttribute(runFonts, "hAnsi") ??
+    getWordAttribute(runFonts, "cs") ??
+    getWordAttribute(runFonts, "eastAsia")
   );
+}
+
+function parseRunFontSize(runProperties: Element | null): number | null {
+  const sizeElement = runProperties ? getFirstDescendant(runProperties, "sz") : null;
+  const halfPointValue = sizeElement ? getWordAttribute(sizeElement, "val") : null;
+
+  if (halfPointValue === null) {
+    return null;
+  }
+
+  const parsedValue = Number(halfPointValue);
+
+  return Number.isFinite(parsedValue) ? parsedValue / 2 : null;
+}
+
+function parseAlignment(paragraphElement: Element): ParagraphAlignment | null {
+  const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
+  const alignmentElement = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "jc")
+    : null;
+  const value = alignmentElement ? getWordAttribute(alignmentElement, "val") : null;
+
+  switch (value) {
+    case "left":
+    case "right":
+    case "center":
+    case "justify":
+      return value;
+    default:
+      return null;
+  }
+}
+
+function parseParagraphStyleId(paragraphElement: Element): string | null {
+  const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
+  const styleElement = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "pStyle")
+    : null;
+
+  return styleElement ? getWordAttribute(styleElement, "val") : null;
+}
+
+function getParagraphText(runs: Run[]): string {
+  return runs.map((run) => run.text).join("");
+}
+
+function getFirstDescendant(element: Element, localName: string): Element | null {
+  return element.getElementsByTagNameNS(WORD_NAMESPACE, localName).item(0);
+}
+
+function getWordAttribute(element: Element, localName: string): string | null {
+  return element.getAttributeNS(WORD_NAMESPACE, localName);
 }
