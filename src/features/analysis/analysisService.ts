@@ -2,8 +2,9 @@ import { RuleEngine } from "./engine/RuleEngine";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
+import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRules } from "./rules/RuleLoader";
-import type { NormalizedDocument, RuleResult } from "./types";
+import type { AnalysisReport, NormalizedDocument } from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
   const { documentXml, stylesXml } = await readDocxAnalysisXmlParts(file);
@@ -15,10 +16,12 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
   };
 }
 
-export async function analyzeDocxWithRuleEngine(file: File): Promise<RuleResult[]> {
+export async function analyzeDocx(file: File): Promise<AnalysisReport> {
   const normalizedDocument = await createNormalizedDocumentFromDocx(file);
   const rules = loadRules();
   const ruleEngine = new RuleEngine();
+  const reportBuilder = new ReportBuilder();
+  const results = ruleEngine.run(normalizedDocument, rules);
 
-  return ruleEngine.run(normalizedDocument, rules);
+  return reportBuilder.build(results);
 }

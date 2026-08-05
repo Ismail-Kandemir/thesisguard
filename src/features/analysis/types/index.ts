@@ -98,10 +98,5 @@ export interface NormalizedDocument {
   styles: StyleDefinition[];
 }
 
-export interface AnalysisReport {
-  document: DocumentInfo;
-  results: RuleResult[];
-}
-import type { RuleResult } from "./RuleResult";
-
+export type { AnalysisReport } from "./AnalysisReport";
 export type { RuleResult, RuleResultValue } from "./RuleResult";

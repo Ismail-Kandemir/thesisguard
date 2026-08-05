@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { analyzeDocxWithRuleEngine } from '../features/analysis/analysisService'
+import { analyzeDocx } from '../features/analysis/analysisService'
+import type { AnalysisReport } from '../features/analysis/types'
 import {
   FileInfo,
   UploadActions,
@@ -9,20 +10,24 @@ import {
 } from '../features/upload'
 import type { SelectedUploadFile } from '../features/upload'
 import { Card, Container } from '../shared'
+import { ReportPage } from './ReportPage'
 import './UploadPage.css'
 
 export function UploadPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<SelectedUploadFile | null>(null)
+  const [analysisReport, setAnalysisReport] = useState<AnalysisReport | null>(null)
 
   function handleFileSelect(file: File) {
     if (!isSupportedUploadFile(file)) {
       setSelectedFile(null)
+      setAnalysisReport(null)
       setErrorMessage('Yalnızca .docx uzantılı dosyalar yüklenebilir.')
       return
     }
 
     setErrorMessage('')
+    setAnalysisReport(null)
     setSelectedFile(createSelectedUploadFile(file))
   }
 
@@ -34,9 +39,9 @@ export function UploadPage() {
 
     try {
       setErrorMessage('')
-      const ruleResults = await analyzeDocxWithRuleEngine(selectedFile.file)
+      const analysisReport = await analyzeDocx(selectedFile.file)
 
-      console.table(ruleResults)
+      setAnalysisReport(analysisReport)
     } catch (error) {
       const message =
         error instanceof Error
@@ -46,6 +51,10 @@ export function UploadPage() {
       setErrorMessage(message)
       console.error(message)
     }
+  }
+
+  if (analysisReport) {
+    return <ReportPage analysisReport={analysisReport} />
   }
 
   return (
