@@ -51,6 +51,19 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.bachelor.format.alignment",
+      "title": "Paragraf Hizalama",
+      "description": "Tez metnindeki paragrafların hizalama biçimini tanımlar.",
+      "category": "format",
+      "expected": "justify",
+      "severity": "warning",
+      "score": 8,
+      "message": "Paragraf hizalaması beklenen tez formatı ile uyumlu değil.",
+      "solution": "Ana metin paragraflarını iki yana yaslı olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.bachelor.margin.left",
       "title": "Sol Kenar Boşluğu",
       "description": "Sayfa düzeninde kullanılacak sol kenar boşluğunu tanımlar.",
