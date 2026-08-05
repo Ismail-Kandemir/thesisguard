@@ -4,6 +4,7 @@ import type {
   RuleExpectedValue,
   RuleResult,
 } from "../../types";
+import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import type { RuleValidator } from "./RuleValidator";
 
 export class FontFamilyValidator implements RuleValidator {
@@ -39,8 +40,15 @@ function getExpectedFontFamily(expected: RuleExpectedValue): string {
 }
 
 function getActualFontFamilies(document: NormalizedDocument): Array<string | null> {
+  const formattingResolver = new EffectiveFormattingResolver(
+    document.styles,
+    document.documentDefaults,
+  );
+
   return document.paragraphs.flatMap((paragraph) =>
-    paragraph.runs.map((run) => run.fontFamily),
+    paragraph.runs.map(
+      (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontFamily,
+    ),
   );
 }
 

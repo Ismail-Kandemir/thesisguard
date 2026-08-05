@@ -89,6 +89,11 @@ export interface DocumentDefaults {
   fontSize: number | null;
 }
 
+export interface EffectiveFormatting {
+  fontFamily: string | null;
+  fontSize: number | null;
+}
+
 export interface Paragraph {
   id: string;
   text: string;
