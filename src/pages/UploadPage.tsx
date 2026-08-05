@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { analyzeDocx } from '../features/analysis/analysisService'
 import type { AnalysisReport } from '../features/analysis/types'
 import {
@@ -60,10 +60,45 @@ export function UploadPage() {
   return (
     <Container className="upload-page">
       <Card className="upload-page__card">
+        <header className="upload-page__header">
+          <h1>Tez Analizi</h1>
+          <p>Tez bilgilerini seçin ve analiz edilecek DOCX dosyasını yükleyin.</p>
+        </header>
+
+        <section className="upload-page__selections" aria-label="Tez bilgileri">
+          <SelectionField id="university" label="Üniversite">
+            <option value="comu">Çanakkale Onsekiz Mart Üniversitesi</option>
+          </SelectionField>
+          <SelectionField id="faculty" label="Fakülte">
+            <option value="all">Tüm fakülteler</option>
+          </SelectionField>
+          <SelectionField id="institute" label="Enstitü">
+            <option value="all">Tüm enstitüler</option>
+          </SelectionField>
+          <SelectionField id="thesis-type" label="Tez türü">
+            <option value="bachelor">Lisans tezi</option>
+          </SelectionField>
+        </section>
+
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
         {selectedFile ? <FileInfo selectedFile={selectedFile} /> : null}
         <UploadActions disabled={!selectedFile} onAnalyze={handleAnalyzeClick} />
       </Card>
     </Container>
+  )
+}
+
+interface SelectionFieldProps {
+  children: ReactNode
+  id: string
+  label: string
+}
+
+function SelectionField({ children, id, label }: SelectionFieldProps) {
+  return (
+    <label className="upload-page__selection" htmlFor={id}>
+      <span>{label}</span>
+      <select id={id}>{children}</select>
+    </label>
   )
 }

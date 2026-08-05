@@ -6,3 +6,49 @@
   display: grid;
   gap: 24px;
 }
+
+.upload-page__header h1,
+.upload-page__header p {
+  margin: 0;
+}
+
+.upload-page__header {
+  display: grid;
+  gap: 8px;
+}
+
+.upload-page__header p {
+  color: #4b5563;
+}
+
+.upload-page__selections {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.upload-page__selection {
+  display: grid;
+  gap: 6px;
+}
+
+.upload-page__selection span {
+  color: #374151;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.upload-page__selection select {
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  color: #111827;
+  font: inherit;
+}
+
+.upload-page__selection select:focus {
+  border-color: #1f2937;
+  outline: 2px solid #e5e7eb;
+}

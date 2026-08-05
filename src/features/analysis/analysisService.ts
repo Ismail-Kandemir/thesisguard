@@ -1,5 +1,6 @@
 import { RuleEngine } from "./engine/RuleEngine";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
+import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
 import { ReportBuilder } from "./report/ReportBuilder";
@@ -20,10 +21,63 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
 
 export async function analyzeDocx(file: File): Promise<AnalysisReport> {
   const normalizedDocument = await createNormalizedDocumentFromDocx(file);
+  logParserDebugData(normalizedDocument);
   const rules = loadRules();
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();
   const results = ruleEngine.run(normalizedDocument, rules);
 
   return reportBuilder.build(results);
+}
+
+function logParserDebugData(document: NormalizedDocument): void {
+  console.table(createParagraphDebugRows(document));
+  console.table(createRunDebugRows(document));
+  console.table([document.documentDefaults]);
+  console.table(createEffectiveFormattingDebugRows(document));
+}
+
+function createParagraphDebugRows(document: NormalizedDocument) {
+  const stylesById = new Map(document.styles.map((style) => [style.id, style]));
+
+  return document.paragraphs.map((paragraph) => ({
+    paragraphId: paragraph.id,
+    styleId: paragraph.styleId,
+    alignment: paragraph.alignment,
+    lineSpacing: paragraph.styleId
+      ? stylesById.get(paragraph.styleId)?.lineSpacing ?? null
+      : null,
+  }));
+}
+
+function createRunDebugRows(document: NormalizedDocument) {
+  return document.paragraphs.flatMap((paragraph) =>
+    paragraph.runs.map((run, runIndex) => ({
+      paragraphId: paragraph.id,
+      runIndex,
+      text: run.text,
+      fontFamily: run.fontFamily,
+      fontSize: run.fontSize,
+    })),
+  );
+}
+
+function createEffectiveFormattingDebugRows(document: NormalizedDocument) {
+  const resolver = new EffectiveFormattingResolver(
+    document.styles,
+    document.documentDefaults,
+  );
+
+  return document.paragraphs.flatMap((paragraph) =>
+    paragraph.runs.map((run, runIndex) => {
+      const effectiveFormatting = resolver.resolveRun(run, paragraph.styleId);
+
+      return {
+        paragraphId: paragraph.id,
+        runIndex,
+        fontFamily: effectiveFormatting.fontFamily,
+        fontSize: effectiveFormatting.fontSize,
+      };
+    }),
+  );
 }

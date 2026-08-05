@@ -23,6 +23,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     documentDefaults: {
       fontFamily: null,
       fontSize: null,
+      lineSpacing: null,
     },
     pageMargins: parsePageMargins(xmlDocument),
   };
@@ -81,6 +82,7 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
         text: getParagraphText(runs),
         runs,
         alignment: parseAlignment(paragraphElement),
+        lineSpacing: parseLineSpacing(paragraphElement),
         styleId: parseParagraphStyleId(paragraphElement),
         isEmpty: runs.every((run) => run.text.length === 0),
       };
@@ -189,13 +191,40 @@ function parseAlignment(paragraphElement: Element): ParagraphAlignment | null {
 
   switch (value) {
     case "left":
+    case "start":
+      return "left";
     case "right":
+    case "end":
+      return "right";
     case "center":
-    case "justify":
       return value;
+    case "both":
+    case "justify":
+      return "justify";
     default:
       return null;
   }
+}
+
+function parseLineSpacing(paragraphElement: Element): number | null {
+  const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
+  const spacingElement = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "spacing")
+    : null;
+
+  return spacingElement ? parseNumericWordAttribute(spacingElement, "line") : null;
+}
+
+function parseNumericWordAttribute(element: Element, localName: string): number | null {
+  const value = getWordAttribute(element, localName);
+
+  if (value === null) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isFinite(parsedValue) ? parsedValue : null;
 }
 
 function parseParagraphStyleId(paragraphElement: Element): string | null {

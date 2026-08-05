@@ -44,10 +44,17 @@ function parseDocumentDefaults(xmlDocument: Document): DocumentDefaults {
   const runProperties = runPropertiesDefault
     ? getFirstDescendant(runPropertiesDefault, "rPr")
     : null;
+  const paragraphPropertiesDefault = documentDefaults
+    ? getFirstDescendant(documentDefaults, "pPrDefault")
+    : null;
+  const paragraphProperties = paragraphPropertiesDefault
+    ? getFirstDescendant(paragraphPropertiesDefault, "pPr")
+    : null;
 
   return {
     fontFamily: parseFont(runProperties),
     fontSize: parseFontSize(runProperties),
+    lineSpacing: parseSpacing(paragraphProperties),
   };
 }
 
@@ -151,10 +158,16 @@ function parseAlignment(paragraphProperties: Element | null): ParagraphAlignment
 
   switch (value) {
     case "left":
+    case "start":
+      return "left";
     case "right":
+    case "end":
+      return "right";
     case "center":
-    case "justify":
       return value;
+    case "both":
+    case "justify":
+      return "justify";
     default:
       return null;
   }

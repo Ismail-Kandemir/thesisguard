@@ -87,6 +87,7 @@ export interface StyleDefinition {
 export interface DocumentDefaults {
   fontFamily: string | null;
   fontSize: number | null;
+  lineSpacing: number | null;
 }
 
 export interface EffectiveFormatting {
@@ -99,6 +100,7 @@ export interface Paragraph {
   text: string;
   runs: Run[];
   alignment: ParagraphAlignment | null;
+  lineSpacing: number | null;
   styleId: string | null;
   isEmpty: boolean;
 }
