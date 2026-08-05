@@ -4,6 +4,7 @@ import type {
   RuleExpectedValue,
   RuleResult,
 } from "../../types";
+import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import type { RuleValidator } from "./RuleValidator";
 
 export class FontSizeValidator implements RuleValidator {
@@ -36,8 +37,15 @@ function getExpectedFontSize(expected: RuleExpectedValue): number {
 }
 
 function getActualFontSizes(document: NormalizedDocument): Array<number | null> {
+  const formattingResolver = new EffectiveFormattingResolver(
+    document.styles,
+    document.documentDefaults,
+  );
+
   return document.paragraphs.flatMap((paragraph) =>
-    paragraph.runs.map((run) => run.fontSize),
+    paragraph.runs.map(
+      (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontSize,
+    ),
   );
 }
 
