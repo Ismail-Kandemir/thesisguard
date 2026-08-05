@@ -1,11 +1,20 @@
 import type { RuleValidator } from "./validators/RuleValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
+import { MarginValidator } from "./validators/MarginValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
+const LEFT_MARGIN_RULE_ID = "comu.bachelor.margin.left";
+const RIGHT_MARGIN_RULE_ID = "comu.bachelor.margin.right";
+const TOP_MARGIN_RULE_ID = "comu.bachelor.margin.top";
+const BOTTOM_MARGIN_RULE_ID = "comu.bachelor.margin.bottom";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
     [ALIGNMENT_RULE_ID, new AlignmentValidator()],
+    [LEFT_MARGIN_RULE_ID, new MarginValidator("left")],
+    [RIGHT_MARGIN_RULE_ID, new MarginValidator("right")],
+    [TOP_MARGIN_RULE_ID, new MarginValidator("top")],
+    [BOTTOM_MARGIN_RULE_ID, new MarginValidator("bottom")],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

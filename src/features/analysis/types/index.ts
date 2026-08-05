@@ -93,9 +93,17 @@ export interface Paragraph {
   isEmpty: boolean;
 }
 
+export interface PageMargins {
+  left: number | null;
+  right: number | null;
+  top: number | null;
+  bottom: number | null;
+}
+
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
+  pageMargins: PageMargins;
 }
 
 export type { AnalysisReport } from "./AnalysisReport";

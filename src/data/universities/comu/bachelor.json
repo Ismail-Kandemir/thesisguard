@@ -94,6 +94,38 @@
       "solution": "Sağ kenar boşluğunu 2.5 cm olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.margin.top",
+      "title": "Üst Kenar Boşluğu",
+      "description": "Sayfa düzeninde kullanılacak üst kenar boşluğunu tanımlar.",
+      "category": "margin",
+      "expected": {
+        "value": 2.5,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Üst kenar boşluğu beklenen tez formatı ile uyumlu değil.",
+      "solution": "Üst kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.margin.bottom",
+      "title": "Alt Kenar Boşluğu",
+      "description": "Sayfa düzeninde kullanılacak alt kenar boşluğunu tanımlar.",
+      "category": "margin",
+      "expected": {
+        "value": 2.5,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Alt kenar boşluğu beklenen tez formatı ile uyumlu değil.",
+      "solution": "Alt kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

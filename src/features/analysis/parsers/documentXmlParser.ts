@@ -1,11 +1,14 @@
 import type {
   NormalizedDocument,
+  PageMargins,
   Paragraph,
   ParagraphAlignment,
   Run,
 } from "../types";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+const TWIPS_PER_INCH = 1440;
+const CENTIMETERS_PER_INCH = 2.54;
 
 export function parseDocumentXml(documentXml: string): NormalizedDocument {
   const xmlDocument = new DOMParser().parseFromString(documentXml, "application/xml");
@@ -17,7 +20,51 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
   return {
     paragraphs: parseParagraphs(xmlDocument),
     styles: [],
+    pageMargins: parsePageMargins(xmlDocument),
   };
+}
+
+function parsePageMargins(xmlDocument: Document): PageMargins {
+  const sectionProperties = Array.from(
+    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "sectPr"),
+  ).at(-1);
+  const pageMarginElement = sectionProperties
+    ? getFirstDescendant(sectionProperties, "pgMar")
+    : null;
+
+  return {
+    left: parseMarginInCentimeters(pageMarginElement, "left"),
+    right: parseMarginInCentimeters(pageMarginElement, "right"),
+    top: parseMarginInCentimeters(pageMarginElement, "top"),
+    bottom: parseMarginInCentimeters(pageMarginElement, "bottom"),
+  };
+}
+
+function parseMarginInCentimeters(
+  pageMarginElement: Element | null,
+  marginName: keyof PageMargins,
+): number | null {
+  if (!pageMarginElement) {
+    return null;
+  }
+
+  const twipsValue = getWordAttribute(pageMarginElement, marginName);
+
+  if (twipsValue === null) {
+    return null;
+  }
+
+  const parsedTwips = Number(twipsValue);
+
+  if (!Number.isFinite(parsedTwips)) {
+    return null;
+  }
+
+  return roundToTwoDecimals((parsedTwips / TWIPS_PER_INCH) * CENTIMETERS_PER_INCH);
+}
+
+function roundToTwoDecimals(value: number): number {
+  return Math.round(value * 100) / 100;
 }
 
 function parseParagraphs(xmlDocument: Document): Paragraph[] {
