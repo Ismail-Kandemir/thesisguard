@@ -9,10 +9,12 @@ import type { AnalysisReport, NormalizedDocument } from "./types";
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
   const { documentXml, stylesXml } = await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
+  const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
 
   return {
     ...normalizedDocument,
-    styles: stylesXml ? parseStylesXml(stylesXml) : [],
+    styles: parsedStyles?.styles ?? [],
+    documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
   };
 }
 

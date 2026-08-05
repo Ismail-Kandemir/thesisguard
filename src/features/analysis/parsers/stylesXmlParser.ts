@@ -1,4 +1,8 @@
-import type { ParagraphAlignment, StyleDefinition } from "../types";
+import type {
+  DocumentDefaults,
+  ParagraphAlignment,
+  StyleDefinition,
+} from "../types";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
@@ -12,14 +16,39 @@ interface StyleProperties {
   alignment: ParagraphAlignment | null;
 }
 
-export function parseStylesXml(stylesXml: string): StyleDefinition[] {
+interface ParsedStylesXml {
+  styles: StyleDefinition[];
+  documentDefaults: DocumentDefaults;
+}
+
+export function parseStylesXml(stylesXml: string): ParsedStylesXml {
   const xmlDocument = new DOMParser().parseFromString(stylesXml, "application/xml");
 
   if (xmlDocument.querySelector("parsererror")) {
     throw new Error("styles.xml gecerli XML degil.");
   }
 
-  return parseStyles(xmlDocument);
+  return {
+    styles: parseStyles(xmlDocument),
+    documentDefaults: parseDocumentDefaults(xmlDocument),
+  };
+}
+
+function parseDocumentDefaults(xmlDocument: Document): DocumentDefaults {
+  const documentDefaults = xmlDocument
+    .getElementsByTagNameNS(WORD_NAMESPACE, "docDefaults")
+    .item(0);
+  const runPropertiesDefault = documentDefaults
+    ? getFirstDescendant(documentDefaults, "rPrDefault")
+    : null;
+  const runProperties = runPropertiesDefault
+    ? getFirstDescendant(runPropertiesDefault, "rPr")
+    : null;
+
+  return {
+    fontFamily: parseFont(runProperties),
+    fontSize: parseFontSize(runProperties),
+  };
 }
 
 function parseStyles(xmlDocument: Document): StyleDefinition[] {

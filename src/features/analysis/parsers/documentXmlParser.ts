@@ -20,6 +20,10 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
   return {
     paragraphs: parseParagraphs(xmlDocument),
     styles: [],
+    documentDefaults: {
+      fontFamily: null,
+      fontSize: null,
+    },
     pageMargins: parsePageMargins(xmlDocument),
   };
 }

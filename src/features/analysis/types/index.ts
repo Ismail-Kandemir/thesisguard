@@ -84,6 +84,11 @@ export interface StyleDefinition {
   alignment: ParagraphAlignment | null;
 }
 
+export interface DocumentDefaults {
+  fontFamily: string | null;
+  fontSize: number | null;
+}
+
 export interface Paragraph {
   id: string;
   text: string;
@@ -103,6 +108,7 @@ export interface PageMargins {
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
+  documentDefaults: DocumentDefaults;
   pageMargins: PageMargins;
 }
 
