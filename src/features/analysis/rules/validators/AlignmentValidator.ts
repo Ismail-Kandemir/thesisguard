@@ -22,7 +22,9 @@ export class AlignmentValidator implements RuleValidator {
       severity: rule.severity,
       expected: expectedAlignment,
       actual: formatActualAlignments(actualAlignments),
-      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+      message: passed
+        ? `${rule.title} kurali basarili.`
+        : createFailureMessage(expectedAlignment, actualAlignments),
     };
   }
 }
@@ -48,9 +50,37 @@ function formatActualAlignments(
     return null;
   }
 
-  const uniqueAlignments = new Set(
-    alignments.map((alignment) => alignment ?? "belirtilmemis"),
-  );
+  const uniqueAlignments = new Set(alignments.map(formatAlignmentLabel));
 
   return Array.from(uniqueAlignments).join(", ");
+}
+
+function createFailureMessage(
+  expectedAlignment: ParagraphAlignment,
+  actualAlignments: Array<ParagraphAlignment | null>,
+): string {
+  const actual = formatActualAlignments(actualAlignments);
+
+  if (!actual || actualAlignments.every((alignment) => alignment === null)) {
+    return "Paragraf hizalamasi uygun degil. Belgede bu ozellik tespit edilemedi.";
+  }
+
+  return `Paragraf hizalamasi uygun degil. Beklenen: ${formatAlignmentLabel(
+    expectedAlignment,
+  )}, Bulunan: ${actual}.`;
+}
+
+function formatAlignmentLabel(alignment: ParagraphAlignment | null): string {
+  if (alignment === null) {
+    return "Belirtilmemis";
+  }
+
+  const labels: Record<ParagraphAlignment, string> = {
+    left: "Sola hizali",
+    right: "Saga hizali",
+    center: "Ortali",
+    justify: "Iki yana yasli",
+  };
+
+  return labels[alignment];
 }

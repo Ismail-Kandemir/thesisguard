@@ -22,7 +22,9 @@ export class FontFamilyValidator implements RuleValidator {
       severity: rule.severity,
       expected: expectedFontFamily,
       actual: formatActualValues(actualFontFamilies),
-      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+      message: passed
+        ? `${rule.title} kurali basarili.`
+        : createFailureMessage(expectedFontFamily, actualFontFamilies),
     };
   }
 }
@@ -57,7 +59,20 @@ function formatActualValues(values: Array<string | null>): string | null {
     return null;
   }
 
-  const uniqueValues = new Set(values.map((value) => value ?? "belirtilmemis"));
+  const uniqueValues = new Set(values.map((value) => value ?? "Belirtilmemis"));
 
   return Array.from(uniqueValues).join(", ");
+}
+
+function createFailureMessage(
+  expectedFontFamily: string,
+  actualFontFamilies: Array<string | null>,
+): string {
+  const actual = formatActualValues(actualFontFamilies);
+
+  if (!actual || actualFontFamilies.every((fontFamily) => fontFamily === null)) {
+    return "Yazi tipi uygun degil. Belgede bu ozellik tespit edilemedi.";
+  }
+
+  return `Yazi tipi uygun degil. Beklenen: ${expectedFontFamily}, Bulunan: ${actual}.`;
 }

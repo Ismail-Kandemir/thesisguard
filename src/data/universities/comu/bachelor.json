@@ -35,6 +35,66 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.bachelor.heading.heading1",
+      "title": "Heading 1 Basligi",
+      "description": "Birinci seviye baslik stilinin tez formatina uygunlugunu tanimlar.",
+      "category": "heading",
+      "type": "HEADING",
+      "target": "Heading1",
+      "expected": {
+        "value": "Heading1",
+        "fontFamily": "Times New Roman",
+        "fontSize": 14,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Heading 1 baslik stili beklenen tez formati ile uyumlu degil.",
+      "solution": "Heading 1 stilini Times New Roman, 14 punto ve kalin olarak duzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.heading.heading2",
+      "title": "Heading 2 Basligi",
+      "description": "Ikinci seviye baslik stilinin tez formatina uygunlugunu tanimlar.",
+      "category": "heading",
+      "type": "HEADING",
+      "target": "Heading2",
+      "expected": {
+        "value": "Heading2",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Heading 2 baslik stili beklenen tez formati ile uyumlu degil.",
+      "solution": "Heading 2 stilini Times New Roman, 12 punto ve kalin olarak duzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.bachelor.heading.heading3",
+      "title": "Heading 3 Basligi",
+      "description": "Ucuncu seviye baslik stilinin tez formatina uygunlugunu tanimlar.",
+      "category": "heading",
+      "type": "HEADING",
+      "target": "Heading3",
+      "expected": {
+        "value": "Heading3",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "warning",
+      "score": 8,
+      "message": "Heading 3 baslik stili beklenen tez formati ile uyumlu degil.",
+      "solution": "Heading 3 stilini Times New Roman, 12 punto ve kalin olarak duzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.bachelor.spacing.line-height",
       "title": "Satır Aralığı",
       "description": "Tez metninde kullanılacak temel satır aralığını tanımlar.",

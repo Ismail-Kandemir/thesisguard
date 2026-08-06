@@ -20,7 +20,9 @@ export class FontSizeValidator implements RuleValidator {
       severity: rule.severity,
       expected: expectedFontSize,
       actual: formatActualFontSizes(actualFontSizes),
-      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+      message: passed
+        ? `${rule.title} kurali basarili.`
+        : createFailureMessage(expectedFontSize, actualFontSizes),
     };
   }
 }
@@ -59,4 +61,17 @@ function formatActualFontSizes(fontSizes: Array<number | null>): string | null {
   );
 
   return Array.from(uniqueFontSizes).join(", ");
+}
+
+function createFailureMessage(
+  expectedFontSize: number,
+  actualFontSizes: Array<number | null>,
+): string {
+  const actual = formatActualFontSizes(actualFontSizes);
+
+  if (!actual || actualFontSizes.every((fontSize) => fontSize === null)) {
+    return "Yazi boyutu uygun degil. Belgede bu ozellik tespit edilemedi.";
+  }
+
+  return `Yazi boyutu uygun degil. Beklenen: ${expectedFontSize} pt, Bulunan: ${actual} pt.`;
 }

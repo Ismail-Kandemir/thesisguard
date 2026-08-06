@@ -24,7 +24,9 @@ export class MarginValidator implements RuleValidator {
       severity: rule.severity,
       expected: expectedMargin,
       actual: actualMargin,
-      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+      message: passed
+        ? `${rule.title} kurali basarili.`
+        : createFailureMessage(this.side, expectedMargin, actualMargin),
     };
   }
 }
@@ -38,4 +40,31 @@ function getExpectedMargin(expected: RuleExpectedValue): number {
   }
 
   return parsedValue;
+}
+
+function createFailureMessage(
+  side: MarginSide,
+  expectedMargin: number,
+  actualMargin: number | null,
+): string {
+  if (actualMargin === null) {
+    return `${formatMarginSide(side)} kenar boslugu uygun degil. Belgede bu ozellik tespit edilemedi.`;
+  }
+
+  return `${formatMarginSide(
+    side,
+  )} kenar boslugu uygun degil. Beklenen: ${formatMarginSide(
+    side,
+  )} kenar ${expectedMargin} cm, Bulunan: ${actualMargin} cm.`;
+}
+
+function formatMarginSide(side: MarginSide): string {
+  const labels: Record<MarginSide, string> = {
+    left: "Sol",
+    right: "Sag",
+    top: "Ust",
+    bottom: "Alt",
+  };
+
+  return labels[side];
 }

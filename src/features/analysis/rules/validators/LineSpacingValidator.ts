@@ -33,7 +33,9 @@ export class LineSpacingValidator implements RuleValidator {
       severity: rule.severity,
       expected: expectedLineSpacing,
       actual: formatActualLineSpacings(actualLineSpacings),
-      message: passed ? `${rule.title} kurali basarili.` : rule.message,
+      message: passed
+        ? `${rule.title} kurali basarili.`
+        : createFailureMessage(expectedLineSpacing, actualLineSpacings),
     };
   }
 }
@@ -76,4 +78,17 @@ function formatActualLineSpacings(lineSpacings: number[]): string | null {
   }
 
   return Array.from(new Set(lineSpacings)).join(", ");
+}
+
+function createFailureMessage(
+  expectedLineSpacing: number,
+  actualLineSpacings: number[],
+): string {
+  const actual = formatActualLineSpacings(actualLineSpacings);
+
+  if (!actual) {
+    return "Satir araligi uygun degil. Belgede bu ozellik tespit edilemedi.";
+  }
+
+  return `Satir araligi uygun degil. Beklenen: ${expectedLineSpacing} satir, Bulunan: ${actual} satir.`;
 }

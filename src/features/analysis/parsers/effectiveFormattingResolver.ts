@@ -37,6 +37,7 @@ export class EffectiveFormattingResolver {
         run.fontSize ??
         findFirstStyleValue(styleChain, (style) => style.fontSize) ??
         this.documentDefaults.fontSize,
+      bold: run.bold || (findFirstStyleValue(styleChain, (style) => style.bold) ?? false),
       lineSpacing:
         paragraphLineSpacing ??
         findFirstStyleValue(styleChain, (style) => style.lineSpacing) ??

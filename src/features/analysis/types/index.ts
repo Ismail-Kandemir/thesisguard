@@ -16,9 +16,12 @@ export type RuleCategory =
   | "margin"
   | "structure"
   | "citation"
-  | "format";
+  | "format"
+  | "heading";
 
 export type RuleSeverity = "info" | "warning" | "error";
+
+export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
 
 export type RuleExpectedValue =
   | string
@@ -27,6 +30,10 @@ export type RuleExpectedValue =
   | {
       value: string | number | boolean;
       unit?: string;
+      level?: HeadingLevel;
+      fontFamily?: string;
+      fontSize?: number;
+      bold?: boolean;
     };
 
 export interface RuleDefinition {
@@ -93,6 +100,7 @@ export interface DocumentDefaults {
 export interface EffectiveFormatting {
   fontFamily: string | null;
   fontSize: number | null;
+  bold: boolean;
   lineSpacing: number | null;
 }
 
