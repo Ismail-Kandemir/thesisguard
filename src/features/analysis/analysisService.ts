@@ -70,13 +70,18 @@ function createEffectiveFormattingDebugRows(document: NormalizedDocument) {
 
   return document.paragraphs.flatMap((paragraph) =>
     paragraph.runs.map((run, runIndex) => {
-      const effectiveFormatting = resolver.resolveRun(run, paragraph.styleId);
+      const effectiveFormatting = resolver.resolveRun(
+        run,
+        paragraph.styleId,
+        paragraph.lineSpacing,
+      );
 
       return {
         paragraphId: paragraph.id,
         runIndex,
         fontFamily: effectiveFormatting.fontFamily,
         fontSize: effectiveFormatting.fontSize,
+        lineSpacing: effectiveFormatting.lineSpacing,
       };
     }),
   );

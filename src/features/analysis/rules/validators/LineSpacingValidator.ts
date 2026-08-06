@@ -3,10 +3,20 @@ import type {
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
+  Run,
 } from "../../types";
+import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import type { RuleValidator } from "./RuleValidator";
 
 const OOXML_UNITS_PER_LINE = 240;
+const EMPTY_RUN: Run = {
+  text: "",
+  bold: false,
+  italic: false,
+  underline: false,
+  fontFamily: null,
+  fontSize: null,
+};
 
 export class LineSpacingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
@@ -40,8 +50,18 @@ function getExpectedLineSpacing(expected: RuleExpectedValue): number {
 }
 
 function getActualLineSpacings(document: NormalizedDocument): number[] {
-  return document.styles
-    .map((style) => style.lineSpacing)
+  const formattingResolver = new EffectiveFormattingResolver(
+    document.styles,
+    document.documentDefaults,
+  );
+
+  return document.paragraphs
+    .map((paragraph) => {
+      const run = paragraph.runs[0] ?? EMPTY_RUN;
+
+      return formattingResolver.resolveRun(run, paragraph.styleId, paragraph.lineSpacing)
+        .lineSpacing;
+    })
     .filter((lineSpacing): lineSpacing is number => lineSpacing !== null)
     .map(convertOoxmlSpacingToLines);
 }

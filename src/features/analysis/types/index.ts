@@ -93,6 +93,7 @@ export interface DocumentDefaults {
 export interface EffectiveFormatting {
   fontFamily: string | null;
   fontSize: number | null;
+  lineSpacing: number | null;
 }
 
 export interface Paragraph {

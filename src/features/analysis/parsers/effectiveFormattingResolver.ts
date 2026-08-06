@@ -19,7 +19,11 @@ export class EffectiveFormattingResolver {
     this.inheritanceResolver = new StyleInheritanceResolver(styles);
   }
 
-  resolveRun(run: Run, paragraphStyleId: string | null): EffectiveFormatting {
+  resolveRun(
+    run: Run,
+    paragraphStyleId: string | null,
+    paragraphLineSpacing: number | null = null,
+  ): EffectiveFormatting {
     const styleChain = paragraphStyleId
       ? this.inheritanceResolver.resolve(paragraphStyleId)
       : [];
@@ -33,6 +37,10 @@ export class EffectiveFormattingResolver {
         run.fontSize ??
         findFirstStyleValue(styleChain, (style) => style.fontSize) ??
         this.documentDefaults.fontSize,
+      lineSpacing:
+        paragraphLineSpacing ??
+        findFirstStyleValue(styleChain, (style) => style.lineSpacing) ??
+        this.documentDefaults.lineSpacing,
     };
   }
 }
