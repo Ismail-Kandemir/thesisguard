@@ -26,6 +26,10 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       lineSpacing: null,
     },
     pageMargins: parsePageMargins(xmlDocument),
+    pageNumbering: {
+      hasPageNumbers: false,
+      fields: [],
+    },
   };
 }
 

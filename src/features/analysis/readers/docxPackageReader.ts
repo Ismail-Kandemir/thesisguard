@@ -1,5 +1,10 @@
 import JSZip from "jszip";
-import type { DocxAnalysisXmlParts, DocxPackageInspection } from "../types";
+import type {
+  DocxAnalysisXmlParts,
+  DocxPackageInspection,
+  HeaderFooterLocation,
+  HeaderFooterXmlPart,
+} from "../types";
 
 const DOCUMENT_XML_PATH = "word/document.xml";
 const STYLES_XML_PATH = "word/styles.xml";
@@ -55,11 +60,46 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
     const stylesXml = zip.file(STYLES_XML_PATH)
       ? await readXmlPart(file, STYLES_XML_PATH, zip)
       : null;
+    const headerFooterXmlParts = await readHeaderFooterXmlParts(file, zip);
 
-    return { documentXml, stylesXml };
+    return { documentXml, stylesXml, headerFooterXmlParts };
   } catch (error) {
     throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
   }
+}
+
+async function readHeaderFooterXmlParts(
+  file: File,
+  zip: JSZip,
+): Promise<HeaderFooterXmlPart[]> {
+  const partDescriptors = Object.values(zip.files)
+    .filter((entry) => !entry.dir)
+    .map((entry) => ({ path: entry.name, location: getHeaderFooterLocation(entry.name) }))
+    .filter(
+      (descriptor): descriptor is { path: string; location: HeaderFooterLocation } =>
+        descriptor.location !== null,
+    )
+    .sort((first, second) => first.path.localeCompare(second.path));
+
+  return Promise.all(
+    partDescriptors.map(async ({ path, location }) => ({
+      path,
+      location,
+      xml: await readXmlPart(file, path, zip),
+    })),
+  );
+}
+
+function getHeaderFooterLocation(path: string): HeaderFooterLocation | null {
+  if (HEADER_XML_PATTERN.test(path)) {
+    return "header";
+  }
+
+  if (FOOTER_XML_PATTERN.test(path)) {
+    return "footer";
+  }
+
+  return null;
 }
 
 async function readXmlPart(file: File, partPath: string, zip: JSZip): Promise<string> {

@@ -1,25 +1,81 @@
-# Üniversite Kuralları
+# Üniversite Kural Veri Modeli
 
-## İlk Desteklenecek Üniversite
+## Hiyerarşi
 
-ThesisGuard projesinde ilk desteklenecek üniversite Çanakkale Onsekiz Mart Üniversitesi (ÇOMÜ) olacaktır. İlk aşamada yalnızca ÇOMÜ için kural sistemi tasarlanacak, gerçek tez kuralları daha sonraki geliştirme aşamalarında tanımlanacaktır.
+ThesisGuard kural verisi uzun vadede aşağıdaki hiyerarşiyi temsil eder:
 
-## Üniversite Bazlı Kural Sisteminin Amacı
+```text
+Üniversite
+├── Genel kurallar
+├── Fakülte
+│   └── Bölüm / Program
+└── Enstitü
+    └── Bölüm / Program
+        └── Tez türü
+            └── Kural seti
+```
 
-Üniversitelerin tez yazım kuralları birbirinden farklı olabilir. Bu nedenle sistem, kural kontrollerini tek bir sabit yapıya bağlamak yerine üniversite bazlı yönetilebilir bir modelle ele alacaktır. Amaç, her üniversitenin kendi biçimsel gereksinimlerini bağımsız şekilde tanımlayabilmektir.
+`University`, `Faculty`, `Institute`, `Department`, `Program` ve `ThesisType`
+tanımları `id`, `name` ve `slug` alanlarını taşır. Kural seti metadata'sında
+üniversite, tez türü ve sürüm bulunur. Fakülte/enstitü ile bölüm/program
+alanları opsiyoneldir; böylece üniversite genelindeki kurallar da aynı modelle
+temsil edilebilir.
 
-## Farklı Üniversitelerin Eklenmesi
+## Scope
 
-Gelecekte yeni üniversiteler sisteme ayrı kural setleri olarak eklenecektir. Her üniversite için ayrı yapılandırma yaklaşımı kullanılması, mevcut kuralları etkilemeden yeni desteklerin eklenmesini sağlar.
+Bir kuralın `scope` alanı kuralın geçerli olduğu seviyeyi ve hedef birimin
+`id`/`slug` değerlerini belirtir. Desteklenen seviyeler `university`, `faculty`,
+`institute`, `department` ve `program` değerleridir. `scope` mevcut kurallarda
+opsiyoneldir; bu sayede eski kural dosyaları değişmeden çalışır.
 
-## Kural Dosyalarının Ayrı Tutulması
+## Rule ID namespace standardı
 
-Kural dosyalarının ayrı tutulması bakım kolaylığı, okunabilirlik ve hata riskinin azaltılması açısından önemlidir. Bir üniversiteye ait değişiklik başka bir üniversitenin analiz sonucunu etkilememelidir.
+Yeni rule ID'leri küçük harfli slug bileşenlerinden oluşur. Önerilen biçimler:
 
-## Gelecekte JSON Tabanlı Kural Yapısı
+```text
+<university>.<thesis-type>.general.<rule-name>
+<university>.<faculty-or-institute>.<department-or-program>.<thesis-type>.<rule-name>
+```
 
-İlerleyen aşamalarda kuralların JSON tabanlı bir yapıya taşınması planlanmaktadır. Bu yaklaşım, kural tanımlarının koddan bağımsız yönetilmesini, güncellenmesini ve farklı üniversitelere uyarlanmasını kolaylaştıracaktır.
+Örnekler:
 
-## Mevcut Kapsam
+```text
+comu.bachelor.general.font-family
+comu.engineering.computer-engineering.bachelor.page-number
+comu.applied-sciences.food-technology.bachelor.page-number
+```
 
-Bu aşamada gerçek tez yazım kuralları dokümana eklenmeyecektir. Dosya yalnızca üniversite bazlı kural sisteminin tasarım yaklaşımını açıklar ve mevcut kapsamın ÇOMÜ ile sınırlı olduğunu belirtir.
+TypeScript'teki `UniversityGeneralRuleId`, `OrganizationalRuleId` ve
+`NamespacedRuleId` tipleri yeni namespace biçimlerini ifade eder. Mevcut rule
+ID'leri migration sırasında değiştirilmez.
+
+## Kalıtım ve override hazırlığı
+
+Gelecekteki çözümleyici kural setlerini şu sırayla ele alacaktır:
+
+1. Üniversite genel kuralları
+2. Fakülte veya enstitü kuralları
+3. Bölüm veya program kuralları
+4. Tez türüne ait en spesifik kurallar
+
+`UniversityRuleSet.extends`, daha genel kural setlerinin kimlik ve kapsam
+referanslarını tutar. Bir kuralın opsiyonel `overrides` alanı ise hangi genel
+rule ID'lerinin yerine geçtiğini açıkça belirtir. Böylece ileride en spesifik
+kuralın genel kuralı ezmesi belirsiz ID eşleştirmelerine ihtiyaç duymadan
+uygulanabilir. Bu sprintte merge veya override algoritması yoktur ve mevcut
+RuleEngine davranışı değişmez.
+
+## Neden tek bachelor.json yeterli değil?
+
+Bir üniversitenin fakülteleri, enstitüleri ve programları farklı tez yazım
+kuralları uygulayabilir. Üniversite seviyesindeki tek bir `bachelor.json`, bu
+farklı kapsamların kaynağını ve önceliğini güvenli biçimde ifade edemez; zamanla
+çakışan veya doğrulanması zor kurallar üretir. Hiyerarşik yapı her kural setinin
+kurumsal kaynağını, tez türünü ve sürümünü ayrı ayrı tanımlamayı sağlar.
+
+## Geriye uyumluluk
+
+`src/data/universities/comu/bachelor.json` geçici geriye uyumluluk amacıyla
+yerinde korunur. Mevcut `RuleLoader` bu dosyayı aynı şekilde yüklemeye devam
+eder. Yeni metadata, scope, `extends` ve `overrides` alanları mevcut kurallar
+için zorunlu değildir. Yeni klasör iskeleti doğrulanmamış JSON kuralı içermez.

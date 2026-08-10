@@ -23,10 +23,38 @@ export type RuleSeverity = "info" | "warning" | "error";
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
 
+export type RuleScopeLevel =
+  | "university"
+  | "faculty"
+  | "institute"
+  | "department"
+  | "program";
+
+export interface RuleScope {
+  level: RuleScopeLevel;
+  targetId: string;
+  targetSlug: string;
+}
+
+export interface RuleOverride {
+  ruleId: string;
+}
+
+export type UniversityGeneralRuleId =
+  `${string}.${string}.general.${string}`;
+
+export type OrganizationalRuleId =
+  `${string}.${string}.${string}.${string}.${string}`;
+
+export type NamespacedRuleId =
+  | UniversityGeneralRuleId
+  | OrganizationalRuleId;
+
 export type RuleExpectedValue =
   | string
   | number
   | boolean
+  | PageNumberRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;
@@ -38,6 +66,9 @@ export type RuleExpectedValue =
 
 export interface RuleDefinition {
   id: string;
+  type?: RuleType;
+  scope?: RuleScope;
+  overrides?: RuleOverride[];
   title: string;
   description: string;
   category: RuleCategory;
@@ -64,6 +95,15 @@ export interface DocxPackageInspection {
 export interface DocxAnalysisXmlParts {
   documentXml: string;
   stylesXml: string | null;
+  headerFooterXmlParts: HeaderFooterXmlPart[];
+}
+
+export type HeaderFooterLocation = "header" | "footer";
+
+export interface HeaderFooterXmlPart {
+  path: string;
+  location: HeaderFooterLocation;
+  xml: string;
 }
 
 export interface Run {
@@ -121,12 +161,41 @@ export interface PageMargins {
   bottom: number | null;
 }
 
+export type PageNumberFieldType = "PAGE";
+
+export type PageNumberFieldStructure = "fldSimple" | "instrText";
+
+export interface PageNumberField {
+  sourcePath: string;
+  location: HeaderFooterLocation;
+  alignment: ParagraphAlignment | null;
+  fieldType: PageNumberFieldType;
+  structure: PageNumberFieldStructure;
+}
+
+export interface PageNumbering {
+  hasPageNumbers: boolean;
+  fields: PageNumberField[];
+}
+
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
   documentDefaults: DocumentDefaults;
   pageMargins: PageMargins;
+  pageNumbering: PageNumbering;
 }
 
 export type { AnalysisReport } from "./AnalysisReport";
 export type { RuleResult, RuleResultValue } from "./RuleResult";
+export type {
+  Department,
+  Faculty,
+  Institute,
+  Program,
+  RuleSetMetadata,
+  RuleSetReference,
+  ThesisType,
+  University,
+  UniversityRuleSet,
+} from "./UniversityRuleSet";

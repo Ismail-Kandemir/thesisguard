@@ -1,5 +1,6 @@
 import { RuleEngine } from "./engine/RuleEngine";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
+import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
@@ -8,7 +9,8 @@ import { loadRules } from "./rules/RuleLoader";
 import type { AnalysisReport, NormalizedDocument } from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
-  const { documentXml, stylesXml } = await readDocxAnalysisXmlParts(file);
+  const { documentXml, stylesXml, headerFooterXmlParts } =
+    await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
 
@@ -16,6 +18,7 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     ...normalizedDocument,
     styles: parsedStyles?.styles ?? [],
     documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
+    pageNumbering: parseHeaderFooterPageNumbering(headerFooterXmlParts),
   };
 }
 

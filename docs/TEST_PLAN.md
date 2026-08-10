@@ -86,3 +86,21 @@ Her sprint sonunda aşağıdaki kontrol listesi uygulanır:
 - [ ] Git status kontrol edildi; kapsam dışı değişiklik bulunmadığı doğrulandı.
 - [ ] Değişiklikler açıklayıcı bir mesajla commit edildi.
 - [ ] Commit uzak depoya push edildi.
+
+## 8. RuleResolver Test Senaryoları
+
+Projede otomatik unit test altyapısı kurulana kadar aşağıdaki saf veri
+senaryoları manuel olarak doğrulanacaktır:
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Sadece general rules | Genel kurallar aynı sırada ve yeni nesneler olarak döner. |
+| General + faculty | Genel kurallar fakülte kurallarından önce çözülür. |
+| General + department | Genel kurallar bölüm kurallarından önce çözülür. |
+| General rule override | Spesifik kuralın `overrides` ile işaretlediği genel kural sonuçtan çıkarılır. |
+| Birden fazla override | Spesifik kuralın işaretlediği tüm genel kurallar sonuçtan çıkarılır. |
+| Duplicate rule ID | `RuleResolutionError` ile açık configuration error üretilir. |
+| Missing parent | Bulunamayan extends referansı `RuleResolutionError` üretir. |
+| Extends cycle | Döngünün yolunu içeren `RuleResolutionError` üretilir. |
+| Aynı input → aynı output | Tekrarlanan çözümlemeler aynı rule ID sırasını üretir. |
+| Input immutability | Rule set, rule, expected, scope ve overrides nesneleri değişmez. |

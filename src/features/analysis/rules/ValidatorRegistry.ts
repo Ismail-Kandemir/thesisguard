@@ -2,6 +2,7 @@ import type { RuleValidator } from "./validators/RuleValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { HeadingValidator } from "./validators/HeadingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
+import { PageNumberValidator } from "./validators/PageNumberValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
 const HEADING_1_RULE_ID = "comu.bachelor.heading.heading1";
@@ -11,6 +12,7 @@ const LEFT_MARGIN_RULE_ID = "comu.bachelor.margin.left";
 const RIGHT_MARGIN_RULE_ID = "comu.bachelor.margin.right";
 const TOP_MARGIN_RULE_ID = "comu.bachelor.margin.top";
 const BOTTOM_MARGIN_RULE_ID = "comu.bachelor.margin.bottom";
+const PAGE_NUMBER_RULE_ID = "comu.bachelor.page-number";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -22,6 +24,7 @@ export class ValidatorRegistry {
     [RIGHT_MARGIN_RULE_ID, new MarginValidator("right")],
     [TOP_MARGIN_RULE_ID, new MarginValidator("top")],
     [BOTTOM_MARGIN_RULE_ID, new MarginValidator("bottom")],
+    [PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {
