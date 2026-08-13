@@ -91,19 +91,22 @@ kurallar eklenir.
     └── Gıda Teknolojisi
         └── Bachelor
             ├── Page Number
-            └── Table of Contents section
+            ├── Table of Contents section
+            └── References section
 ```
 
 Kural seti `comu.bachelor` genel setini `extends` ile referanslar. Bölüme ait
 JSON dosyası genel kuralları tekrar etmez. `RuleResolver`, genel ÇOMÜ bachelor
-kurallarını önce, Gıda Teknolojisi sayfa numarası ve İçindekiler bölümü
-kurallarını sonra çözerek tek bir nihai kural listesi üretir.
+kurallarını önce, Gıda Teknolojisi sayfa numarası, İçindekiler bölümü ve
+Kaynaklar bölümü kurallarını sonra çözerek tek bir nihai kural listesi üretir.
 
 Sayfa numarası kuralının kaynağı: **Çanakkale Onsekiz Mart Üniversitesi Gıda
 Teknolojisi Bitirme Tezi Hazırlama Kılavuzu**. Kural setinde sayfa numarasının
 zorunlu, footer konumunda ve center hizalamasında olması ile İçindekiler
 bölümünün bulunması doğrulanır. Word TOC field kullanımı kılavuzda zorunlu
 olmadığından bölüm kuralı yalnızca görünür section varlığını değerlendirir.
+Kaynaklar kuralı da yalnızca bağımsız Kaynaklar bölümünün bulunmasını doğrular;
+APA biçimi, kaynak kayıtlarının yapısı veya metin içi atıflar değerlendirilmez.
 
 ## Akademik seçim akışı
 

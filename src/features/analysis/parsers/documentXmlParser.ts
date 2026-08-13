@@ -6,6 +6,7 @@ import type {
   Run,
 } from "../types";
 import { parseTableOfContents } from "./tableOfContentsXmlParser";
+import { parseReferences } from "./referencesXmlParser";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -32,6 +33,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       fields: [],
     },
     tableOfContents: parseTableOfContents(xmlDocument),
+    references: parseReferences(xmlDocument),
   };
 }
 

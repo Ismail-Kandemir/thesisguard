@@ -4,6 +4,7 @@ import { HeadingValidator } from "./validators/HeadingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { TableOfContentsValidator } from "./validators/TableOfContentsValidator";
+import { ReferencesValidator } from "./validators/ReferencesValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
 const HEADING_1_RULE_ID = "comu.bachelor.heading.heading1";
@@ -18,6 +19,8 @@ const FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.page-number";
 const FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.table-of-contents";
+const FOOD_TECHNOLOGY_REFERENCES_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.references";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -35,6 +38,7 @@ export class ValidatorRegistry {
       FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID,
       new TableOfContentsValidator(),
     ],
+    [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new ReferencesValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

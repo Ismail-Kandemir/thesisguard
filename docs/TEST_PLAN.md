@@ -152,3 +152,15 @@ senaryoları manuel olarak doğrulanacaktır:
 | Bağımsız “İÇİNDEKİLER” başlığı var, Heading stili yok | Başlık metni tam eşleştiği için `hasSection: true` olur. |
 | TOC field var, görünür İçindekiler başlığı yok | `hasField: true`; `hasSection` section tespitine göre false kalır ve university rule başarısız olur. |
 | PAGE ve TOC aynı belgede | PAGE ve TOC normalizasyonları birbirini etkilemeden kendi sonuçlarını üretir. |
+
+## 13. Kaynaklar bölümü test senaryoları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Bağımsız “KAYNAKLAR” paragrafı var | `references.hasSection: true`; REFERENCES validator başarılı olur. |
+| Bağımsız “Kaynaklar” başlığı var | Türkçe case normalizasyonuyla section bulunur ve validator başarılı olur. |
+| Kaynaklar bölümü yok | `references.hasSection: false`; required kural başarısız olur. |
+| Body cümlesinde “Bu çalışmada kullanılan kaynaklar aşağıda verilmiştir.” yazıyor | Tam paragraf eşleşmesi olmadığı için section kabul edilmez. |
+| Heading stili olmayan bağımsız “KAYNAKLAR” paragrafı | Style zorunlu olmadığı için section kabul edilir. |
+| Kaynaklar ve İçindekiler aynı belgede | İki structural detection birbirinden bağımsız sonuç üretir. |
+| Kaynaklar, PAGE ve TOC aynı belgede | References, PAGE ve TOC parser davranışları birbirini etkilemeden korunur. |
