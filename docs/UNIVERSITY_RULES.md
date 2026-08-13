@@ -102,3 +102,31 @@ Sayfa numarası kuralının kaynağı: **Çanakkale Onsekiz Mart Üniversitesi G
 Teknolojisi Bitirme Tezi Hazırlama Kılavuzu**. Kılavuzdan bu sprintte yalnızca
 sayfa numarasının zorunlu, footer konumunda ve center hizalamasında olması
 kuralı eklenmiştir.
+
+## Akademik seçim akışı
+
+```text
+AcademicCatalog
+↓
+AcademicSelection
+↓
+RuleSetSelector
+↓
+RuleResolver
+↓
+RuleEngine
+```
+
+`AcademicCatalog`, kullanıcıya sunulabilecek doğrulanmış üniversite, fakülte
+veya enstitü, bölüm veya program ve tez türü kombinasyonlarını tanımlar.
+`AcademicSelection`, bu seçeneklerden yapılan tek bir seçimi taşır.
+`RuleSetSelector` seçimin geçerliliğini katalog üzerinden denetler ve yalnızca
+gerekli rule setleri belirler. Kuralları birleştirmez veya override uygulamaz;
+bu sorumluluk `RuleResolver` katmanında kalır. `RuleEngine` ise resolver'ın
+ürettiği nihai kuralları çalıştırır.
+
+Katalog verisi rule JSON dosyalarından ayrı tutulur. Rule JSON'ları analiz ve
+kalıtım yapılandırmasıdır; katalog ise UI seçeneklerinin açık, kontrollü ve
+doğrulanmış listesidir. Bu ayrım, kural dosyalarının UI veri kaynağına
+dönüşmesini ve henüz kullanıcıya açılmaması gereken yapıların yanlışlıkla
+seçilebilir olmasını önler.

@@ -201,6 +201,10 @@ export interface NormalizedDocument {
 }
 
 export type { AnalysisReport } from "./AnalysisReport";
+export type {
+  AcademicSelection,
+  AcademicSelectionBase,
+} from "./AcademicSelection";
 
 export type {
   RuleResult,

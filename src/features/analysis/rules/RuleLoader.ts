@@ -36,6 +36,10 @@ export function loadFoodTechnologyBachelorRuleSets(): UniversityRuleSet[] {
   ]);
 }
 
+export function loadAvailableRuleSets(): UniversityRuleSet[] {
+  return loadFoodTechnologyBachelorRuleSets();
+}
+
 function adaptComuBachelorRuleSet(): UniversityRuleSet {
   const { metadata, rules } = legacyComuBachelorRuleSet;
 

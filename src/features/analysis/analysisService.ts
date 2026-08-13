@@ -7,7 +7,12 @@ import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
 import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRuleSets } from "./rules/RuleLoader";
 import { RuleResolver } from "./rules/RuleResolver";
-import type { AnalysisReport, NormalizedDocument } from "./types";
+import { RuleSetSelector } from "./rules/RuleSetSelector";
+import type {
+  AcademicSelection,
+  AnalysisReport,
+  NormalizedDocument,
+} from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
   const { documentXml, stylesXml, headerFooterXmlParts } =
@@ -23,10 +28,15 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
   };
 }
 
-export async function analyzeDocx(file: File): Promise<AnalysisReport> {
+export async function analyzeDocx(
+  file: File,
+  selection?: Readonly<AcademicSelection>,
+): Promise<AnalysisReport> {
   const normalizedDocument = await createNormalizedDocumentFromDocx(file);
   logParserDebugData(normalizedDocument);
-  const ruleSets = loadRuleSets();
+  const ruleSets = selection
+    ? new RuleSetSelector().select(selection)
+    : loadRuleSets();
   const rules = new RuleResolver().resolve(ruleSets);
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();

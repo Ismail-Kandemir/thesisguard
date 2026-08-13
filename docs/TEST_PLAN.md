@@ -104,3 +104,15 @@ senaryoları manuel olarak doğrulanacaktır:
 | Extends cycle | Döngünün yolunu içeren `RuleResolutionError` üretilir. |
 | Aynı input → aynı output | Tekrarlanan çözümlemeler aynı rule ID sırasını üretir. |
 | Input immutability | Rule set, rule, expected, scope ve overrides nesneleri değişmez. |
+
+## 9. Akademik seçim test senaryoları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| ÇOMÜ + Uygulamalı Bilimler + Gıda Teknolojisi + Bachelor | Selector, `comu.bachelor` ve `comu.applied-sciences.food-technology.bachelor` setlerini sağlar; resolver genel kurallara PAGE_NUMBER kuralını ekler. |
+| Bilinmeyen university | Açık bir `AcademicSelectionError` üretilir; fallback yapılmaz. |
+| Bilinmeyen faculty | Faculty kimliğini içeren açık bir `AcademicSelectionError` üretilir. |
+| Bilinmeyen department | Department kimliğini içeren açık bir `AcademicSelectionError` üretilir. |
+| Desteklenmeyen thesis type | Thesis type kimliğini içeren açık bir `AcademicSelectionError` üretilir. |
+| Selection verilmemesi | AnalysisService yalnızca mevcut legacy/default ÇOMÜ bachelor setini kullanır. |
+| Selector ve resolver sorumluluk ayrımı | Selector rule içeriklerini merge veya override etmeden gerekli rule setleri döndürür; nihai kural listesi yalnızca RuleResolver çağrısından sonra oluşur. |
