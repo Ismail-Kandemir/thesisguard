@@ -29,6 +29,25 @@
       "solution": "Sayfa numarasını alt bilgi alanına ekleyin ve ortalayın.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.table-of-contents",
+      "type": "TABLE_OF_CONTENTS",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "İçindekiler Bölümü",
+      "description": "Tezde İçindekiler bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "İçindekiler bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir İçindekiler bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

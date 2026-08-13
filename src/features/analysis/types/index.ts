@@ -21,12 +21,16 @@ export type RuleCategory =
 
 export type RuleSeverity = "info" | "warning" | "error";
 
-export type RuleType = "PAGE_NUMBER";
+export type RuleType = "PAGE_NUMBER" | "TABLE_OF_CONTENTS";
 
 export interface PageNumberRuleExpected {
   required: boolean;
   location?: HeaderFooterLocation;
   alignment?: Exclude<ParagraphAlignment, "justify">;
+}
+
+export interface TableOfContentsRuleExpected {
+  required: boolean;
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
@@ -63,6 +67,7 @@ export type RuleExpectedValue =
   | number
   | boolean
   | PageNumberRuleExpected
+  | TableOfContentsRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;
@@ -192,12 +197,30 @@ export interface PageNumbering {
   fields: PageNumberField[];
 }
 
+export type TableOfContentsFieldType = "TOC";
+
+export type TableOfContentsFieldStructure = "fldSimple" | "complex";
+
+export interface TableOfContentsField {
+  fieldType: TableOfContentsFieldType;
+  structure: TableOfContentsFieldStructure;
+  instruction: string;
+  sourcePath: string;
+}
+
+export interface TableOfContents {
+  hasSection: boolean;
+  hasField: boolean;
+  fields: TableOfContentsField[];
+}
+
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
   documentDefaults: DocumentDefaults;
   pageMargins: PageMargins;
   pageNumbering: PageNumbering;
+  tableOfContents: TableOfContents;
 }
 
 export type { AnalysisReport } from "./AnalysisReport";

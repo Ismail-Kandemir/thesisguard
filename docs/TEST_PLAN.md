@@ -116,3 +116,39 @@ senaryoları manuel olarak doğrulanacaktır:
 | Desteklenmeyen thesis type | Thesis type kimliğini içeren açık bir `AcademicSelectionError` üretilir. |
 | Selection verilmemesi | AnalysisService yalnızca mevcut legacy/default ÇOMÜ bachelor setini kullanır. |
 | Selector ve resolver sorumluluk ayrımı | Selector rule içeriklerini merge veya override etmeden gerekli rule setleri döndürür; nihai kural listesi yalnızca RuleResolver çağrısından sonra oluşur. |
+
+## 10. Table of Contents detection test senaryoları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| `fldSimple` TOC | `w:instr` değeri TOC komutuysa field, `fldSimple` yapısıyla normalize edilir. |
+| Complex field TOC | Tamamlanmış begin/instrText/separate/end alanı TOC olarak normalize edilir. |
+| Birden fazla `instrText` düğümüne bölünmüş TOC | Aynı field kapsamındaki parçalar birleştirilir ve TOC komutu tespit edilir. |
+| TOC olmayan normal metin | Metinde “TOC” bulunması field üretmez. |
+| “İçindekiler” başlığı var fakat TOC field yok | Başlık tek başına TOC olarak kabul edilmez. |
+| PAGE field var fakat TOC yok | `tableOfContents.hasField` false ve fields boş olur. |
+| TOC ve PAGE birlikte | TOC document.xml'den, PAGE header/footer parçalarından birbirini etkilemeden tespit edilir. |
+| Bozuk veya eksik field yapısı | Eksik begin/end, instrText olmayan veya boş instruction içeren field parser'ı çökertmez ve TOC üretmez. |
+| TOC bulunmayan normal DOCX | Analiz devam eder; `tableOfContents` içinde `hasSection` ve `hasField` false, fields boş olur. |
+
+## 11. Table of Contents validator test senaryoları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| `required: true` ve TOC var | Validator başarılı sonuç üretir; actual “Bulundu” olur. |
+| `required: true` ve TOC yok | Validator başarısız olur ve “İçindekiler alanı tespit edilemedi.” mesajını üretir. |
+| `required: false` ve TOC yok | TOC opsiyonel olduğu için validator başarılı sonuç üretir. |
+| Yalnız “İçindekiler” metni var | Parser gerçek TOC field üretmediği için `required: true` kuralı başarısız olur. |
+| TOC ve PAGE birlikte | TOC validator yalnızca `tableOfContents` verisini kullanarak doğru sonucu üretir; PAGE sonucu davranışı etkilemez. |
+
+## 12. İçindekiler bölümü ve Word TOC field ayrımı
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| İçindekiler bölümü ve TOC field var | `hasSection: true`, `hasField: true`; TABLE_OF_CONTENTS validator başarılı olur. |
+| İçindekiler bölümü var, TOC field yok | `hasSection: true`, `hasField: false`; validator bölüm varlığı üzerinden başarılı olur. |
+| İçindekiler bölümü ve TOC field yok | `hasSection: false`, `hasField: false`; validator başarısız olur. |
+| Body cümlesinde yalnız “İçindekiler” kelimesi geçiyor | Paragraf başlığı tam eşleşmediği için section kabul edilmez. |
+| Bağımsız “İÇİNDEKİLER” başlığı var, Heading stili yok | Başlık metni tam eşleştiği için `hasSection: true` olur. |
+| TOC field var, görünür İçindekiler başlığı yok | `hasField: true`; `hasSection` section tespitine göre false kalır ve university rule başarısız olur. |
+| PAGE ve TOC aynı belgede | PAGE ve TOC normalizasyonları birbirini etkilemeden kendi sonuçlarını üretir. |

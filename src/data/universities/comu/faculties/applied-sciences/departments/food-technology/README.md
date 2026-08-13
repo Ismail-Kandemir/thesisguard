@@ -7,5 +7,6 @@ Kaynak: Çanakkale Onsekiz Mart Üniversitesi, Gıda Teknolojisi Bitirme Tezi
 Hazırlama Kılavuzu.
 
 bachelor.json, kılavuzda doğrulanan sayfa numarasının zorunlu, alt bilgide ve
-ortalanmış olması kuralını içerir. Kaynakta doğrulanmamış başka bir kural
-eklenmemiştir.
+ortalanmış olması kuralıyla İçindekiler bölümünün bulunması kuralını içerir.
+Kılavuz Word TOC field kullanımını zorunlu tutmadığından bu teknik yapı
+üniversite kuralının başarı koşulu değildir.

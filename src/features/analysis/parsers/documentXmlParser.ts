@@ -5,6 +5,7 @@ import type {
   ParagraphAlignment,
   Run,
 } from "../types";
+import { parseTableOfContents } from "./tableOfContentsXmlParser";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -30,6 +31,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       hasPageNumbers: false,
       fields: [],
     },
+    tableOfContents: parseTableOfContents(xmlDocument),
   };
 }
 
