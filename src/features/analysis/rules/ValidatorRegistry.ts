@@ -3,8 +3,7 @@ import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { HeadingValidator } from "./validators/HeadingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
-import { TableOfContentsValidator } from "./validators/TableOfContentsValidator";
-import { ReferencesValidator } from "./validators/ReferencesValidator";
+import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
 const HEADING_1_RULE_ID = "comu.bachelor.heading.heading1";
@@ -36,9 +35,9 @@ export class ValidatorRegistry {
     [FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
     [
       FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID,
-      new TableOfContentsValidator(),
+      new RequiredSectionValidator(),
     ],
-    [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new ReferencesValidator()],
+    [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new RequiredSectionValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

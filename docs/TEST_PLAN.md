@@ -129,38 +129,19 @@ senaryoları manuel olarak doğrulanacaktır:
 | PAGE field var fakat TOC yok | `tableOfContents.hasField` false ve fields boş olur. |
 | TOC ve PAGE birlikte | TOC document.xml'den, PAGE header/footer parçalarından birbirini etkilemeden tespit edilir. |
 | Bozuk veya eksik field yapısı | Eksik begin/end, instrText olmayan veya boş instruction içeren field parser'ı çökertmez ve TOC üretmez. |
-| TOC bulunmayan normal DOCX | Analiz devam eder; `tableOfContents` içinde `hasSection` ve `hasField` false, fields boş olur. |
+| TOC bulunmayan normal DOCX | Analiz devam eder; `tableOfContents.hasField` false ve fields boş olur. |
 
-## 11. Table of Contents validator test senaryoları
-
-| Senaryo | Beklenen sonuç |
-| --- | --- |
-| `required: true` ve TOC var | Validator başarılı sonuç üretir; actual “Bulundu” olur. |
-| `required: true` ve TOC yok | Validator başarısız olur ve “İçindekiler alanı tespit edilemedi.” mesajını üretir. |
-| `required: false` ve TOC yok | TOC opsiyonel olduğu için validator başarılı sonuç üretir. |
-| Yalnız “İçindekiler” metni var | Parser gerçek TOC field üretmediği için `required: true` kuralı başarısız olur. |
-| TOC ve PAGE birlikte | TOC validator yalnızca `tableOfContents` verisini kullanarak doğru sonucu üretir; PAGE sonucu davranışı etkilemez. |
-
-## 12. İçindekiler bölümü ve Word TOC field ayrımı
+## 11. Generic RequiredSection test senaryoları
 
 | Senaryo | Beklenen sonuç |
 | --- | --- |
-| İçindekiler bölümü ve TOC field var | `hasSection: true`, `hasField: true`; TABLE_OF_CONTENTS validator başarılı olur. |
-| İçindekiler bölümü var, TOC field yok | `hasSection: true`, `hasField: false`; validator bölüm varlığı üzerinden başarılı olur. |
-| İçindekiler bölümü ve TOC field yok | `hasSection: false`, `hasField: false`; validator başarısız olur. |
-| Body cümlesinde yalnız “İçindekiler” kelimesi geçiyor | Paragraf başlığı tam eşleşmediği için section kabul edilmez. |
-| Bağımsız “İÇİNDEKİLER” başlığı var, Heading stili yok | Başlık metni tam eşleştiği için `hasSection: true` olur. |
-| TOC field var, görünür İçindekiler başlığı yok | `hasField: true`; `hasSection` section tespitine göre false kalır ve university rule başarısız olur. |
-| PAGE ve TOC aynı belgede | PAGE ve TOC normalizasyonları birbirini etkilemeden kendi sonuçlarını üretir. |
-
-## 13. Kaynaklar bölümü test senaryoları
-
-| Senaryo | Beklenen sonuç |
-| --- | --- |
-| Bağımsız “KAYNAKLAR” paragrafı var | `references.hasSection: true`; REFERENCES validator başarılı olur. |
-| Bağımsız “Kaynaklar” başlığı var | Türkçe case normalizasyonuyla section bulunur ve validator başarılı olur. |
-| Kaynaklar bölümü yok | `references.hasSection: false`; required kural başarısız olur. |
-| Body cümlesinde “Bu çalışmada kullanılan kaynaklar aşağıda verilmiştir.” yazıyor | Tam paragraf eşleşmesi olmadığı için section kabul edilmez. |
-| Heading stili olmayan bağımsız “KAYNAKLAR” paragrafı | Style zorunlu olmadığı için section kabul edilir. |
-| Kaynaklar ve İçindekiler aynı belgede | İki structural detection birbirinden bağımsız sonuç üretir. |
-| Kaynaklar, PAGE ve TOC aynı belgede | References, PAGE ve TOC parser davranışları birbirini etkilemeden korunur. |
+| Rule'da tanımlı section mevcut | Normalize edilmiş tam isim eşleşir ve validator başarılı olur. |
+| Rule'da tanımlı section yok | Required rule başarısız olur. |
+| Türkçe karakter ve case varyasyonu | `İÇİNDEKİLER`, `İçindekiler` ve `icindekiler` aynı normalized name ile eşleşir. |
+| Heading stili olmayan bağımsız başlık | Paragraf metni tam eşleştiği için section bulunur. |
+| Section kelimesini içeren body cümlesi | Normalize edilmiş tam isim eşleşmediği için false-positive oluşmaz. |
+| İki required section aynı belgede | Her iki rule da aynı immutable sections listesi üzerinden başarılı olur. |
+| Bir section var, diğeri yok | Yalnız bulunan section'ın rule'u başarılı olur. |
+| İçindekiler section var, TOC field yok | Required section başarılı; `tableOfContents.hasField` false olur. |
+| TOC field var, İçindekiler heading yok | `hasField` true kalır; İçindekiler required section başarısız olur. |
+| PAGE, sections ve TOC field birlikte | Üç normalization/validation davranışı birbirini etkilemez. |

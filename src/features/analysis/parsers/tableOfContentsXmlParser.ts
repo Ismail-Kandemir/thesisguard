@@ -22,34 +22,9 @@ export function parseTableOfContents(
   ];
 
   return {
-    hasSection: hasTableOfContentsSection(xmlDocument),
     hasField: fields.length > 0,
     fields,
   };
-}
-
-function hasTableOfContentsSection(xmlDocument: Document): boolean {
-  return Array.from(
-    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "p"),
-  ).some((paragraph) => {
-    const paragraphText = Array.from(
-      paragraph.getElementsByTagNameNS(WORD_NAMESPACE, "t"),
-    )
-      .map((textElement) => textElement.textContent ?? "")
-      .join("");
-
-    return normalizeSectionTitle(paragraphText) === "icindekiler";
-  });
-}
-
-function normalizeSectionTitle(title: string): string {
-  return title
-    .trim()
-    .toLocaleLowerCase("tr-TR")
-    .replace(/ı/g, "i")
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]/g, "");
 }
 
 function parseSimpleFields(xmlDocument: Document): TableOfContentsField[] {

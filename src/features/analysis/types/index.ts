@@ -21,7 +21,7 @@ export type RuleCategory =
 
 export type RuleSeverity = "info" | "warning" | "error";
 
-export type RuleType = "PAGE_NUMBER" | "TABLE_OF_CONTENTS" | "REFERENCES";
+export type RuleType = "PAGE_NUMBER" | "REQUIRED_SECTION";
 
 export interface PageNumberRuleExpected {
   required: boolean;
@@ -29,11 +29,9 @@ export interface PageNumberRuleExpected {
   alignment?: Exclude<ParagraphAlignment, "justify">;
 }
 
-export interface TableOfContentsRuleExpected {
-  required: boolean;
-}
-
-export interface ReferencesRuleExpected {
+export interface RequiredSectionRuleExpected {
+  section: string;
+  aliases?: string[];
   required: boolean;
 }
 
@@ -71,8 +69,7 @@ export type RuleExpectedValue =
   | number
   | boolean
   | PageNumberRuleExpected
-  | TableOfContentsRuleExpected
-  | ReferencesRuleExpected
+  | RequiredSectionRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;
@@ -214,13 +211,13 @@ export interface TableOfContentsField {
 }
 
 export interface TableOfContents {
-  hasSection: boolean;
   hasField: boolean;
   fields: TableOfContentsField[];
 }
 
-export interface References {
-  hasSection: boolean;
+export interface DocumentSection {
+  normalizedName: string;
+  displayName: string;
 }
 
 export interface NormalizedDocument {
@@ -230,7 +227,7 @@ export interface NormalizedDocument {
   pageMargins: PageMargins;
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;
-  references: References;
+  sections: DocumentSection[];
 }
 
 export type { AnalysisReport } from "./AnalysisReport";

@@ -32,7 +32,7 @@
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-of-contents",
-      "type": "TABLE_OF_CONTENTS",
+      "type": "REQUIRED_SECTION",
       "scope": {
         "level": "department",
         "targetId": "food-technology",
@@ -41,7 +41,7 @@
       "title": "İçindekiler Bölümü",
       "description": "Tezde İçindekiler bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "required": true },
+      "expected": { "section": "İçindekiler", "required": true },
       "severity": "error",
       "score": 10,
       "message": "İçindekiler bölümü tespit edilemedi.",
@@ -51,7 +51,7 @@
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.references",
-      "type": "REFERENCES",
+      "type": "REQUIRED_SECTION",
       "scope": {
         "level": "department",
         "targetId": "food-technology",
@@ -60,7 +60,7 @@
       "title": "Kaynaklar Bölümü",
       "description": "Tezde Kaynaklar bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "required": true },
+      "expected": { "section": "Kaynaklar", "required": true },
       "severity": "error",
       "score": 10,
       "message": "Kaynaklar bölümü tespit edilemedi.",
