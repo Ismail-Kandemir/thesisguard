@@ -77,7 +77,16 @@ export function UploadPage() {
   }
 
   if (analysisReport) {
-    return <ReportPage analysisReport={analysisReport} />
+    return (
+      <ReportPage
+        analysisReport={analysisReport}
+        onNewAnalysis={() => {
+          setAnalysisReport(null)
+          setSelectedFile(null)
+          setErrorMessage('')
+        }}
+      />
+    )
   }
 
   return (
