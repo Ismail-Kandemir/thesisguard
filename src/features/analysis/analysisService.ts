@@ -5,7 +5,8 @@ import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolv
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
 import { ReportBuilder } from "./report/ReportBuilder";
-import { loadRules } from "./rules/RuleLoader";
+import { loadRuleSets } from "./rules/RuleLoader";
+import { RuleResolver } from "./rules/RuleResolver";
 import type { AnalysisReport, NormalizedDocument } from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
@@ -25,7 +26,8 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
 export async function analyzeDocx(file: File): Promise<AnalysisReport> {
   const normalizedDocument = await createNormalizedDocumentFromDocx(file);
   logParserDebugData(normalizedDocument);
-  const rules = loadRules();
+  const ruleSets = loadRuleSets();
+  const rules = new RuleResolver().resolve(ruleSets);
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();
   const results = ruleEngine.run(normalizedDocument, rules);

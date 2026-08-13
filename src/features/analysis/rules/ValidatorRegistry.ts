@@ -13,6 +13,8 @@ const RIGHT_MARGIN_RULE_ID = "comu.bachelor.margin.right";
 const TOP_MARGIN_RULE_ID = "comu.bachelor.margin.top";
 const BOTTOM_MARGIN_RULE_ID = "comu.bachelor.margin.bottom";
 const PAGE_NUMBER_RULE_ID = "comu.bachelor.page-number";
+const FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.page-number";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -25,6 +27,7 @@ export class ValidatorRegistry {
     [TOP_MARGIN_RULE_ID, new MarginValidator("top")],
     [BOTTOM_MARGIN_RULE_ID, new MarginValidator("bottom")],
     [PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
+    [FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

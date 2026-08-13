@@ -1,0 +1,34 @@
+{
+  "id": "comu.applied-sciences.food-technology.bachelor",
+  "metadata": {
+    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
+    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
+    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
+    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
+    "version": "1.0.0"
+  },
+  "extends": [
+    { "id": "comu.bachelor", "scopeLevel": "university", "version": "1.0.0" }
+  ],
+  "rules": [
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.page-number",
+      "type": "PAGE_NUMBER",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Sayfa Numarası",
+      "description": "Tez sayfalarında alt bilgi alanında ortalanmış sayfa numarası bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "required": true, "location": "footer", "alignment": "center" },
+      "severity": "error",
+      "score": 10,
+      "message": "Sayfa numarası zorunlu konum veya hizalama şartını karşılamıyor.",
+      "solution": "Sayfa numarasını alt bilgi alanına ekleyin ve ortalayın.",
+      "enabled": true,
+      "version": "1.0.0"
+    }
+  ]
+}

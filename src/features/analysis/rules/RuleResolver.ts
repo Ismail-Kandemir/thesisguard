@@ -136,6 +136,12 @@ function resolveRules(orderedRuleSets: readonly UniversityRuleSet[]): RuleDefini
       encounteredRuleIds.add(rule.id);
 
       for (const override of rule.overrides ?? []) {
+        if (!resolvedRules.has(override.ruleId)) {
+          throw new RuleResolutionError(
+            `${rule.id} kuralı geçersiz bir override tanımlıyor: ${override.ruleId}.`,
+          );
+        }
+
         resolvedRules.delete(override.ruleId);
       }
 

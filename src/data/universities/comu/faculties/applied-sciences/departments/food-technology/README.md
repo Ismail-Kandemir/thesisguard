@@ -1,4 +1,11 @@
 # Gıda Teknolojisi
 
-Uygulamalı Bilimler kapsamındaki Gıda Teknolojisi için doğrulanmış kural setleri ileride bu klasörde tutulacaktır.
-Bu iskelet varsayımsal bir kural içermez.
+Bu klasörde Uygulamalı Bilimler Fakültesi Gıda Teknolojisi bölümünün doğrulanmış
+kural setleri tutulur.
+
+Kaynak: Çanakkale Onsekiz Mart Üniversitesi, Gıda Teknolojisi Bitirme Tezi
+Hazırlama Kılavuzu.
+
+bachelor.json, kılavuzda doğrulanan sayfa numarasının zorunlu, alt bilgide ve
+ortalanmış olması kuralını içerir. Kaynakta doğrulanmamış başka bir kural
+eklenmemiştir.

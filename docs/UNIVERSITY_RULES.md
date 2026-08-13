@@ -78,4 +78,27 @@ kurumsal kaynağını, tez türünü ve sürümünü ayrı ayrı tanımlamayı s
 `src/data/universities/comu/bachelor.json` geçici geriye uyumluluk amacıyla
 yerinde korunur. Mevcut `RuleLoader` bu dosyayı aynı şekilde yüklemeye devam
 eder. Yeni metadata, scope, `extends` ve `overrides` alanları mevcut kurallar
-için zorunlu değildir. Yeni klasör iskeleti doğrulanmamış JSON kuralı içermez.
+için zorunlu değildir. Yeni hiyerarşik dosyalara yalnızca kaynağı doğrulanmış
+kurallar eklenir.
+
+## İlk department-level kural seti
+
+İlk gerçek hiyerarşik kural seti şu kapsamı temsil eder:
+
+```text
+ÇOMÜ
+└── Uygulamalı Bilimler Fakültesi
+    └── Gıda Teknolojisi
+        └── Bachelor
+            └── Page Number
+```
+
+Kural seti `comu.bachelor` genel setini `extends` ile referanslar. Bölüme ait
+JSON dosyası genel kuralları tekrar etmez. `RuleResolver`, genel ÇOMÜ bachelor
+kurallarını önce, Gıda Teknolojisi sayfa numarası kuralını sonra çözerek tek bir
+nihai kural listesi üretir.
+
+Sayfa numarası kuralının kaynağı: **Çanakkale Onsekiz Mart Üniversitesi Gıda
+Teknolojisi Bitirme Tezi Hazırlama Kılavuzu**. Kılavuzdan bu sprintte yalnızca
+sayfa numarasının zorunlu, footer konumunda ve center hizalamasında olması
+kuralı eklenmiştir.

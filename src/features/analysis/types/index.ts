@@ -21,6 +21,14 @@ export type RuleCategory =
 
 export type RuleSeverity = "info" | "warning" | "error";
 
+export type RuleType = "PAGE_NUMBER";
+
+export interface PageNumberRuleExpected {
+  required: boolean;
+  location?: HeaderFooterLocation;
+  alignment?: Exclude<ParagraphAlignment, "justify">;
+}
+
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
 
 export type RuleScopeLevel =
@@ -115,7 +123,11 @@ export interface Run {
   fontSize: number | null;
 }
 
-export type ParagraphAlignment = "left" | "right" | "center" | "justify";
+export type ParagraphAlignment =
+  | "left"
+  | "right"
+  | "center"
+  | "justify";
 
 export interface StyleDefinition {
   id: string;
@@ -163,7 +175,9 @@ export interface PageMargins {
 
 export type PageNumberFieldType = "PAGE";
 
-export type PageNumberFieldStructure = "fldSimple" | "instrText";
+export type PageNumberFieldStructure =
+  | "fldSimple"
+  | "instrText";
 
 export interface PageNumberField {
   sourcePath: string;
@@ -187,7 +201,12 @@ export interface NormalizedDocument {
 }
 
 export type { AnalysisReport } from "./AnalysisReport";
-export type { RuleResult, RuleResultValue } from "./RuleResult";
+
+export type {
+  RuleResult,
+  RuleResultValue,
+} from "./RuleResult";
+
 export type {
   Department,
   Faculty,
