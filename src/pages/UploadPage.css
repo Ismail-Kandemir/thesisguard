@@ -52,3 +52,21 @@
   border-color: #1f2937;
   outline: 2px solid #e5e7eb;
 }
+
+.upload-page__selection select:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+
+.upload-page__analysis-hint {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
+@media (max-width: 640px) {
+  .upload-page__selections {
+    grid-template-columns: 1fr;
+  }
+}

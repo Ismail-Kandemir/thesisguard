@@ -6,11 +6,14 @@ import type {
   RuleResult,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { getBodyParagraphs } from "./bodyParagraphs";
 
 export class AlignmentValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedAlignment = getExpectedAlignment(rule.expected);
-    const actualAlignments = document.paragraphs.map((paragraph) => paragraph.alignment);
+    const actualAlignments = getBodyParagraphs(document).map(
+      (paragraph) => paragraph.alignment,
+    );
     const passed =
       actualAlignments.length > 0 &&
       actualAlignments.every((alignment) => alignment === expectedAlignment);

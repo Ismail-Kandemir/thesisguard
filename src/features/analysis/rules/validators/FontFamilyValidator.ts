@@ -5,6 +5,7 @@ import type {
   RuleResult,
 } from "../../types";
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
+import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
 
 export class FontFamilyValidator implements RuleValidator {
@@ -47,7 +48,7 @@ function getActualFontFamilies(document: NormalizedDocument): Array<string | nul
     document.documentDefaults,
   );
 
-  return document.paragraphs.flatMap((paragraph) =>
+  return getBodyParagraphs(document).flatMap((paragraph) =>
     paragraph.runs.map(
       (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontFamily,
     ),

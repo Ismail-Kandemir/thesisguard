@@ -6,6 +6,7 @@ import type {
   Run,
 } from "../../types";
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
+import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
 
 const OOXML_UNITS_PER_LINE = 240;
@@ -57,7 +58,7 @@ function getActualLineSpacings(document: NormalizedDocument): number[] {
     document.documentDefaults,
   );
 
-  return document.paragraphs
+  return getBodyParagraphs(document)
     .map((paragraph) => {
       const run = paragraph.runs[0] ?? EMPTY_RUN;
 
