@@ -16,11 +16,17 @@ export function getBodyParagraphs(
   const stylesById = new Map(
     document.styles.map((style) => [style.id, style]),
   );
+  const sectionHeadingParagraphIds = new Set(
+    document.sections
+      .filter((section) => section.isRuleDefinedHeading)
+      .map((section) => section.paragraphId),
+  );
 
   return document.paragraphs.filter(
     (paragraph) =>
       !paragraph.isEmpty &&
-      !isHeadingParagraph(paragraph.styleId, stylesById),
+      !isHeadingParagraph(paragraph.styleId, stylesById) &&
+      !sectionHeadingParagraphIds.has(paragraph.id),
   );
 }
 

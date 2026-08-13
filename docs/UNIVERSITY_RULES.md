@@ -92,13 +92,21 @@ kurallar eklenir.
         └── Bachelor
             ├── Page Number
             ├── Table of Contents section
-            └── References section
+            ├── References section
+            ├── Özet section
+            ├── Abstract section
+            ├── İntihal (Aşırma) Beyan Sayfası
+            ├── Teşekkür
+            ├── Giriş
+            ├── Sonuç
+            └── Özgeçmiş
 ```
 
 Kural seti `comu.bachelor` genel setini `extends` ile referanslar. Bölüme ait
 JSON dosyası genel kuralları tekrar etmez. `RuleResolver`, genel ÇOMÜ bachelor
-kurallarını önce, Gıda Teknolojisi sayfa numarası, İçindekiler bölümü ve
-Kaynaklar bölümü kurallarını sonra çözerek tek bir nihai kural listesi üretir.
+kurallarını önce; Gıda Teknolojisi sayfa numarası, İçindekiler, Kaynaklar,
+Özet, Abstract ve ortak zorunlu yapısal bölüm kurallarını sonra çözerek tek bir
+nihai kural listesi üretir.
 
 Sayfa numarası kuralının kaynağı: **Çanakkale Onsekiz Mart Üniversitesi Gıda
 Teknolojisi Bitirme Tezi Hazırlama Kılavuzu**. Kural setinde sayfa numarasının
@@ -107,6 +115,20 @@ bölümünün bulunması doğrulanır. Word TOC field kullanımı kılavuzda zor
 olmadığından bölüm kuralı yalnızca görünür section varlığını değerlendirir.
 Kaynaklar kuralı da yalnızca bağımsız Kaynaklar bölümünün bulunmasını doğrular;
 APA biçimi, kaynak kayıtlarının yapısı veya metin içi atıflar değerlendirilmez.
+
+Kılavuz, Türkçe özet sayfasını `ÖZET`, İngilizce özet sayfasını
+`ABSTRACT` başlığıyla gösterir. Department rule setindeki `summary-tr` ve
+`summary-en` kuralları yalnızca bu bağımsız bölümlerin varlığını kontrol eder.
+Özet uzunluğu, kelime sayısı, anahtar kelimeler, dilsel içerik doğruluğu,
+başlık fontu veya özet biçimlendirmesi bu kuralların kapsamında değildir.
+
+Kılavuz, deneysel ve teorik/kaynak araştırması çalışmalarının her ikisinde de
+`İNTİHAL (AŞIRMA) BEYAN SAYFASI`, `TEŞEKKÜR`, `GİRİŞ`, `SONUÇ` ve `ÖZGEÇMİŞ`
+bölümlerini zorunlu tez yapısında gösterir. Bu kurallar yalnızca ilgili bağımsız
+bölüm başlığının varlığını kontrol eder; bölüm sırası, içeriği veya biçimi
+değerlendirilmez. İntihal beyanı kuralı intihal oranını, Turnitin sonucunu,
+imzayı ya da beyan metninin doğruluğunu kontrol etmez. Özgeçmiş kuralı da
+özgeçmiş içeriğinin veya şablonunun uygunluğunu doğrulamaz.
 
 ## Akademik seçim akışı
 

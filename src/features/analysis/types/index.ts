@@ -218,6 +218,8 @@ export interface TableOfContents {
 export interface DocumentSection {
   normalizedName: string;
   displayName: string;
+  paragraphId: string;
+  isRuleDefinedHeading: boolean;
 }
 
 export interface NormalizedDocument {

@@ -145,3 +145,48 @@ senaryoları manuel olarak doğrulanacaktır:
 | İçindekiler section var, TOC field yok | Required section başarılı; `tableOfContents.hasField` false olur. |
 | TOC field var, İçindekiler heading yok | `hasField` true kalır; İçindekiler required section başarısız olur. |
 | PAGE, sections ve TOC field birlikte | Üç normalization/validation davranışı birbirini etkilemez. |
+
+## 12. Türkçe ve İngilizce özet bölümleri
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Türkçe Özet mevcut | `summary-tr` rule başarılı olur. |
+| Türkçe Özet yok | Yalnız `summary-tr` rule başarısız olur. |
+| Abstract mevcut | `summary-en` rule başarılı olur. |
+| Abstract yok | Yalnız `summary-en` rule başarısız olur. |
+| Özet ve Abstract birlikte | İki required-section rule da başarılı olur. |
+| Yalnız Özet var | Türkçe rule başarılı, İngilizce rule başarısız olur. |
+| Yalnız Abstract var | İngilizce rule başarılı, Türkçe rule başarısız olur. |
+| Body cümlesinde “Bu çalışmanın özeti...” yazıyor | Tam normalized-name eşleşmesi olmadığı için Özet section sayılmaz. |
+| `ÖZET`/`Özet` ve `ABSTRACT`/`Abstract` varyasyonları | Case normalizasyonuyla ilgili section rule başarılı olur. |
+| Özet, Abstract, İçindekiler ve Kaynaklar birlikte | Dört required-section rule birbirinden bağımsız şekilde başarılı olur. |
+
+## 13. Gıda Teknolojisi ortak zorunlu bölümleri
+
+Bu senaryolar deneysel ve teorik/kaynak araştırması çalışmalarının ikisi için
+ortak olan İntihal (Aşırma) Beyan Sayfası, Teşekkür, Giriş, Sonuç ve Özgeçmiş
+bölümlerine ayrı ayrı uygulanır.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Her bölüm ayrı ayrı mevcut | Yalnız ilgili required-section rule başarılı olur. |
+| Her bölüm ayrı ayrı yok | Yalnız ilgili required-section rule başarısız olur. |
+| Heading style olmadan bağımsız başlık | Paragraf metni tam eşleştiği için ilgili rule başarılı olur. |
+| Body cümlesinde bölüm adı geçiyor | Tam normalized-name eşleşmesi olmadığı için false-positive oluşmaz. |
+| Türkçe case/karakter varyasyonu | Büyük/küçük harf ve desteklenen Türkçe karakter normalizasyonuyla ilgili rule başarılı olur. |
+| Beş ortak bölüm birlikte mevcut | Beş required-section rule da birbirinden bağımsız şekilde başarılı olur. |
+| Mevcut Özet, Abstract, İçindekiler ve Kaynaklar bölümleri mevcut | Önceki dört required-section rule aynı davranışı korur. |
+
+## 14. Section heading body kapsamı regresyonu
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Center section heading + justify body | Section heading body kapsamından çıkarılır; alignment rule başarılı olur. |
+| Left section heading + justify body | Section heading body kapsamından çıkarılır; alignment rule başarılı olur. |
+| Section heading farklı font size + doğru body font size | Body font-size rule başarılı olur. |
+| Section heading farklı font + doğru body font | Body font-family rule başarılı olur. |
+| Section heading farklı line spacing + doğru body spacing | Body line-spacing rule başarılı olur. |
+| Heading1–Heading3 paragrafları | Mevcut style tabanlı body exclusion davranışı korunur. |
+| Boş paragraf | Mevcut empty-paragraph exclusion davranışı korunur. |
+| Body cümlesinde “kaynaklar” geçiyor | Tam section adı olmadığı için rule-defined heading olarak işaretlenmez ve body kapsamında kalır. |
+| Required section başlığı mevcut/yok | `RequiredSectionValidator` sonuçları değişmeden korunur. |

@@ -20,6 +20,20 @@ const FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.table-of-contents";
 const FOOD_TECHNOLOGY_REFERENCES_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.references";
+const FOOD_TECHNOLOGY_SUMMARY_TR_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.summary-tr";
+const FOOD_TECHNOLOGY_SUMMARY_EN_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.summary-en";
+const FOOD_TECHNOLOGY_PLAGIARISM_DECLARATION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.plagiarism-declaration";
+const FOOD_TECHNOLOGY_ACKNOWLEDGEMENTS_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.acknowledgements";
+const FOOD_TECHNOLOGY_INTRODUCTION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.introduction";
+const FOOD_TECHNOLOGY_CONCLUSION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.conclusion";
+const FOOD_TECHNOLOGY_CV_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.cv";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -38,6 +52,16 @@ export class ValidatorRegistry {
       new RequiredSectionValidator(),
     ],
     [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_SUMMARY_TR_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_SUMMARY_EN_RULE_ID, new RequiredSectionValidator()],
+    [
+      FOOD_TECHNOLOGY_PLAGIARISM_DECLARATION_RULE_ID,
+      new RequiredSectionValidator(),
+    ],
+    [FOOD_TECHNOLOGY_ACKNOWLEDGEMENTS_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_INTRODUCTION_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_CONCLUSION_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_CV_RULE_ID, new RequiredSectionValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

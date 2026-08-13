@@ -8,9 +8,9 @@ export function parseDocumentSections(
 ): DocumentSection[] {
   const sections = new Map<string, DocumentSection>();
 
-  for (const paragraph of Array.from(
+  for (const [index, paragraph] of Array.from(
     xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "p"),
-  )) {
+  ).entries()) {
     const displayName = Array.from(
       paragraph.getElementsByTagNameNS(WORD_NAMESPACE, "t"),
     )
@@ -20,7 +20,12 @@ export function parseDocumentSections(
     const normalizedName = normalizeSectionName(displayName);
 
     if (normalizedName.length > 0 && !sections.has(normalizedName)) {
-      sections.set(normalizedName, { normalizedName, displayName });
+      sections.set(normalizedName, {
+        normalizedName,
+        displayName,
+        paragraphId: `paragraph-${index + 1}`,
+        isRuleDefinedHeading: false,
+      });
     }
   }
 

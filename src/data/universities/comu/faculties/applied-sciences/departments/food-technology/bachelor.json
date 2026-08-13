@@ -67,6 +67,139 @@
       "solution": "Teze bağımsız bir Kaynaklar bölümü ekleyin.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-tr",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Türkçe Özet Bölümü",
+      "description": "Tezde Özet bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Özet", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Özet bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Özet bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-en",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "İngilizce Özet Bölümü",
+      "description": "Tezde Abstract bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Abstract", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Abstract bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Abstract bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.plagiarism-declaration",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "İntihal Beyan Sayfası",
+      "description": "Tezde İntihal (Aşırma) Beyan Sayfası bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "İntihal (Aşırma) Beyan Sayfası", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "İntihal (Aşırma) Beyan Sayfası tespit edilemedi.",
+      "solution": "Teze bağımsız bir İntihal (Aşırma) Beyan Sayfası bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.acknowledgements",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Teşekkür Bölümü",
+      "description": "Tezde Teşekkür bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Teşekkür", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Teşekkür bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Teşekkür bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.introduction",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Giriş Bölümü",
+      "description": "Tezde Giriş bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Giriş", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Giriş bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Giriş bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.conclusion",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Sonuç Bölümü",
+      "description": "Tezde Sonuç bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Sonuç", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Sonuç bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Sonuç bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.cv",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Özgeçmiş Bölümü",
+      "description": "Tezde Özgeçmiş bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": { "section": "Özgeçmiş", "required": true },
+      "severity": "error",
+      "score": 10,
+      "message": "Özgeçmiş bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Özgeçmiş bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

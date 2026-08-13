@@ -8,6 +8,7 @@ import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRuleSets } from "./rules/RuleLoader";
 import { RuleResolver } from "./rules/RuleResolver";
 import { RuleSetSelector } from "./rules/RuleSetSelector";
+import { markRequiredSectionHeadings } from "./rules/markRequiredSectionHeadings";
 import type {
   AcademicSelection,
   AnalysisReport,
@@ -38,9 +39,13 @@ export async function analyzeDocx(
     ? new RuleSetSelector().select(selection)
     : loadRuleSets();
   const rules = new RuleResolver().resolve(ruleSets);
+  const documentWithSectionHeadings = markRequiredSectionHeadings(
+    normalizedDocument,
+    rules,
+  );
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();
-  const results = ruleEngine.run(normalizedDocument, rules);
+  const results = ruleEngine.run(documentWithSectionHeadings, rules);
 
   return reportBuilder.build(results);
 }
