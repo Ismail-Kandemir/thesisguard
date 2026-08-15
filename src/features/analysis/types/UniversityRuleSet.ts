@@ -36,9 +36,16 @@ export interface ThesisType {
   slug: string;
 }
 
+export interface StudyType {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 interface RuleSetMetadataBase {
   university: University;
   thesisType: ThesisType;
+  studyType?: StudyType;
   version: string;
 }
 

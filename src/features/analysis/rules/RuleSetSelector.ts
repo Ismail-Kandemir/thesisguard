@@ -85,12 +85,28 @@ function validateSelection(
   }
 
   if (
-    !unitEntries.some(
-      (entry) => entry.thesisType.id === selection.thesisTypeId,
-    )
+    !unitEntries.some((entry) => entry.thesisType.id === selection.thesisTypeId)
   ) {
     throw new AcademicSelectionError(
       `Desteklenmeyen thesis type: ${selection.thesisTypeId}.`,
+    );
+  }
+
+  const selectedEntry = unitEntries.find(
+    (entry) => entry.thesisType.id === selection.thesisTypeId,
+  );
+  const studyTypes = selectedEntry?.studyTypes ?? [];
+
+  if (studyTypes.length > 0 && !selection.studyTypeId) {
+    throw new AcademicSelectionError("Çalışma türü seçimi zorunludur.");
+  }
+
+  if (
+    selection.studyTypeId &&
+    !studyTypes.some((studyType) => studyType.id === selection.studyTypeId)
+  ) {
+    throw new AcademicSelectionError(
+      `Bilinmeyen study type: ${selection.studyTypeId}.`,
     );
   }
 }
@@ -104,6 +120,7 @@ function matchesSelection(
   return (
     metadata.university.id === selection.universityId &&
     metadata.thesisType.id === selection.thesisTypeId &&
+    metadata.studyType?.id === selection.studyTypeId &&
     ("facultyId" in selection
       ? metadata.faculty?.id === selection.facultyId
       : metadata.institute?.id === selection.instituteId) &&

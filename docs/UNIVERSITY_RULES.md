@@ -157,3 +157,43 @@ kalıtım yapılandırmasıdır; katalog ise UI seçeneklerinin açık, kontroll
 doğrulanmış listesidir. Bu ayrım, kural dosyalarının UI veri kaynağına
 dönüşmesini ve henüz kullanıcıya açılmaması gereken yapıların yanlışlıkla
 seçilebilir olmasını önler.
+
+## Çalışma türü hiyerarşisi
+
+`bachelor`, akademik tez düzeyidir. `experimental` ve `source-research` çalışma
+metodolojisini belirtir; bu iki kavram aynı şey değildir. `AcademicSelection`
+tez düzeyini `thesisTypeId`, metodolojiyi ayrı ve opsiyonel `studyTypeId` ile
+taşır. Katalog bir tez türü için çalışma türleri tanımlıyorsa seçim zorunludur;
+tanımlamıyorsa mevcut akış değişmeden çalışır.
+
+Ortak Gıda Teknolojisi Lisans kuralları `food-technology/bachelor.json`
+dosyasında kalır. Experimental child seti ortak seti `extends` eder ve yalnız
+Deneysel Çalışma için doğrulanan şu `REQUIRED_SECTION` kurallarını içerir:
+
+- Genel Bilgiler ve Literatür Çalışması
+- Materyal ve Metot
+- Bulgular ve Tartışma
+
+Bu kurallar Teorik / Kaynak Araştırması tezlerine uygulanmaz; source-research
+child setine yalnız bu çalışma türü için zorunlu `Genel Bilgiler` bölümü
+eklenmiştir. Bu kural Deneysel Çalışma tezlerine uygulanmaz. Kontrol yalnız
+bağımsız section varlığına odaklanır; içerik kalitesi, bölüm sırası ve bilimsel
+uygunluk doğrulanmaz.
+
+Kılavuzdaki “Ana ve Alt Bölümler” ifadesi sabit bir görünür tez başlığı değil,
+konuya göre kurulacak bölüm yapısının tarifidir. Bu nedenle sabit bir
+`REQUIRED_SECTION` olarak modellenmemiştir.
+
+```text
+comu.bachelor
+→ comu.applied-sciences.food-technology.bachelor
+→ comu.applied-sciences.food-technology.bachelor.experimental
+
+comu.bachelor
+→ comu.applied-sciences.food-technology.bachelor
+→ comu.applied-sciences.food-technology.bachelor.source-research
+```
+
+Selector eksik veya bilinmeyen çalışma türünde sessiz fallback yapmaz ve
+`AcademicSelectionError` üretir. Bir child seçildiğinde diğer çalışma türünün
+seti seçilen zincire dahil edilmez.

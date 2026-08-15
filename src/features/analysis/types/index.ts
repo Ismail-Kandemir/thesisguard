@@ -250,6 +250,7 @@ export type {
   Program,
   RuleSetMetadata,
   RuleSetReference,
+  StudyType,
   ThesisType,
   University,
   UniversityRuleSet,

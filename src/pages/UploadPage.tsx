@@ -28,6 +28,7 @@ export function UploadPage() {
   const [organizationId, setOrganizationId] = useState('')
   const [unitId, setUnitId] = useState('')
   const [thesisTypeId, setThesisTypeId] = useState('')
+  const [studyTypeId, setStudyTypeId] = useState('')
 
   const universityEntries = universityId
     ? ACADEMIC_CATALOG.filter((entry) => entry.university.id === universityId)
@@ -41,7 +42,12 @@ export function UploadPage() {
   const academicSelection = createAcademicSelection(
     unitEntries,
     thesisTypeId,
+    studyTypeId,
   )
+  const thesisTypeEntry = unitEntries.find(
+    (entry) => entry.thesisType.id === thesisTypeId,
+  )
+  const studyTypes = thesisTypeEntry?.studyTypes ?? []
   const disabledReason = getDisabledReason(selectedFile, academicSelection)
 
   function handleFileSelect(file: File) {
@@ -106,6 +112,7 @@ export function UploadPage() {
               setOrganizationId('')
               setUnitId('')
               setThesisTypeId('')
+              setStudyTypeId('')
             }}
             value={universityId}
           >
@@ -127,6 +134,7 @@ export function UploadPage() {
               setOrganizationId(event.target.value)
               setUnitId('')
               setThesisTypeId('')
+              setStudyTypeId('')
             }}
             value={organizationId}
           >
@@ -150,6 +158,7 @@ export function UploadPage() {
             onChange={(event) => {
               setUnitId(event.target.value)
               setThesisTypeId('')
+              setStudyTypeId('')
             }}
             value={unitId}
           >
@@ -170,7 +179,10 @@ export function UploadPage() {
             disabled={!unitId}
             id="thesis-type"
             label="Tez Türü"
-            onChange={(event) => setThesisTypeId(event.target.value)}
+            onChange={(event) => {
+              setThesisTypeId(event.target.value)
+              setStudyTypeId('')
+            }}
             value={thesisTypeId}
           >
             <option value="">Tez türü seçin</option>
@@ -182,6 +194,23 @@ export function UploadPage() {
               ),
             )}
           </SelectionField>
+
+          {studyTypes.length > 0 ? (
+            <SelectionField
+              disabled={!thesisTypeId}
+              id="study-type"
+              label="Çalışma Türü"
+              onChange={(event) => setStudyTypeId(event.target.value)}
+              value={studyTypeId}
+            >
+              <option value="">Çalışma türü seçin</option>
+              {studyTypes.map((studyType) => (
+                <option key={studyType.id} value={studyType.id}>
+                  {studyType.name}
+                </option>
+              ))}
+            </SelectionField>
+          ) : null}
         </section>
 
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
@@ -246,6 +275,7 @@ function uniqueEntries(
 function createAcademicSelection(
   entries: readonly AcademicCatalogEntry[],
   thesisTypeId: string,
+  studyTypeId: string,
 ): AcademicSelection | null {
   const entry = entries.find(
     (candidate) => candidate.thesisType.id === thesisTypeId,
@@ -255,9 +285,21 @@ function createAcademicSelection(
     return null
   }
 
+  if (entry.studyTypes?.length && !studyTypeId) {
+    return null
+  }
+
+  if (
+    studyTypeId &&
+    !entry.studyTypes?.some((studyType) => studyType.id === studyTypeId)
+  ) {
+    return null
+  }
+
   const base = {
     universityId: entry.university.id,
     thesisTypeId: entry.thesisType.id,
+    ...(studyTypeId ? { studyTypeId } : {}),
   }
 
   if (entry.faculty && entry.department) {

@@ -34,6 +34,14 @@ const FOOD_TECHNOLOGY_CONCLUSION_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.conclusion";
 const FOOD_TECHNOLOGY_CV_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.cv";
+const FOOD_TECHNOLOGY_EXPERIMENTAL_GENERAL_INFORMATION_LITERATURE_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.experimental.general-information-literature";
+const FOOD_TECHNOLOGY_EXPERIMENTAL_MATERIAL_METHOD_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.experimental.material-method";
+const FOOD_TECHNOLOGY_EXPERIMENTAL_FINDINGS_DISCUSSION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.experimental.findings-discussion";
+const FOOD_TECHNOLOGY_SOURCE_RESEARCH_GENERAL_INFORMATION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.source-research.general-information";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -62,6 +70,22 @@ export class ValidatorRegistry {
     [FOOD_TECHNOLOGY_INTRODUCTION_RULE_ID, new RequiredSectionValidator()],
     [FOOD_TECHNOLOGY_CONCLUSION_RULE_ID, new RequiredSectionValidator()],
     [FOOD_TECHNOLOGY_CV_RULE_ID, new RequiredSectionValidator()],
+    [
+      FOOD_TECHNOLOGY_EXPERIMENTAL_GENERAL_INFORMATION_LITERATURE_RULE_ID,
+      new RequiredSectionValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_EXPERIMENTAL_MATERIAL_METHOD_RULE_ID,
+      new RequiredSectionValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_EXPERIMENTAL_FINDINGS_DISCUSSION_RULE_ID,
+      new RequiredSectionValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_SOURCE_RESEARCH_GENERAL_INFORMATION_RULE_ID,
+      new RequiredSectionValidator(),
+    ],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

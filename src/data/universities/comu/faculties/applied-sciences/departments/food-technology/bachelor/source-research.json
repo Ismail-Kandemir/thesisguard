@@ -1,0 +1,38 @@
+{
+  "id": "comu.applied-sciences.food-technology.bachelor.source-research",
+  "metadata": {
+    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
+    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
+    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
+    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
+    "studyType": { "id": "source-research", "name": "Teorik / Kaynak Araştırması", "slug": "source-research" },
+    "version": "1.0.0"
+  },
+  "extends": [
+    { "id": "comu.applied-sciences.food-technology.bachelor", "scopeLevel": "department", "version": "1.0.0" }
+  ],
+  "rules": [
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.source-research.general-information",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Genel Bilgiler Bölümü",
+      "description": "Teorik veya kaynak araştırması tezinde Genel Bilgiler bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Genel Bilgiler",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Genel Bilgiler bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Genel Bilgiler bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    }
+  ]
+}

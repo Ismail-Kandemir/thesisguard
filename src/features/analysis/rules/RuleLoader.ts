@@ -1,5 +1,7 @@
 import comuBachelorRuleSet from "../../../data/universities/comu/bachelor.json";
 import foodTechnologyBachelorRuleSet from "../../../data/universities/comu/faculties/applied-sciences/departments/food-technology/bachelor.json";
+import foodTechnologyExperimentalRuleSet from "../../../data/universities/comu/faculties/applied-sciences/departments/food-technology/bachelor/experimental.json";
+import foodTechnologySourceResearchRuleSet from "../../../data/universities/comu/faculties/applied-sciences/departments/food-technology/bachelor/source-research.json";
 import type {
   RuleDefinition,
   RuleExpectedValue,
@@ -18,6 +20,10 @@ interface LegacyRuleFile {
 const legacyComuBachelorRuleSet = comuBachelorRuleSet as LegacyRuleFile;
 const comuFoodTechnologyBachelorRuleSet =
   foodTechnologyBachelorRuleSet as UniversityRuleSet;
+const comuFoodTechnologyExperimentalRuleSet =
+  foodTechnologyExperimentalRuleSet as UniversityRuleSet;
+const comuFoodTechnologySourceResearchRuleSet =
+  foodTechnologySourceResearchRuleSet as UniversityRuleSet;
 
 export function loadRules(): RuleDefinition[] {
   return cloneRules(legacyComuBachelorRuleSet.rules);
@@ -33,6 +39,8 @@ export function loadFoodTechnologyBachelorRuleSets(): UniversityRuleSet[] {
   return loadRuleSets([
     adaptComuBachelorRuleSet(),
     comuFoodTechnologyBachelorRuleSet,
+    comuFoodTechnologyExperimentalRuleSet,
+    comuFoodTechnologySourceResearchRuleSet,
   ]);
 }
 
@@ -69,6 +77,9 @@ function cloneRuleSet(ruleSet: UniversityRuleSet): UniversityRuleSet {
       ...ruleSet.metadata,
       university: { ...ruleSet.metadata.university },
       thesisType: { ...ruleSet.metadata.thesisType },
+      studyType: ruleSet.metadata.studyType
+        ? { ...ruleSet.metadata.studyType }
+        : undefined,
       faculty: ruleSet.metadata.faculty
         ? { ...ruleSet.metadata.faculty }
         : undefined,

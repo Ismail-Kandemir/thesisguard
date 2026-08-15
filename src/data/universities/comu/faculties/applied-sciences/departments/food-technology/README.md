@@ -29,3 +29,25 @@ içeriğini, sırasını veya biçimini değerlendirmez.
 İntihal beyanı kontrolü gerçek intihal oranını, Turnitin sonucunu, imzayı veya
 beyan içeriğinin doğruluğunu değerlendirmez. Özgeçmiş kontrolü de yalnızca
 bölüm varlığını doğrular; özgeçmiş içeriğini ya da şablon uygunluğunu incelemez.
+
+## Tez düzeyi ve çalışma türü
+
+`bachelor`, akademik tez düzeyidir. `experimental` (Deneysel Çalışma) ve
+`source-research` (Teorik / Kaynak Araştırması) çalışma metodolojisidir; tez
+düzeyi ile çalışma metodolojisi aynı kavram değildir.
+
+İki metodolojinin ortak kuralları `bachelor.json` dosyasında kalır.
+`bachelor/experimental.json` ve `bachelor/source-research.json` bu ortak seti
+`extends` eden child rule setlerdir. Experimental child seti yalnız Deneysel
+Çalışma için zorunlu olan Genel Bilgiler ve Literatür Çalışması, Materyal ve
+Metot, Bulgular ve Tartışma bölümlerini doğrular. Bu üç kural Teorik / Kaynak
+Araştırması tezlerine uygulanmaz ve source-research child setinde yer almaz.
+
+Kontrol yalnız bağımsız section başlığının varlığını değerlendirir; içerik
+kalitesi, bölümlerin sırası veya bilimsel uygunluk doğrulanmaz.
+
+Source-research child setindeki `Genel Bilgiler` bölümü yalnız Teorik / Kaynak
+Araştırması için zorunludur ve Deneysel Çalışma analizine uygulanmaz. Bu kontrol
+de yalnız section varlığını değerlendirir. Kılavuzdaki “Ana ve Alt Bölümler”
+ifadesi konuya göre oluşturulacak yapıyı tarif ettiğinden sabit bir
+`REQUIRED_SECTION` olarak modellenmemiştir.

@@ -3,6 +3,7 @@ import type {
   Faculty,
   Institute,
   Program,
+  StudyType,
   ThesisType,
   University,
 } from "../types";
@@ -10,6 +11,7 @@ import type {
 interface AcademicCatalogEntryBase {
   university: Readonly<University>;
   thesisType: Readonly<ThesisType>;
+  studyTypes?: readonly Readonly<StudyType>[];
 }
 
 type FacultyOrInstituteCatalogEntry =
@@ -48,5 +50,17 @@ export const ACADEMIC_CATALOG: readonly AcademicCatalogEntry[] = [
       name: "Lisans",
       slug: "bachelor",
     },
+    studyTypes: [
+      {
+        id: "experimental",
+        name: "Deneysel Çalışma",
+        slug: "experimental",
+      },
+      {
+        id: "source-research",
+        name: "Teorik / Kaynak Araştırması",
+        slug: "source-research",
+      },
+    ],
   },
 ];

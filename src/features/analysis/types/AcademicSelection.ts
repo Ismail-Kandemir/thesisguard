@@ -1,6 +1,7 @@
 export interface AcademicSelectionBase {
   universityId: string;
   thesisTypeId: string;
+  studyTypeId?: string;
 }
 
 type FacultyOrInstituteSelection =

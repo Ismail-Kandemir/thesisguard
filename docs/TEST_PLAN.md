@@ -117,6 +117,23 @@ senaryoları manuel olarak doğrulanacaktır:
 | Selection verilmemesi | AnalysisService yalnızca mevcut legacy/default ÇOMÜ bachelor setini kullanır. |
 | Selector ve resolver sorumluluk ayrımı | Selector rule içeriklerini merge veya override etmeden gerekli rule setleri döndürür; nihai kural listesi yalnızca RuleResolver çağrısından sonra oluşur. |
 
+### Çalışma türü seçim altyapısı
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Gıda Teknolojisi Bachelor seçenekleri | Katalog `experimental` ve `source-research` çalışma türlerini sunar. |
+| Experimental seçimi | Seçim geçerlidir ve experimental child rule set seçilir. |
+| Source research seçimi | Seçim geçerlidir ve source-research child rule set seçilir. |
+| Zorunlu çalışma türü seçilmemiş | UI analiz butonunu etkinleştirmez; doğrudan selector kullanımı `AcademicSelectionError` üretir. |
+| Bilinmeyen çalışma türü | Açık bir `AcademicSelectionError` üretilir; fallback yapılmaz. |
+| Experimental izolasyonu | Dönen zincirde source-research seti bulunmaz. |
+| Source research izolasyonu | Dönen zincirde experimental seti bulunmaz. |
+| Ortak department seti | `comu.applied-sciences.food-technology.bachelor` iki seçimde de gelir. |
+| Ortak university seti | `comu.bachelor` iki seçimde de parent olarak gelir. |
+| Üst seçim değişikliği | University, organization, unit veya thesis type değiştiğinde study type temizlenir. |
+| Study type tanımlamayan katalog kaydı | `studyTypeId` olmadan mevcut akademik seçim akışı çalışabilir. |
+| Selection verilmeden `analyzeDocx(file)` | Legacy/default davranış korunur; çalışma türü otomatik seçilmez. |
+
 ## 10. Table of Contents detection test senaryoları
 
 | Senaryo | Beklenen sonuç |
@@ -190,3 +207,32 @@ bölümlerine ayrı ayrı uygulanır.
 | Boş paragraf | Mevcut empty-paragraph exclusion davranışı korunur. |
 | Body cümlesinde “kaynaklar” geçiyor | Tam section adı olmadığı için rule-defined heading olarak işaretlenmez ve body kapsamında kalır. |
 | Required section başlığı mevcut/yok | `RequiredSectionValidator` sonuçları değişmeden korunur. |
+
+## 15. Deneysel çalışma zorunlu bölümleri
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Experimental seçimi | Üç experimental required-section rule ortak 21 kurala eklenir; toplam 24 kural çözülür. |
+| Source research seçimi | Experimental rule'lar dahil edilmez; ortak 21 kural korunur. |
+| Üç experimental section mevcut | Üç rule da başarılı olur. |
+| Bölümlerden her biri ayrı ayrı eksik | Yalnız eksik bölümün rule'u başarısız olur. |
+| Türkçe karakter ve case varyasyonu | Normalize edilmiş tam section adı eşleşir. |
+| Heading style olmayan bağımsız section | Tam section adı eşleştiği için rule başarılı olur. |
+| Bölüm adı body cümlesinde geçiyor | Tam isim eşleşmediğinden false-positive oluşmaz. |
+| Experimental section headinglerinde farklı body formatı | Başlıklar alignment, font-family, font-size ve line-spacing body kapsamından çıkarılır. |
+| Ortak kurallar | Ortak 21 kural experimental ve source-research seçimlerinde korunur. |
+
+## 16. Teorik / kaynak araştırması zorunlu bölümü
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Source research seçimi | Genel Bilgiler rule'u ortak 21 kurala eklenir; toplam 22 kural çözülür. |
+| Experimental seçimi | Source-research Genel Bilgiler rule'u dahil edilmez; toplam 24 kural korunur. |
+| Genel Bilgiler mevcut | Required-section rule başarılı olur. |
+| Genel Bilgiler yok | Required-section rule başarısız olur. |
+| Türkçe karakter ve case varyasyonu | Normalize edilmiş tam `Genel Bilgiler` section adı eşleşir. |
+| Heading style olmayan bağımsız Genel Bilgiler | Tam section adı eşleştiği için rule başarılı olur. |
+| Body cümlesinde “genel bilgiler” geçiyor | Tam isim eşleşmediğinden false-positive oluşmaz. |
+| Genel Bilgiler headinginde farklı body formatı | Başlık alignment, font-family, font-size ve line-spacing body kapsamından çıkarılır. |
+| Ortak kurallar | Ortak 21 kural iki çalışma türünde de korunur. |
+| Experimental kurallar | Üç experimental rule değişmeden ve yalnız experimental seçiminde korunur. |

@@ -1,0 +1,82 @@
+{
+  "id": "comu.applied-sciences.food-technology.bachelor.experimental",
+  "metadata": {
+    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
+    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
+    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
+    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
+    "studyType": { "id": "experimental", "name": "Deneysel Çalışma", "slug": "experimental" },
+    "version": "1.0.0"
+  },
+  "extends": [
+    { "id": "comu.applied-sciences.food-technology.bachelor", "scopeLevel": "department", "version": "1.0.0" }
+  ],
+  "rules": [
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.experimental.general-information-literature",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Genel Bilgiler ve Literatür Çalışması Bölümü",
+      "description": "Deneysel tezde Genel Bilgiler ve Literatür Çalışması bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Genel Bilgiler ve Literatür Çalışması",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Genel Bilgiler ve Literatür Çalışması bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Genel Bilgiler ve Literatür Çalışması bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.experimental.material-method",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Materyal ve Metot Bölümü",
+      "description": "Deneysel tezde Materyal ve Metot bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Materyal ve Metot",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Materyal ve Metot bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Materyal ve Metot bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.experimental.findings-discussion",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Bulgular ve Tartışma Bölümü",
+      "description": "Deneysel tezde Bulgular ve Tartışma bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Bulgular ve Tartışma",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Bulgular ve Tartışma bölümü tespit edilemedi.",
+      "solution": "Teze bağımsız bir Bulgular ve Tartışma bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    }
+  ]
+}
