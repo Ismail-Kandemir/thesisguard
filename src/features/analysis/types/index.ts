@@ -21,7 +21,11 @@ export type RuleCategory =
 
 export type RuleSeverity = "info" | "warning" | "error";
 
-export type RuleType = "PAGE_NUMBER" | "REQUIRED_SECTION" | "SECTION_ORDER";
+export type RuleType =
+  | "PAGE_NUMBER"
+  | "REQUIRED_SECTION"
+  | "SECTION_ORDER"
+  | "SECTION_WORD_COUNT";
 
 export interface PageNumberRuleExpected {
   required: boolean;
@@ -42,6 +46,13 @@ export interface SectionOrderItem {
 
 export interface SectionOrderRuleExpected {
   sections: SectionOrderItem[];
+}
+
+export interface SectionWordCountRuleExpected {
+  section: string;
+  aliases?: string[];
+  min?: number;
+  max?: number;
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
@@ -80,6 +91,7 @@ export type RuleExpectedValue =
   | PageNumberRuleExpected
   | RequiredSectionRuleExpected
   | SectionOrderRuleExpected
+  | SectionWordCountRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;

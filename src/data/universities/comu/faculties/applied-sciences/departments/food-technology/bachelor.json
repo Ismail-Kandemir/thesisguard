@@ -200,6 +200,50 @@
       "solution": "Teze bağımsız bir Özgeçmiş bölümü ekleyin.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count",
+      "type": "SECTION_WORD_COUNT",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Türkçe Özet Kelime Sayısı",
+      "description": "Türkçe Özet bölümünün en fazla 200 kelime olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "section": "Özet",
+        "max": 200
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Türkçe Özet bölümü 200 kelime sınırını aşıyor.",
+      "solution": "Türkçe Özet içeriğini en fazla 200 kelime olacak şekilde düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-en-word-count",
+      "type": "SECTION_WORD_COUNT",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "İngilizce Özet Kelime Sayısı",
+      "description": "İngilizce Özet bölümünün en fazla 200 kelime olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "section": "Abstract",
+        "max": 200
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İngilizce Özet bölümü 200 kelime sınırını aşıyor.",
+      "solution": "İngilizce Özet içeriğini en fazla 200 kelime olacak şekilde düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

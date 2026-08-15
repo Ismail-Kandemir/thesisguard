@@ -65,3 +65,14 @@ yokluğu order hatası değildir. Dış Kapak, İç Kapak ve Kabul ve Onay mevcu
 section-presence modeliyle güvenilir temsil edilmediğinden listelere alınmaz.
 “Ana ve Alt Bölümler” sabit görünür bir başlık değildir. Bu doğrulama içerik
 kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını değerlendirmez.
+
+## Özet kelime sayısı
+
+Kılavuz Türkçe Özet için en fazla 200 kelime sınırı tanımlar ve Türkçe Özet
+kurallarının İngilizce Özette de geçerli olduğunu belirtir. Bu nedenle ortak
+`bachelor.json` seti hem `Özet` hem `Abstract` için ayrı
+`SECTION_WORD_COUNT` kuralları içerir; iki çalışma türü de bu kuralları alır.
+
+Kelime sayımı yalnız heading'den sonraki görünür section içeriğine uygulanır.
+Heading ve sonraki section'ın heading/içeriği sayıma dahil edilmez. Kontrol
+içerik kalitesini, bilimsel uygunluğu, dili veya anahtar kelimeleri doğrulamaz.

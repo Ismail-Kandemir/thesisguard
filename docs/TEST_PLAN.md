@@ -272,3 +272,47 @@ bölümlerine ayrı ayrı uygulanır.
 | Expected section duplicate occurrence | SECTION_ORDER güvenli ve deterministik failure üretir. |
 | İki mevcut section yer değiştiriyor | REQUIRED_SECTION sonuçları başarılı kalırken SECTION_ORDER başarısız olur. |
 | Rule sayıları | Experimental 25, source-research 23 rule çözer. |
+
+## 19. Generic section kelime sayısı
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Max 200 / actual 199 | SECTION_WORD_COUNT başarılı olur. |
+| Max 200 / actual 200 | Üst sınır dahil olduğu için başarılı olur. |
+| Max 200 / actual 201 | Başarısız olur ve bulunan kelime sayısını açıklar. |
+| Min 100 / actual 100 | Alt sınır dahil olduğu için başarılı olur. |
+| Min 100 / actual 99 | Başarısız olur ve minimum değeri açıklar. |
+| Min 100, max 200 / actual 150 | Range kontrolü başarılı olur. |
+| Section heading | Heading paragrafı kelime sayısına dahil edilmez. |
+| Sonraki gerçek section | Sonraki heading ve içeriği hedef section count'una dahil edilmez. |
+| Birden fazla içerik paragrafı | Görünür metinler sırayla birleştirilip doğru sayılır. |
+| Boş paragraflar | Kelime sayısını etkilemez. |
+| Türkçe karakterli kelimeler | Tek kelimeler parçalanmadan sayılır. |
+| Punctuation-only tokenlar | `-`, `—` ve `/` kelime sayılmaz. |
+| Section bulunamıyor | Presence ile çakışmayan PASS/no-op sonucu üretilir; sıfır kelime uygulanmaz. |
+| Duplicate target section | Rastgele occurrence seçilmez; güvenli failure üretilir. |
+| Alias eşleşmesi | Alias ile bulunan section içeriği doğrulanır. |
+| Invalid min/max | Non-negative integer olmayan değer açık configuration error üretir. |
+| Min max değerini aşıyor | Açık configuration error üretilir. |
+| Empty section name | Açık configuration error üretilir. |
+| Mevcut validatorlar | PAGE_NUMBER, REQUIRED_SECTION ve SECTION_ORDER davranışları korunur. |
+| Input immutability | Document, paragraphs, sections, expected ve aliases mutate edilmez. |
+
+## 20. Gıda Teknolojisi Özet kelime sınırları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Türkçe Özet 199 kelime | Türkçe Özet SECTION_WORD_COUNT başarılı olur. |
+| Türkçe Özet tam 200 kelime | Üst sınır dahil olduğu için başarılı olur. |
+| Türkçe Özet 201 kelime | Yalnız ilgili word-count rule başarısız olur. |
+| Türkçe Özet heading | Kelime sayısına dahil edilmez. |
+| Abstract heading ve içeriği | Türkçe Özet kelime sayısına dahil edilmez. |
+| Çoklu Türkçe Özet paragrafları | Paragraflar birlikte sayılır. |
+| Empty paragraph | Kelime sayısını etkilemez. |
+| Türkçe karakterli kelimeler | Parçalanmadan sayılır. |
+| Türkçe Özet yok | REQUIRED_SECTION eksikliği raporlar; word-count no-op davranışı korunur. |
+| İngilizce Özet 200/201 sınırı | PDF'nin Türkçe Özet kurallarını İngilizce Özete de uygulaması nedeniyle sırasıyla pass/fail olur. |
+| Experimental seçimi | İki ortak Özet word-count rule'u dahil; toplam 27 rule çözülür. |
+| Source Research seçimi | İki ortak Özet word-count rule'u dahil; toplam 25 rule çözülür. |
+| 200 ve 201 kelimelik runtime DOCX çifti | Presence ve SECTION_ORDER aynı kalır; yalnız sınırı aşan word-count sonucu değişir. |
+| SECTION_ORDER regresyonu | Özet word-count kuralları bölüm sırası sonuçlarını değiştirmez. |

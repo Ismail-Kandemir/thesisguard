@@ -5,6 +5,7 @@ import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
 import { SectionOrderValidator } from "./validators/SectionOrderValidator";
+import { SectionWordCountValidator } from "./validators/SectionWordCountValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
 const HEADING_1_RULE_ID = "comu.bachelor.heading.heading1";
@@ -47,6 +48,10 @@ const FOOD_TECHNOLOGY_EXPERIMENTAL_SECTION_ORDER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.experimental.section-order";
 const FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.source-research.section-order";
+const FOOD_TECHNOLOGY_SUMMARY_TR_WORD_COUNT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count";
+const FOOD_TECHNOLOGY_SUMMARY_EN_WORD_COUNT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.summary-en-word-count";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -98,6 +103,14 @@ export class ValidatorRegistry {
     [
       FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID,
       new SectionOrderValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_SUMMARY_TR_WORD_COUNT_RULE_ID,
+      new SectionWordCountValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_SUMMARY_EN_WORD_COUNT_RULE_ID,
+      new SectionWordCountValidator(),
     ],
   ]);
 

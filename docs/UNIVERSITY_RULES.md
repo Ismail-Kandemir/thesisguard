@@ -202,6 +202,20 @@ Bölümler” de sabit bir başlık olmadığı için source-research listesinde
 Validator içerik kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını
 kontrol etmez.
 
+## Özet kelime sınırları
+
+Gıda Teknolojisi kılavuzu hem deneysel hem kaynak araştırması tezlerinde Türkçe
+Özet için en fazla 200 kelime sınırı koyar. İngilizce Özet bölümünde de Türkçe
+Özet kurallarının geçerli olduğunu açıkça belirttiği için `Özet` ve `Abstract`
+için ayrı `SECTION_WORD_COUNT` kuralları ortak `bachelor.json` setinde bulunur.
+
+Her kontrol yalnız ilgili heading'den sonraki görünür section içeriğini sayar.
+Heading sayılmaz ve bir sonraki güvenilir section heading'i sınırdır. Böylece
+Türkçe Özet hesabına Abstract heading'i/içeriği, Abstract hesabına da sonraki
+bölüm dahil edilmez. Kelime sayımı içeriğin kalitesini, doğruluğunu, dilini,
+anahtar kelime sayısını veya bilimsel uygunluğunu değerlendirmez. Section
+eksikliği ayrı `REQUIRED_SECTION` kuralının sorumluluğundadır.
+
 ```text
 comu.bachelor
 → comu.applied-sciences.food-technology.bachelor
