@@ -184,6 +184,24 @@ Kılavuzdaki “Ana ve Alt Bölümler” ifadesi sabit bir görünür tez başl�
 konuya göre kurulacak bölüm yapısının tarifidir. Bu nedenle sabit bir
 `REQUIRED_SECTION` olarak modellenmemiştir.
 
+## Gıda Teknolojisi bölüm sırası kuralları
+
+Experimental ve Teorik / Kaynak Araştırması ana metin yapıları farklı olduğu
+için her child rule set kendi `SECTION_ORDER` kuralını taşır. Kurallar,
+kılavuzdaki örnek içindekiler yapısında doğrulanabilen zorunlu bölümlerin
+relative sırasını kontrol eder.
+
+Eksik bölüm kontrolü `REQUIRED_SECTION` sorumluluğunda kalır. `SECTION_ORDER`
+yalnız belgede bulunan expected bölümlerin kendi aralarındaki sırasını
+değerlendirir. Simgeler ve Kısaltmalar, Tablolar, Şekiller ve Ekler gibi koşullu
+bölümlerin yokluğu hata değildir; araya girmeleri de relative sırayı bozmaz.
+Dış/İç Kapak ve Kabul ve Onay mevcut section-presence modeliyle güvenilir
+biçimde temsil edilmediğinden order listelerine dahil edilmemiştir. “Ana ve Alt
+Bölümler” de sabit bir başlık olmadığı için source-research listesinde yoktur.
+
+Validator içerik kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını
+kontrol etmez.
+
 ```text
 comu.bachelor
 → comu.applied-sciences.food-technology.bachelor

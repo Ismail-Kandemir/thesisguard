@@ -236,3 +236,39 @@ bölümlerine ayrı ayrı uygulanır.
 | Genel Bilgiler headinginde farklı body formatı | Başlık alignment, font-family, font-size ve line-spacing body kapsamından çıkarılır. |
 | Ortak kurallar | Ortak 21 kural iki çalışma türünde de korunur. |
 | Experimental kurallar | Üç experimental rule değişmeden ve yalnız experimental seçiminde korunur. |
+
+## 17. Generic bölüm sırası doğrulaması
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Expected A → B → C / document A → B → C | SECTION_ORDER başarılı olur. |
+| Expected A → B → C / document A → C → B | SECTION_ORDER başarısız olur ve ters ilişki mesajda belirtilir. |
+| Expected section eksik, kalan relative order doğru | Eksiklik REQUIRED_SECTION'a bırakılır; SECTION_ORDER başarılı olur. |
+| Expected section eksik, kalan relative order yanlış | SECTION_ORDER başarısız olur. |
+| Unknown section expected bölümler arasına giriyor | Unknown section yok sayılır ve SECTION_ORDER başarılı olur. |
+| Türkçe case/karakter varyasyonu | Ortak section normalization ile eşleşir ve doğru sırada geçer. |
+| Alias document section ile eşleşiyor | Alias, canonical section adına ait occurrence olarak değerlendirilir. |
+| Heading style olmayan bağımsız sectionlar | Parser paragraph konumlarını koruduğu için sıra doğrulanır. |
+| Expected section birden fazla occurrence içeriyor | Rastgele occurrence seçilmez; güvenli ve deterministik validation failure üretilir. |
+| Empty expected sections | Açık SECTION_ORDER configuration error üretilir. |
+| Yanlış expected shape | Açık SECTION_ORDER configuration error üretilir. |
+| Validator'a farklı rule type veriliyor | Açık configuration error üretilir. |
+| PAGE_NUMBER ve REQUIRED_SECTION | Mevcut validator davranışları korunur. |
+| Input immutability | Document sections, expected sections ve alias dizileri mutate edilmez. |
+
+## 18. Gıda Teknolojisi study-type bölüm sırası
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Experimental doğru sıra | Experimental SECTION_ORDER başarılı olur. |
+| Experimental yanlış sıra | Experimental SECTION_ORDER başarısız olur ve problemli relative ilişkiyi açıklar. |
+| Source Research doğru sıra | Source-research SECTION_ORDER başarılı olur. |
+| Source Research yanlış sıra | Source-research SECTION_ORDER başarısız olur ve problemli relative ilişkiyi açıklar. |
+| Source Research seçimi | Experimental order rule RuleEngine'e ulaşmaz. |
+| Experimental seçimi | Source-research order rule RuleEngine'e ulaşmaz. |
+| Expected section eksik, kalan sıra doğru | SECTION_ORDER başarılı; eksiklik yalnız REQUIRED_SECTION sonucunu etkiler. |
+| Expected section eksik, kalan sıra yanlış | SECTION_ORDER başarısız olur. |
+| Koşullu veya unknown section araya giriyor | Relative order bozulmaz. |
+| Expected section duplicate occurrence | SECTION_ORDER güvenli ve deterministik failure üretir. |
+| İki mevcut section yer değiştiriyor | REQUIRED_SECTION sonuçları başarılı kalırken SECTION_ORDER başarısız olur. |
+| Rule sayıları | Experimental 25, source-research 23 rule çözer. |

@@ -6,7 +6,7 @@ const WORD_NAMESPACE =
 export function parseDocumentSections(
   xmlDocument: Document,
 ): DocumentSection[] {
-  const sections = new Map<string, DocumentSection>();
+  const sections: DocumentSection[] = [];
 
   for (const [index, paragraph] of Array.from(
     xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "p"),
@@ -19,17 +19,18 @@ export function parseDocumentSections(
       .trim();
     const normalizedName = normalizeSectionName(displayName);
 
-    if (normalizedName.length > 0 && !sections.has(normalizedName)) {
-      sections.set(normalizedName, {
+    if (normalizedName.length > 0) {
+      sections.push({
         normalizedName,
         displayName,
         paragraphId: `paragraph-${index + 1}`,
+        paragraphIndex: index,
         isRuleDefinedHeading: false,
       });
     }
   }
 
-  return Array.from(sections.values());
+  return sections;
 }
 
 export function normalizeSectionName(value: string): string {

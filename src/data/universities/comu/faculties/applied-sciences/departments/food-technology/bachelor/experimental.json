@@ -77,6 +77,40 @@
       "solution": "Teze bağımsız bir Bulgular ve Tartışma bölümü ekleyin.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.experimental.section-order",
+      "type": "SECTION_ORDER",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Deneysel Tez Bölüm Sırası",
+      "description": "Deneysel tezde doğrulanabilen zorunlu bölümlerin kılavuzdaki relative sırasını kontrol eder.",
+      "category": "structure",
+      "expected": {
+        "sections": [
+          { "section": "İntihal (Aşırma) Beyan Sayfası" },
+          { "section": "Teşekkür" },
+          { "section": "Özet" },
+          { "section": "Abstract" },
+          { "section": "İçindekiler" },
+          { "section": "Giriş" },
+          { "section": "Genel Bilgiler ve Literatür Çalışması" },
+          { "section": "Materyal ve Metot" },
+          { "section": "Bulgular ve Tartışma" },
+          { "section": "Sonuç" },
+          { "section": "Kaynaklar" },
+          { "section": "Özgeçmiş" }
+        ]
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Deneysel tez bölümleri kılavuzdaki relative sırayı izlemiyor.",
+      "solution": "Tez bölümlerini kılavuzdaki deneysel çalışma sırasına göre düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

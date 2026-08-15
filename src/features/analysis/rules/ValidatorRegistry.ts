@@ -4,6 +4,7 @@ import { HeadingValidator } from "./validators/HeadingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
+import { SectionOrderValidator } from "./validators/SectionOrderValidator";
 
 const ALIGNMENT_RULE_ID = "comu.bachelor.format.alignment";
 const HEADING_1_RULE_ID = "comu.bachelor.heading.heading1";
@@ -42,6 +43,10 @@ const FOOD_TECHNOLOGY_EXPERIMENTAL_FINDINGS_DISCUSSION_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.experimental.findings-discussion";
 const FOOD_TECHNOLOGY_SOURCE_RESEARCH_GENERAL_INFORMATION_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.source-research.general-information";
+const FOOD_TECHNOLOGY_EXPERIMENTAL_SECTION_ORDER_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.experimental.section-order";
+const FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.source-research.section-order";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -85,6 +90,14 @@ export class ValidatorRegistry {
     [
       FOOD_TECHNOLOGY_SOURCE_RESEARCH_GENERAL_INFORMATION_RULE_ID,
       new RequiredSectionValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_EXPERIMENTAL_SECTION_ORDER_RULE_ID,
+      new SectionOrderValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID,
+      new SectionOrderValidator(),
     ],
   ]);
 

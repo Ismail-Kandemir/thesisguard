@@ -33,6 +33,38 @@
       "solution": "Teze bağımsız bir Genel Bilgiler bölümü ekleyin.",
       "enabled": true,
       "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.source-research.section-order",
+      "type": "SECTION_ORDER",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Teorik / Kaynak Araştırması Tez Bölüm Sırası",
+      "description": "Teorik veya kaynak araştırması tezinde doğrulanabilen zorunlu bölümlerin kılavuzdaki relative sırasını kontrol eder.",
+      "category": "structure",
+      "expected": {
+        "sections": [
+          { "section": "İntihal (Aşırma) Beyan Sayfası" },
+          { "section": "Teşekkür" },
+          { "section": "Özet" },
+          { "section": "Abstract" },
+          { "section": "İçindekiler" },
+          { "section": "Giriş" },
+          { "section": "Genel Bilgiler" },
+          { "section": "Sonuç" },
+          { "section": "Kaynaklar" },
+          { "section": "Özgeçmiş" }
+        ]
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Teorik / kaynak araştırması tez bölümleri kılavuzdaki relative sırayı izlemiyor.",
+      "solution": "Tez bölümlerini kılavuzdaki teorik / kaynak araştırması sırasına göre düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
     }
   ]
 }

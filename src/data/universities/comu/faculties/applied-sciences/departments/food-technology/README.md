@@ -51,3 +51,17 @@ Araştırması için zorunludur ve Deneysel Çalışma analizine uygulanmaz. Bu 
 de yalnız section varlığını değerlendirir. Kılavuzdaki “Ana ve Alt Bölümler”
 ifadesi konuya göre oluşturulacak yapıyı tarif ettiğinden sabit bir
 `REQUIRED_SECTION` olarak modellenmemiştir.
+
+## Bölüm sırası
+
+Experimental ve Source Research child setleri farklı `SECTION_ORDER` kuralları
+kullanır. Her kural yalnız seçilen çalışma türüne ait, kılavuzdan doğrulanan
+zorunlu bölümlerin relative sırasını denetler. Missing section kontrolü
+`REQUIRED_SECTION` kurallarına aittir; order validator yalnız bulunan expected
+bölümleri karşılaştırır.
+
+Simgeler ve Kısaltmalar, Tablolar, Şekiller ve Ekler gibi koşullu bölümlerin
+yokluğu order hatası değildir. Dış Kapak, İç Kapak ve Kabul ve Onay mevcut
+section-presence modeliyle güvenilir temsil edilmediğinden listelere alınmaz.
+“Ana ve Alt Bölümler” sabit görünür bir başlık değildir. Bu doğrulama içerik
+kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını değerlendirmez.
