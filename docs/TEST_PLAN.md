@@ -316,3 +316,79 @@ bölümlerine ayrı ayrı uygulanır.
 | Source Research seçimi | İki ortak Özet word-count rule'u dahil; toplam 25 rule çözülür. |
 | 200 ve 201 kelimelik runtime DOCX çifti | Presence ve SECTION_ORDER aynı kalır; yalnız sınırı aşan word-count sonucu değişir. |
 | SECTION_ORDER regresyonu | Özet word-count kuralları bölüm sırası sonuçlarını değiştirmez. |
+
+## 21. Tablo ve şekil varlığı normalizasyonu
+
+Bu senaryolar yalnız `word/document.xml` body kapsamındaki OOXML yapılarını doğrular.
+Header/footer parçalarındaki nesneler body tablo/şekil sayısına dahil edilmez.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Hiç tablo yok | `tables.count` 0 ve `tables.hasTables` false olur. |
+| Bir tablo | Body içindeki tek `w:tbl` için `tables.count` 1 ve `tables.hasTables` true olur. |
+| Birden fazla tablo | Body içindeki her `w:tbl` ayrı sayılır. |
+| Nested table davranışı | İç içe tablo dahil her `w:tbl` ayrı sayılır; dış tablo + iç tablo sonucu 2 olur. |
+| Metinde "Tablo 1" yazması | Normal text OOXML tablo yapısı olmadığı için table sayılmaz. |
+| Hiç görsel yok | `figures.count` 0 ve `figures.hasFigures` false olur. |
+| Bir drawing image | Body içindeki tek `w:drawing` için `figures.count` 1 ve `figures.hasFigures` true olur. |
+| Birden fazla image | Body içindeki her `w:drawing` ayrı sayılır. |
+| Metinde "Şekil 1" yazması | Normal text OOXML drawing yapısı olmadığı için figure sayılmaz. |
+| Table + figure aynı belgede | `tables` ve `figures` alanları birbirinden bağımsız doğru sayıları döner. |
+| Header/footer image body count'a dahil değil | Header/footer XML içindeki image, `figures.count` değerini artırmaz. |
+| Malformed drawing parser'ı düşürmüyor | Eksik veya beklenmeyen drawing relationship yapısı analiz akışını çökertmez. |
+
+## 22. Generic conditional required-section doğrulaması
+
+Bu senaryolar `CONDITIONAL_REQUIRED_SECTION` altyapısını gerçek üniversite rule
+JSON'u eklemeden doğrular.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| `hasTables=true` + section var | Condition true olur; bölüm bulunduğu için validator pass döner. |
+| `hasTables=true` + section yok | Condition true olur; bölüm bulunmadığı için validator fail döner. |
+| `hasTables=false` + section yok | Condition false olur; validator no-op/pass döner ve actual `Uygulanmadı` olur. |
+| `hasTables=false` + section var | Condition false olur; validator no-op/pass döner ve actual `Uygulanmadı` olur. |
+| `hasFigures=true` + section var | Condition true olur; bölüm bulunduğu için validator pass döner. |
+| `hasFigures=true` + section yok | Condition true olur; bölüm bulunmadığı için validator fail döner. |
+| `hasFigures=false` + section yok | Condition false olur; validator no-op/pass döner ve actual `Uygulanmadı` olur. |
+| `hasFigures=false` + section var | Condition false olur; validator no-op/pass döner ve actual `Uygulanmadı` olur. |
+| Türkçe/case normalization | Section adı mevcut `normalizeSectionName()` ile eşleşir. |
+| Alias eşleşmesi | Expected `aliases` içindeki geçerli ad section ile eşleşirse validator pass döner. |
+| Body cümlesi false-positive üretmez | Bölüm adı yalnız body cümlesinde geçiyorsa tam normalized section eşleşmesi olmadığı için section sayılmaz. |
+| Boş section | Açık configuration error üretilir. |
+| Boş alias | Açık configuration error üretilir. |
+| Unsupported fact | Açık configuration error üretilir. |
+| `equals` boolean değil | Açık configuration error üretilir. |
+| Yanlış rule type | `ConditionalRequiredSectionValidator` açık configuration error üretir. |
+| REQUIRED_SECTION regresyonu | Mevcut `RequiredSectionValidator` davranışı değişmeden korunur. |
+| SECTION_ORDER regresyonu | Mevcut `SectionOrderValidator` davranışı değişmeden korunur. |
+| SECTION_WORD_COUNT regresyonu | Mevcut `SectionWordCountValidator` davranışı değişmeden korunur. |
+| PAGE_NUMBER regresyonu | Mevcut `PageNumberValidator` davranışı değişmeden korunur. |
+| Document/rule immutability | Document, sections, rule ve expected nesneleri mutate edilmez. |
+
+## 23. Gıda Teknolojisi koşullu Tablolar/Şekiller Listesi kuralları
+
+Bu senaryolar ÇOMÜ Uygulamalı Bilimler Fakültesi Gıda Teknolojisi Lisans
+Bitirme Tezi kural setindeki gerçek `CONDITIONAL_REQUIRED_SECTION` kurallarını
+doğrular.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Table yok + liste yok | `hasTables=false`; Tablolar Listesi kuralı `Uygulanmadı` no-op/pass döner. |
+| Table var + Tablolar Listesi var | Tablolar Listesi kuralı pass döner. |
+| Table var + Tablolar Listesi yok | Tablolar Listesi kuralı fail döner. |
+| Yalnız "Tablo 1" text | Gerçek `w:tbl` olmadığı için condition tetiklenmez ve kural `Uygulanmadı` döner. |
+| Figure yok + liste yok | `hasFigures=false`; Şekiller Listesi kuralı `Uygulanmadı` no-op/pass döner. |
+| Figure var + Şekiller Listesi var | Şekiller Listesi kuralı pass döner. |
+| Figure var + Şekiller Listesi yok | Şekiller Listesi kuralı fail döner. |
+| Yalnız "Şekil 1" text | Gerçek `w:drawing` olmadığı için condition tetiklenmez ve kural `Uygulanmadı` döner. |
+| Table + figure var, iki liste de var | İki conditional rule da pass döner. |
+| Table + figure var, iki liste de yok | İki conditional rule da fail döner. |
+| Table var/listesi var + figure yok | Tablolar Listesi pass, Şekiller Listesi `Uygulanmadı` döner. |
+| Figure var/listesi var + table yok | Şekiller Listesi pass, Tablolar Listesi `Uygulanmadı` döner. |
+| Experimental seçimi | Çözülmüş rule listesinde iki conditional rule bulunur; toplam 29 rule/result beklenir. |
+| Source Research seçimi | Çözülmüş rule listesinde iki conditional rule bulunur; toplam 27 rule/result beklenir. |
+| SECTION_ORDER regresyonu | Conditional listeler mevcut order listelerine eklenmez; mevcut order davranışı korunur. |
+| REQUIRED_SECTION regresyonu | Mevcut required-section kuralları değişmeden çalışır. |
+| SECTION_WORD_COUNT regresyonu | Mevcut word-count kuralları değişmeden çalışır. |
+| PAGE_NUMBER regresyonu | Mevcut page-number kuralları değişmeden çalışır. |

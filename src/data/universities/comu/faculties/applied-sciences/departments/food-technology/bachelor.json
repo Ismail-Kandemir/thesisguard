@@ -202,6 +202,56 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.list-of-tables",
+      "type": "CONDITIONAL_REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Tablolar Listesi",
+      "description": "Tezde gerçek tablo varsa Tablolar Listesi bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Tablolar Listesi",
+        "requiredWhen": {
+          "fact": "hasTables",
+          "equals": true
+        }
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablo içeren tezde Tablolar Listesi bölümü bulunmalıdır.",
+      "solution": "Tezde tablo kullanıldıysa Tablolar Listesi bölümünü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.list-of-figures",
+      "type": "CONDITIONAL_REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Şekiller Listesi",
+      "description": "Tezde gerçek şekil varsa Şekiller Listesi bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Şekiller Listesi",
+        "requiredWhen": {
+          "fact": "hasFigures",
+          "equals": true
+        }
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil içeren tezde Şekiller Listesi bölümü bulunmalıdır.",
+      "solution": "Tezde şekil kullanıldıysa Şekiller Listesi bölümünü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count",
       "type": "SECTION_WORD_COUNT",
       "scope": {

@@ -1,5 +1,6 @@
 import type { RuleValidator } from "./validators/RuleValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
+import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
 import { HeadingValidator } from "./validators/HeadingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
@@ -36,6 +37,10 @@ const FOOD_TECHNOLOGY_CONCLUSION_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.conclusion";
 const FOOD_TECHNOLOGY_CV_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.cv";
+const FOOD_TECHNOLOGY_LIST_OF_TABLES_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.list-of-tables";
+const FOOD_TECHNOLOGY_LIST_OF_FIGURES_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.list-of-figures";
 const FOOD_TECHNOLOGY_EXPERIMENTAL_GENERAL_INFORMATION_LITERATURE_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.experimental.general-information-literature";
 const FOOD_TECHNOLOGY_EXPERIMENTAL_MATERIAL_METHOD_RULE_ID =
@@ -80,6 +85,14 @@ export class ValidatorRegistry {
     [FOOD_TECHNOLOGY_INTRODUCTION_RULE_ID, new RequiredSectionValidator()],
     [FOOD_TECHNOLOGY_CONCLUSION_RULE_ID, new RequiredSectionValidator()],
     [FOOD_TECHNOLOGY_CV_RULE_ID, new RequiredSectionValidator()],
+    [
+      FOOD_TECHNOLOGY_LIST_OF_TABLES_RULE_ID,
+      new ConditionalRequiredSectionValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_LIST_OF_FIGURES_RULE_ID,
+      new ConditionalRequiredSectionValidator(),
+    ],
     [
       FOOD_TECHNOLOGY_EXPERIMENTAL_GENERAL_INFORMATION_LITERATURE_RULE_ID,
       new RequiredSectionValidator(),

@@ -1,4 +1,6 @@
 import type {
+  DocumentFigures,
+  DocumentTables,
   NormalizedDocument,
   PageMargins,
   Paragraph,
@@ -33,7 +35,27 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       fields: [],
     },
     tableOfContents: parseTableOfContents(xmlDocument),
+    tables: parseDocumentTables(xmlDocument),
+    figures: parseDocumentFigures(xmlDocument),
     sections: parseDocumentSections(xmlDocument),
+  };
+}
+
+function parseDocumentTables(xmlDocument: Document): DocumentTables {
+  const count = getBodyDescendants(xmlDocument, "tbl").length;
+
+  return {
+    count,
+    hasTables: count > 0,
+  };
+}
+
+function parseDocumentFigures(xmlDocument: Document): DocumentFigures {
+  const count = getBodyDescendants(xmlDocument, "drawing").length;
+
+  return {
+    count,
+    hasFigures: count > 0,
   };
 }
 
@@ -250,6 +272,16 @@ function getParagraphText(runs: Run[]): string {
 
 function getFirstDescendant(element: Element, localName: string): Element | null {
   return element.getElementsByTagNameNS(WORD_NAMESPACE, localName).item(0);
+}
+
+function getBodyDescendants(xmlDocument: Document, localName: string): Element[] {
+  const body = xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "body").item(0);
+
+  if (!body) {
+    return [];
+  }
+
+  return Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, localName));
 }
 
 function getWordAttribute(element: Element, localName: string): string | null {

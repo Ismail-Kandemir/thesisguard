@@ -130,6 +130,22 @@ değerlendirilmez. İntihal beyanı kuralı intihal oranını, Turnitin sonucunu
 imzayı ya da beyan metninin doğruluğunu kontrol etmez. Özgeçmiş kuralı da
 özgeçmiş içeriğinin veya şablonunun uygunluğunu doğrulamaz.
 
+Kılavuz iki çalışma türü için de `TABLOLAR LİSTESİ` bölümünü bitirme ödevinde
+tablo varsa, `ŞEKİLLER LİSTESİ` bölümünü ise bitirme ödevinde şekil varsa
+eklenmesi gereken bölüm olarak tanımlar. Bu nedenle bu iki başlık ortak Gıda
+Teknolojisi Lisans kural setinde `CONDITIONAL_REQUIRED_SECTION` olarak
+modellenir. Tablolar Listesi koşulu normalize edilmiş DOCX body
+`word/document.xml` içindeki gerçek `w:tbl` varlığına, Şekiller Listesi koşulu
+ise gerçek `w:drawing` varlığına dayanır. Metindeki `Tablo` veya `Şekil`
+ifadeleri tek başına koşul oluşturmaz.
+
+Bu conditional kurallar liste içeriğinin doğruluğunu, listedeki sayfa
+numaralarını, caption yapılarını, tablo/şekil numaralandırmasını veya görsel
+içeriğini kontrol etmez. Mevcut `RuleResult` modelinde skipped/not-applicable
+durumu bulunmadığı için koşul false olduğunda sonuç `Uygulanmadı` actual
+değeriyle pass/no-op olarak temsil edilir ve mevcut skor hesabında pass olarak
+sayılır.
+
 ## Akademik seçim akışı
 
 ```text

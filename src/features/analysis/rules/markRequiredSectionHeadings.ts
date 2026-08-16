@@ -1,5 +1,6 @@
 import { normalizeSectionName } from "../parsers/documentSectionsParser";
 import type {
+  ConditionalRequiredSectionRuleExpected,
   NormalizedDocument,
   RequiredSectionRuleExpected,
   RuleDefinition,
@@ -11,7 +12,7 @@ export function markRequiredSectionHeadings(
 ): NormalizedDocument {
   const requiredSectionNames = new Set(
     rules
-      .filter(isRequiredSectionRule)
+      .filter(isRuleDefinedSectionRule)
       .flatMap((rule) => [
         rule.expected.section,
         ...(rule.expected.aliases ?? []),
@@ -28,16 +29,18 @@ export function markRequiredSectionHeadings(
   };
 }
 
-function isRequiredSectionRule(
+function isRuleDefinedSectionRule(
   rule: RuleDefinition,
 ): rule is RuleDefinition & {
-  type: "REQUIRED_SECTION";
-  expected: RequiredSectionRuleExpected;
+  type: "CONDITIONAL_REQUIRED_SECTION" | "REQUIRED_SECTION";
+  expected: ConditionalRequiredSectionRuleExpected | RequiredSectionRuleExpected;
 } {
   return (
     rule.enabled &&
-    rule.type === "REQUIRED_SECTION" &&
+    (rule.type === "CONDITIONAL_REQUIRED_SECTION" ||
+      rule.type === "REQUIRED_SECTION") &&
     typeof rule.expected === "object" &&
+    rule.expected !== null &&
     "section" in rule.expected &&
     typeof rule.expected.section === "string"
   );

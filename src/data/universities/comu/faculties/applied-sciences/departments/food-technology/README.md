@@ -30,6 +30,27 @@ içeriğini, sırasını veya biçimini değerlendirmez.
 beyan içeriğinin doğruluğunu değerlendirmez. Özgeçmiş kontrolü de yalnızca
 bölüm varlığını doğrular; özgeçmiş içeriğini ya da şablon uygunluğunu incelemez.
 
+Kılavuz, deneysel ve teorik/kaynak araştırması çalışmalarının ikisinde de
+`TABLOLAR LİSTESİ` bölümünü bitirme ödevinde tablo varsa, `ŞEKİLLER LİSTESİ`
+bölümünü ise bitirme ödevinde şekil varsa eklenmesi gereken bölüm olarak
+tanımlar. Bu nedenle ortak `bachelor.json` setinde iki
+`CONDITIONAL_REQUIRED_SECTION` kuralı bulunur:
+
+- `comu.applied-sciences.food-technology.bachelor.list-of-tables`
+- `comu.applied-sciences.food-technology.bachelor.list-of-figures`
+
+Koşullar normalize edilmiş DOCX OOXML yapısına dayanır: tablo için body
+`word/document.xml` içindeki gerçek `w:tbl`, şekil için gerçek `w:drawing`
+varlığı kullanılır. Normal metinde geçen `Tablo` veya `Şekil` ifadeleri koşulu
+tetiklemez. Bu kurallar liste içeriğinin doğruluğunu, sayfa numaralarını,
+caption yapılarını, tablo/şekil numaralandırmasını veya görsel içeriğini
+kontrol etmez.
+
+Mevcut rapor modelinde ayrı bir skipped/not-applicable durumu olmadığı için
+koşul false olduğunda sonuç `Uygulanmadı` actual değeriyle pass/no-op olarak
+temsil edilir ve skora pass olarak dahil olur. Bu teknik temsil bu sprintte
+değiştirilmemiştir.
+
 ## Tez düzeyi ve çalışma türü
 
 `bachelor`, akademik tez düzeyidir. `experimental` (Deneysel Çalışma) ve

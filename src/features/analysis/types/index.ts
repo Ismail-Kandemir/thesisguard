@@ -23,6 +23,7 @@ export type RuleSeverity = "info" | "warning" | "error";
 
 export type RuleType =
   | "PAGE_NUMBER"
+  | "CONDITIONAL_REQUIRED_SECTION"
   | "REQUIRED_SECTION"
   | "SECTION_ORDER"
   | "SECTION_WORD_COUNT";
@@ -37,6 +38,19 @@ export interface RequiredSectionRuleExpected {
   section: string;
   aliases?: string[];
   required: boolean;
+}
+
+export type ConditionalRequiredSectionFact = "hasTables" | "hasFigures";
+
+export interface ConditionalRequiredSectionCondition {
+  fact: ConditionalRequiredSectionFact;
+  equals: boolean;
+}
+
+export interface ConditionalRequiredSectionRuleExpected {
+  section: string;
+  aliases?: string[];
+  requiredWhen: ConditionalRequiredSectionCondition;
 }
 
 export interface SectionOrderItem {
@@ -89,6 +103,7 @@ export type RuleExpectedValue =
   | number
   | boolean
   | PageNumberRuleExpected
+  | ConditionalRequiredSectionRuleExpected
   | RequiredSectionRuleExpected
   | SectionOrderRuleExpected
   | SectionWordCountRuleExpected
@@ -237,6 +252,16 @@ export interface TableOfContents {
   fields: TableOfContentsField[];
 }
 
+export interface DocumentTables {
+  count: number;
+  hasTables: boolean;
+}
+
+export interface DocumentFigures {
+  count: number;
+  hasFigures: boolean;
+}
+
 export interface DocumentSection {
   normalizedName: string;
   displayName: string;
@@ -252,6 +277,8 @@ export interface NormalizedDocument {
   pageMargins: PageMargins;
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;
+  tables: DocumentTables;
+  figures: DocumentFigures;
   sections: DocumentSection[];
 }
 
