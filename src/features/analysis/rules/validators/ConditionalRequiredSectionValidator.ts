@@ -17,6 +17,7 @@ import type { RuleValidator } from "./RuleValidator";
 const FACT_LABELS: Record<ConditionalRequiredSectionFact, string> = {
   hasTables: "tablo",
   hasFigures: "şekil",
+  hasAbbreviations: "kısaltma",
 };
 
 export class ConditionalRequiredSectionValidator implements RuleValidator {

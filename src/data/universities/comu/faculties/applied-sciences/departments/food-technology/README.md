@@ -6,6 +6,29 @@ kural setleri tutulur.
 Kaynak: Çanakkale Onsekiz Mart Üniversitesi, Gıda Teknolojisi Bitirme Tezi
 Hazırlama Kılavuzu.
 
+Kılavuzun 4.1 maddesi üst ve sol kenar boşluğunu 3 cm, sağ ve alt kenar
+boşluğunu 2,5 cm olarak tanımlar. Genel ÇOMÜ setindeki 2,5 cm üst margin değeri
+bu department kapsamında 3 cm ile override edilir. 4.2 maddesi bitirme projesi
+metninin tamamını Times New Roman 12 punto tanımlar ve ana/alt başlıklar için
+yalnız kalın yazım şartı getirir. Bu nedenle genel setteki 14 punto Heading1
+değeri burada 12 punto, kalın olarak override edilir. Heading2 ve Heading3
+zaten 12 punto olduğundan değiştirilmez.
+
+Kılavuzun iki çalışma türü için verdiği yapıda `KABUL VE ONAY SAYFASI` ortak ve
+zorunludur. Ek-4 ile resmi literatür ve laboratuvar şablonlarında görünür heading
+`KABUL VE ONAY` olduğundan rule canonical `Kabul ve Onay Sayfası` ve alias
+`Kabul ve Onay` kullanır. Kontrol yalnız bağımsız heading presence'ını doğrular;
+jüri üyeleri, danışman, imza veya imza gerçekliği, tarih, öğrenci bilgileri,
+Turnitin sonucu/oranı, sayfa içeriğinin eksiksizliği ve görsel şablona birebir
+uygunluk kapsam dışıdır.
+
+Deneysel ve kaynak araştırması SECTION_ORDER kuralları aynı canonical/alias
+çiftini kullanarak bulunan bölümlerde `İntihal (Aşırma) Beyan Sayfası` → `Kabul
+ve Onay Sayfası` → `Teşekkür` relative sırasını denetler. Kabul ve Onay yoksa
+order kuralı ayrıca hata üretmez; yokluk ortak `acceptance-approval`
+REQUIRED_SECTION kuralının, yanlış ya da belirsiz sıra SECTION_ORDER kuralının
+sorumluluğudur.
+
 bachelor.json, kılavuzda doğrulanan sayfa numarasının zorunlu, alt bilgide ve
 ortalanmış olması kuralıyla İçindekiler bölümünün bulunması kuralını içerir.
 Kılavuz Word TOC field kullanımını zorunlu tutmadığından bu teknik yapı
@@ -46,10 +69,28 @@ tetiklemez. Bu kurallar liste içeriğinin doğruluğunu, sayfa numaralarını,
 caption yapılarını, tablo/şekil numaralandırmasını veya görsel içeriğini
 kontrol etmez.
 
-Mevcut rapor modelinde ayrı bir skipped/not-applicable durumu olmadığı için
-koşul false olduğunda sonuç `Uygulanmadı` actual değeriyle pass/no-op olarak
-temsil edilir ve skora pass olarak dahil olur. Bu teknik temsil bu sprintte
-değiştirilmemiştir.
+Kılavuzdaki `SİMGELER VE KISALTMALAR LİSTESİ` bölümü de tezde kısaltma kullanımı
+tespit edildiğinde ortak `bachelor.json` setindeki
+`comu.applied-sciences.food-technology.bachelor.list-of-abbreviations`
+conditional kuralıyla aranır. Koşul, normalize edilmiş belgenin heuristic
+`hasAbbreviations` fact'ine dayanır; rule'a kaynakla desteklenmeyen alias
+eklenmemiştir.
+
+Bu rule yalnız bağımsız bölüm başlığının varlığını doğrular. Listedeki tüm
+kısaltmaların eksiksizliğini veya açıklamalarını, alfabetik sırayı, metin ile
+listenin birebir eşleşmesini, sembollerin semantik doğruluğunu ya da ilk
+kullanımda açılım verilmesini değerlendirmez. Heuristic fact kesin ve eksiksiz
+bir dilbilimsel kısaltma analizi değildir.
+
+Generic `ABBREVIATION_LIST_CONSISTENCY` validator altyapısı hazırdır fakat bu
+rule setinde etkin değildir. Resmi kılavuz “Eğer kısaltmalar kullanılıyorsa
+listesi yapılmalıdır” diyerek section presence şartını destekler; body'deki tüm
+kısaltmaların listede eksiksiz bulunmasını ayrı bir akademik gereklilik olarak
+yeterince açık tanımlamaz. 4.7 Kısaltmalar bölümü ilk kullanımda açılım verme
+kuralıdır ve liste coverage şartı değildir.
+
+Koşulu karşılanmayan conditional sonuçlar `NOT_APPLICABLE` olur; PASS veya FAIL
+sayılmaz ve score denominator'a dahil edilmez.
 
 ## Tez düzeyi ve çalışma türü
 
@@ -82,8 +123,8 @@ zorunlu bölümlerin relative sırasını denetler. Missing section kontrolü
 bölümleri karşılaştırır.
 
 Simgeler ve Kısaltmalar, Tablolar, Şekiller ve Ekler gibi koşullu bölümlerin
-yokluğu order hatası değildir. Dış Kapak, İç Kapak ve Kabul ve Onay mevcut
-section-presence modeliyle güvenilir temsil edilmediğinden listelere alınmaz.
+yokluğu order hatası değildir. Dış Kapak ve İç Kapak listelere alınmaz; Kabul
+ve Onay canonical ad ve resmi alias ile order listelerinde yer alır.
 “Ana ve Alt Bölümler” sabit görünür bir başlık değildir. Bu doğrulama içerik
 kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını değerlendirmez.
 
@@ -97,3 +138,17 @@ kurallarının İngilizce Özette de geçerli olduğunu belirtir. Bu nedenle ort
 Kelime sayımı yalnız heading'den sonraki görünür section içeriğine uygulanır.
 Heading ve sonraki section'ın heading/içeriği sayıma dahil edilmez. Kontrol
 içerik kalitesini, bilimsel uygunluğu, dili veya anahtar kelimeleri doğrulamaz.
+
+## Özet ve Abstract anahtar kelimeleri
+
+Ortak `bachelor.json` setindeki iki `SECTION_KEYWORDS` kuralı Özet sonunda
+`Anahtar Kelimeler:`, Abstract sonunda `Keyword:` label'ını ve aynı paragrafta
+virgülle ayrılmış 3–5 görünür entry'yi doğrular. Label paragrafından sonraki boş
+paragraflar kabul edilir; aynı section içindeki görünür devam metni placement
+hatasıdır.
+
+Duplicate keyword değerleri kaynakta ayrı bir akademik hata olarak
+tanımlanmadığından görünür entry olarak sayılır. Keyword'lerin bilimsel
+kalitesi, anlamı ve Türkçe/İngilizce semantik çeviri eşdeğerliği kontrol
+edilmez. Mevcut 200 kelimelik `SECTION_WORD_COUNT` davranışı değiştirilmemiştir;
+keyword satırı mevcut section kelime hesabına dahil olmaya devam eder.

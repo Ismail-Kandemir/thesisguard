@@ -26,7 +26,9 @@ export type RuleType =
   | "CONDITIONAL_REQUIRED_SECTION"
   | "REQUIRED_SECTION"
   | "SECTION_ORDER"
-  | "SECTION_WORD_COUNT";
+  | "SECTION_WORD_COUNT"
+  | "SECTION_KEYWORDS"
+  | "ABBREVIATION_LIST_CONSISTENCY";
 
 export interface PageNumberRuleExpected {
   required: boolean;
@@ -40,7 +42,10 @@ export interface RequiredSectionRuleExpected {
   required: boolean;
 }
 
-export type ConditionalRequiredSectionFact = "hasTables" | "hasFigures";
+export type ConditionalRequiredSectionFact =
+  | "hasTables"
+  | "hasFigures"
+  | "hasAbbreviations";
 
 export interface ConditionalRequiredSectionCondition {
   fact: ConditionalRequiredSectionFact;
@@ -67,6 +72,20 @@ export interface SectionWordCountRuleExpected {
   aliases?: string[];
   min?: number;
   max?: number;
+}
+
+export interface SectionKeywordsRuleExpected {
+  section: string;
+  labels: string[];
+  min: number;
+  max: number;
+  separators: string[];
+  placement: "section-end";
+}
+
+export interface AbbreviationListConsistencyRuleExpected {
+  section: string;
+  aliases?: string[];
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
@@ -107,6 +126,8 @@ export type RuleExpectedValue =
   | RequiredSectionRuleExpected
   | SectionOrderRuleExpected
   | SectionWordCountRuleExpected
+  | SectionKeywordsRuleExpected
+  | AbbreviationListConsistencyRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;
@@ -262,6 +283,17 @@ export interface DocumentFigures {
   hasFigures: boolean;
 }
 
+export interface DocumentAbbreviation {
+  value: string;
+  occurrences: number;
+}
+
+export interface DocumentAbbreviations {
+  items: DocumentAbbreviation[];
+  count: number;
+  hasAbbreviations: boolean;
+}
+
 export interface DocumentSection {
   normalizedName: string;
   displayName: string;
@@ -279,6 +311,7 @@ export interface NormalizedDocument {
   tableOfContents: TableOfContents;
   tables: DocumentTables;
   figures: DocumentFigures;
+  abbreviations: DocumentAbbreviations;
   sections: DocumentSection[];
 }
 

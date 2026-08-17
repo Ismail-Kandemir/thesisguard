@@ -425,3 +425,177 @@ değerlendirilen kontrol yalnız `PASSED + FAILED` sonuçlarını kapsar. Skor
 | PAGE_NUMBER regresyonu | Gerçek PASS/FAIL davranışı korunur. |
 | Formatting validator regresyonu | Font, size, spacing, alignment, heading ve margin PASS/FAIL davranışı korunur. |
 | Uygulanmayan sonuç kartı | “Uygulanmadı” metni ve nötr stil gösterir; başarı/başarısızlık olarak sunulmaz. |
+
+## 25. Kısaltma kullanım fact normalizasyonu
+
+Bu altyapı akademik bir zorunluluk kararı vermez. Yalnız görünür body metnindeki
+konservatif heuristic eşleşmeleri normalize edilmiş document fact olarak üretir.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Tek abbreviation: `PCR` | Tek item, occurrence 1, count 1 ve `hasAbbreviations=true`. |
+| Birden fazla: `DNA` + `PCR` | İki item ilk görülme sırasında üretilir. |
+| `PCR` üç kez | Tek item ve occurrence 3. |
+| `TÜBİTAK` | Unicode uppercase desteğiyle tespit edilir. |
+| `UV-VIS` | İç hyphen korunarak tek item olur. |
+| `CO2` ve `H2O` | Alphanumeric abbreviation olarak tespit edilir. |
+| `(PCR), PCR. PCR;` | Dış punctuation temizlenir; tek item ve occurrence 3 olur. |
+| Lowercase normal kelime | Tespit edilmez. |
+| Title Case normal kelime | Tespit edilmez. |
+| Saf sayı: `2026`, `12`, `200` | Tespit edilmez. |
+| Tek uppercase harf: `A`, `B`, `C` | Tespit edilmez. |
+| Boş belge | Empty items, count 0 ve `hasAbbreviations=false`; crash olmaz. |
+| Abbreviation içermeyen normal body | Empty result üretir. |
+| `ÖZET` ve `GİRİŞ` section heading | Rule-defined heading işaretiyle hariç tutulur. |
+| REQUIRED_SECTION heading | Kısaltma false-positive'i üretmez. |
+| CONDITIONAL_REQUIRED_SECTION heading | Kısaltma false-positive'i üretmez. |
+| Heading1–Heading3 paragrafı | Stil adı veya ID üzerinden tarama dışında kalır. |
+| Header içinde abbreviation | Body paragraph modeline girmediği için ignore edilir. |
+| Footer içinde abbreviation | Body paragraph modeline girmediği için ignore edilir. |
+| Duplicate occurrence count | Aynı normalized token tek item altında doğru sayılır. |
+| First-seen ordering | Item dizisi belgedeki ilk görülme sırasını korur. |
+| Immutability | Document, paragraph ve run dizileri mutate edilmez. |
+| Table/figure detection regresyonu | Mevcut count/has fact davranışı değişmez. |
+| Section detection regresyonu | Mevcut section parsing ve marking davranışı değişmez. |
+| NOT_APPLICABLE regresyonu | Status, score denominator ve rapor davranışı değişmez. |
+
+## 26. ÇOMÜ Simgeler ve Kısaltmalar Listesi conditional kuralı
+
+Gerçek rule ID:
+`comu.applied-sciences.food-technology.bachelor.list-of-abbreviations`.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Abbreviation yok + liste yok | `NOT_APPLICABLE`, `passed=false`; değerlendirilen sayısına ve skora girmez. |
+| Abbreviation var + liste yok | `FAILED`, `passed=false`; yalnız score denominator'a girer. |
+| Abbreviation var + liste var | `PASSED`, `passed=true`; score numerator ve denominator'a girer. |
+| Body içinde `PCR` | `hasAbbreviations=true`; conditional kontrol tetiklenir. |
+| Body içinde `DNA` | `hasAbbreviations=true`; conditional kontrol tetiklenir. |
+| Body içinde `TÜBİTAK` | Unicode uppercase desteğiyle kontrol tetiklenir. |
+| Body içinde `UV-VIS` | Hyphen korunur ve kontrol tetiklenir. |
+| Body içinde `CO2` / `H2O` | Alphanumeric heuristic kontrolü tetikler. |
+| Heading `SİMGELER VE KISALTMALAR LİSTESİ` | Uppercase section normalization ile bulunur. |
+| Heading `Simgeler ve Kısaltmalar Listesi` | Case normalization ile bulunur. |
+| Ad yalnız body cümlesinde geçiyor | Bağımsız section olmadığı için section present sayılmaz. |
+| Resolved liste heading'i farklı formatta | Generic rule-defined heading işaretiyle font, size, spacing ve alignment body kapsamından çıkarılır. |
+| Experimental seçim | Ortak setten inherit edilir; resolved toplam 30 rule olur. |
+| Source Research seçim | Ortak setten inherit edilir; resolved toplam 28 rule olur. |
+| Table conditional regresyonu | `hasTables` ve Tablolar Listesi sonuçları değişmez. |
+| Figure conditional regresyonu | `hasFigures` ve Şekiller Listesi sonuçları değişmez. |
+| NOT_APPLICABLE score regresyonu | Uygulanmayan sonuç toplam kontrolde bulunur; evaluated/score denominator'a girmez. |
+| `abbreviation-detection-negative.docx` | `hasAbbreviations=false`; yeni rule doğrudan `NOT_APPLICABLE` olur. |
+| `abbreviation-detection-positive.docx` | `hasAbbreviations=true`, liste yok; yeni rule doğrudan `FAILED` olur. |
+| Abbreviation + liste runtime belgesi | `hasAbbreviations=true`, section present; yeni rule doğrudan `PASSED` olur. |
+
+## 27. Generic abbreviation list consistency
+
+Bu senaryolar yalnız generic `ABBREVIATION_LIST_CONSISTENCY` validator ve liste
+satırı parser altyapısını kapsar; gerçek university rule ID veya registry kaydı
+eklenmez.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Body `PCR`, list `PCR` | `PASSED`; actual `1/1`. |
+| Body `PCR`, `HPLC`; list ikisini içeriyor | `PASSED`; unique coverage `2/2`. |
+| Body `PCR`, `HPLC`; list yalnız `PCR` | `FAILED`; missing ve actual içinde `HPLC` gösterilir. |
+| Body `PCR`; list `PCR`, `HPLC` | `PASSED`; list extra failure üretmez. |
+| Body abbreviation yok | `NOT_APPLICABLE`, `passed=false`. |
+| Body abbreviation var, list section yok | Presence hatası duplicate edilmez; `NOT_APPLICABLE`. |
+| Duplicate list section | Rastgele occurrence seçilmez; deterministik `FAILED`. |
+| `TÜBİTAK` | Unicode token list key'i ve body value eşleşir. |
+| `UV-VIS` | İç hyphen korunur ve eşleşir. |
+| `CO2`, `H2O` | Alphanumeric key'ler eşleşir. |
+| `PCR    Polimeraz Zincir Reaksiyonu` | Çoklu whitespace separator ile `PCR` çıkarılır. |
+| `PCR\tPolimeraz Zincir Reaksiyonu` | Tek tab separator ile `PCR` çıkarılır. |
+| `TÜBİTAK - Türkiye Bilimsel...` | Boşluklu hyphen separator ile `TÜBİTAK` çıkarılır. |
+| `HPLC: Yüksek Performanslı...` | Colon separator ile `HPLC` çıkarılır. |
+| Normal açıklama cümlesi | Geçerli uppercase key/separator yapısı olmadığı için entry sayılmaz. |
+| Hedef heading paragrafı | Liste entry'si veya body abbreviation olarak sayılmaz. |
+| Sonraki rule-defined section | Section range sınırıdır; sonraki içerik listeye dahil edilmez. |
+| Body `PCR` birden fazla occurrence | Coverage unique `PCR` üzerinden bir kez değerlendirilir. |
+| List duplicate `PCR` | Deterministik olarak tek list key'i kabul edilir. |
+| Input immutability | Rule, document, section, paragraph ve abbreviation dizileri mutate edilmez. |
+| Existing abbreviation detector | Unicode, punctuation, duplicate occurrence ve first-seen davranışı korunur. |
+| Conditional required-section | Mevcut presence rule davranışı değişmez. |
+| NOT_APPLICABLE score | Generic status mevcut denominator semantiğini değiştirmez. |
+
+## 28. Gıda Teknolojisi kaynak düzeltmeleri
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Gıda Teknolojisi top margin 3 cm | Department override `PASSED`. |
+| Gıda Teknolojisi top margin 2,5 cm | Department override `FAILED`. |
+| Sol 3 cm, sağ/alt 2,5 cm | Mevcut margin kuralları değişmeden değerlendirilir. |
+| Gıda Teknolojisi Heading1 TNR, 12 pt, bold | Department override `PASSED`. |
+| Gıda Teknolojisi Heading1 TNR, 14 pt, bold | Eski değer artık `FAILED`. |
+| Heading2 ve Heading3 TNR, 12 pt, bold | Mevcut kurallar `PASSED`; değerleri değişmez. |
+| Body font size 12 pt | Mevcut body font-size kuralı değişmeden `PASSED`. |
+| Resolver override | İki global rule department rule'larıyla değiştirilir; toplam rule sayısı değişmez. |
+
+## 29. Gıda Teknolojisi Kabul ve Onay Sayfası
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Bağımsız `KABUL VE ONAY SAYFASI` heading'i | Canonical section eşleşir; `PASSED`. |
+| Canonical heading yok | `FAILED`. |
+| Bağımsız `KABUL VE ONAY` heading'i | Resmi şablon alias'ı eşleşir; `PASSED`. |
+| Uppercase canonical/alias | Türkçe case normalization ile `PASSED`. |
+| Normal case canonical/alias | Case normalization ile `PASSED`. |
+| Heading style olmayan bağımsız paragraph | Exact normalized-name eşleşmesiyle `PASSED`. |
+| Body cümlesinde “kabul ve onay işlemleri” | Tam section adı olmadığı için false-positive oluşmaz. |
+| Aynı section birden fazla occurrence | Mevcut REQUIRED_SECTION presence semantiği korunur; en az bir eşleşmeyle `PASSED`. |
+| Heading farklı body formatting içeriyor | Generic rule-defined heading işaretiyle body font/size/spacing/alignment kapsamından çıkarılır. |
+| Experimental seçim | Ortak setten inherit edilir; resolved toplam 31 rule olur. |
+| Source Research seçim | Ortak setten inherit edilir; resolved toplam 29 rule olur. |
+| Mevcut required sections | PASS/FAIL davranışları değişmez. |
+| SECTION_ORDER | Presence kontrolünden bağımsızdır; bulunan Kabul ve Onay occurrence'ının relative sırasını denetler. |
+
+## 30. Gıda Teknolojisi Kabul ve Onay SECTION_ORDER entegrasyonu
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Canonical `Kabul ve Onay Sayfası` İntihal ile Teşekkür arasında | SECTION_ORDER `PASSED`. |
+| Resmi alias `KABUL VE ONAY` İntihal ile Teşekkür arasında | Canonical occurrence olarak tanınır; SECTION_ORDER `PASSED`. |
+| Kabul ve Onay, Teşekkür'den sonra | SECTION_ORDER `FAILED`. |
+| Kabul ve Onay, İntihal'den önce | SECTION_ORDER `FAILED`. |
+| Kabul ve Onay missing | SECTION_ORDER tek başına missing-section failure üretmez. |
+| Kabul ve Onay missing, presence değerlendirmesi | `acceptance-approval` REQUIRED_SECTION `FAILED`. |
+| Canonical/alias eşleşen birden fazla Kabul ve Onay occurrence'ı | Deterministic safe SECTION_ORDER `FAILED`. |
+| Experimental: İntihal → Kabul ve Onay → Teşekkür → çalışma türüne özel devam | SECTION_ORDER `PASSED`. |
+| Source Research: İntihal → Kabul ve Onay → Teşekkür → çalışma türüne özel devam | SECTION_ORDER `PASSED`. |
+| Experimental ve Source Research'in kalan özel bölüm sıraları | Önceki relative-order sonuçları değişmez. |
+| Beklenen listede bulunmayan conditional/unknown section araya girer | Bulunan beklenen bölümlerin relative sırasını bozmaz. |
+| Uppercase `KABUL VE ONAY` ve Türkçe karakter/case varyantları | Mevcut Türkçe section normalization ile alias eşleşmesi korunur. |
+
+## 31. Generic SECTION_KEYWORDS ve ÇOMÜ keyword kuralları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| TR `Anahtar Kelimeler: A, B, C` | 3 entry; `PASSED`. |
+| TR 5 keyword | Üst sınır dahil; `PASSED`. |
+| TR 2 keyword | Minimum altında; `FAILED`. |
+| TR 6 keyword | Maksimum üstünde; `FAILED`. |
+| EN `Keyword: A, B, C` | 3 entry; `PASSED`. |
+| EN 5 keyword | Üst sınır dahil; `PASSED`. |
+| EN 2 keyword | Minimum altında; `FAILED`. |
+| EN 6 keyword | Maksimum üstünde; `FAILED`. |
+| Section var, exact label yok | Label bulunamadığı için `FAILED`. |
+| Hedef section yok | Presence hatası tekrarlanmaz; `NOT_APPLICABLE`. |
+| `Anahtar kelimeler bu çalışmanın...` | Başlangıçta exact `label:` olmadığı için eşleşmez. |
+| `The keyword used in this study...` | Başlangıçta exact `label:` olmadığı için eşleşmez. |
+| `Anahtar Kelimeler: PCR, , DNA` | Boş entry elenir; bulunan count 2. |
+| `Anahtar Kelimeler: TÜBİTAK, Özet, Gıda` | Türkçe Unicode korunur; 3 entry. |
+| Keyword paragrafı section sonunda | Placement uygun. |
+| Keyword paragrafından sonra görünür body metni | Placement `FAILED`. |
+| Keyword paragrafından sonra yalnız boş paragraflar | Placement `PASSED`. |
+| Keyword paragrafından sonra yeni rule-defined section | Section boundary placement'ı bozmaz. |
+| Aynı section içinde iki matching label paragrafı | Deterministic safe `FAILED`. |
+| `Özet` veya `Abstract` heading'i | Section content dışında kalır; keyword sayılmaz. |
+| TR rule, Abstract içindeki `Keyword:` | Section/label isolation nedeniyle eşleşmez. |
+| Experimental seçim | İki ortak keyword rule'u inherit edilir; resolved toplam 33 rule. |
+| Source Research seçim | İki ortak keyword rule'u inherit edilir; resolved toplam 31 rule. |
+| Mevcut Özet/Abstract SECTION_WORD_COUNT | 200 kelime sınırı ve validator davranışı değişmez. |
+| Keyword satırının word-count etkisi | Mevcut davranış korunur; label ve değerler section kelime hesabındadır. |
+| Input immutability | Rule, document, section ve paragraph dizileri mutate edilmez. |
+| Mevcut Özet/Abstract REQUIRED_SECTION | Presence PASS/FAIL davranışı değişmez. |
+| Duplicate keyword değerleri | Kaynak ayrı hata tanımlamadığı için görünür entry olarak ayrı ayrı sayılır. |

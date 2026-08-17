@@ -96,6 +96,7 @@ kurallar eklenir.
             ├── Özet section
             ├── Abstract section
             ├── İntihal (Aşırma) Beyan Sayfası
+            ├── Kabul ve Onay Sayfası
             ├── Teşekkür
             ├── Giriş
             ├── Sonuç
@@ -107,6 +108,24 @@ JSON dosyası genel kuralları tekrar etmez. `RuleResolver`, genel ÇOMÜ bachel
 kurallarını önce; Gıda Teknolojisi sayfa numarası, İçindekiler, Kaynaklar,
 Özet, Abstract ve ortak zorunlu yapısal bölüm kurallarını sonra çözerek tek bir
 nihai kural listesi üretir.
+
+Gıda Teknolojisi kılavuzunun 4.1 maddesindeki 3 cm üst margin ve 4.2
+maddesindeki tüm metin için 12 punto şartları, daha genel setteki 2,5 cm üst
+margin ile 14 punto Heading1 değerlerinden farklıdır. Bu iki genel rule yalnız
+Gıda Teknolojisi department kapsamında sırasıyla 3 cm ve 12 punto değerleriyle
+override edilir. Heading2 ve Heading3 zaten 12 punto olduğundan korunur.
+
+Kılavuz, deneysel ve kaynak araştırması çalışma türlerinin ikisinde de `KABUL
+VE ONAY SAYFASI`nı ortak zorunlu bölüm olarak gösterir. Ek-4 ile iki resmi Word
+şablonundaki görünür heading `KABUL VE ONAY` olduğundan canonical section
+`Kabul ve Onay Sayfası`, kaynak destekli tek alias `Kabul ve Onay` olarak
+modellenir. `experimental.section-order` ve `source-research.section-order`
+aynı canonical/alias çiftini kullanarak bulunan bölümlerde İntihal → Kabul ve
+Onay → Teşekkür relative sırasını doğrular. Presence kuralı bölümün yokluğunu,
+order kuralı ise yalnız bulunan bölümlerin sırasını raporlar. Rule yalnız
+bağımsız section heading varlığını kontrol eder; jüri,
+danışman, imza, tarih, öğrenci bilgisi, Turnitin sonucu veya görsel şablon
+uygunluğunu doğrulamaz.
 
 Sayfa numarası kuralının kaynağı: **Çanakkale Onsekiz Mart Üniversitesi Gıda
 Teknolojisi Bitirme Tezi Hazırlama Kılavuzu**. Kural setinde sayfa numarasının
@@ -144,6 +163,27 @@ numaralarını, caption yapılarını, tablo/şekil numaralandırmasını veya g
 içeriğini kontrol etmez. Koşul false olduğunda sonuç `NOT_APPLICABLE` durumuyla
 ve `Uygulanmadı` actual değeriyle temsil edilir. `NOT_APPLICABLE` ne PASS ne de
 FAIL'dir ve skor paydasına dahil edilmez.
+
+Kılavuzdaki `SİMGELER VE KISALTMALAR LİSTESİ`, tezde kısaltma kullanımı tespit
+edildiğinde ortak Gıda Teknolojisi bachelor setindeki
+`comu.applied-sciences.food-technology.bachelor.list-of-abbreviations`
+`CONDITIONAL_REQUIRED_SECTION` kuralıyla aranır. Koşul heuristic
+`hasAbbreviations` document fact'ine dayanır. Bu fact kesin akademik veya
+dilbilimsel karar değildir.
+
+Rule yalnız bölüm varlığını doğrular; listedeki kısaltmaların eksiksizliğini,
+açıklamaların doğruluğunu, alfabetik sırayı, metin ve liste arasındaki birebir
+eşleşmeyi, sembollerin semantik doğruluğunu veya ilk kullanımda açılım verilmesini
+kontrol etmez. Kural conditional olduğu için mevcut SECTION_ORDER listelerine
+eklenmemiştir.
+
+Generic `ABBREVIATION_LIST_CONSISTENCY` altyapısı mevcuttur ancak akademik rule
+olarak etkinleştirilmemiştir. Kılavuzun bölüm yapısı tablosu yalnız kısaltma
+kullanılıyorsa listenin hazırlanmasını ister; metinde tespit edilen bütün
+kısaltmaların bu listede bulunmasını ayrıca ve yeterince açık biçimde zorunlu
+kılmaz. Kılavuzun 4.7 Kısaltmalar bölümü de ilk kullanımda açıklama verilmesini
+düzenler, body-to-list coverage şartı getirmez. Bu nedenle mevcut
+`list-of-abbreviations` presence kuralının kapsamı genişletilmemiştir.
 
 ## Akademik seçim akışı
 
@@ -210,9 +250,9 @@ Eksik bölüm kontrolü `REQUIRED_SECTION` sorumluluğunda kalır. `SECTION_ORDE
 yalnız belgede bulunan expected bölümlerin kendi aralarındaki sırasını
 değerlendirir. Simgeler ve Kısaltmalar, Tablolar, Şekiller ve Ekler gibi koşullu
 bölümlerin yokluğu hata değildir; araya girmeleri de relative sırayı bozmaz.
-Dış/İç Kapak ve Kabul ve Onay mevcut section-presence modeliyle güvenilir
-biçimde temsil edilmediğinden order listelerine dahil edilmemiştir. “Ana ve Alt
-Bölümler” de sabit bir başlık olmadığı için source-research listesinde yoktur.
+Dış/İç Kapak order listelerine dahil edilmemiştir. Kabul ve Onay ise canonical
+ad ve resmi alias ile order listelerindedir. “Ana ve Alt Bölümler” sabit bir
+başlık olmadığı için source-research listesinde yoktur.
 
 Validator içerik kalitesini, bilimsel uygunluğu veya bölüm numaralandırmasını
 kontrol etmez.
@@ -230,6 +270,22 @@ Türkçe Özet hesabına Abstract heading'i/içeriği, Abstract hesabına da son
 bölüm dahil edilmez. Kelime sayımı içeriğin kalitesini, doğruluğunu, dilini,
 anahtar kelime sayısını veya bilimsel uygunluğunu değerlendirmez. Section
 eksikliği ayrı `REQUIRED_SECTION` kuralının sorumluluğundadır.
+
+## Özet ve Abstract anahtar kelimeleri
+
+Kılavuz Özet sonunda en az üç, en fazla beş anahtar sözcük ister ve Türkçe Özet
+kurallarının İngilizce Özet için de geçerli olduğunu belirtir. Resmi şablonlara
+uygun olarak Türkçe label yalnız `Anahtar Kelimeler:`, İngilizce label yalnız
+`Keyword:` kabul edilir. İki ortak `SECTION_KEYWORDS` kuralı değerleri aynı
+paragrafta virgülle ayırır ve label paragrafından sonra section içinde yalnız
+boş paragraflar bulunmasına izin verir.
+
+Kontrol keyword'lerin bilimsel kalitesini, birbirinden farklı olmasını veya
+Türkçe/İngilizce değerlerin semantik çeviri eşdeğerliğini değerlendirmez.
+Duplicate görünür değerler ayrı entry olarak sayılır; kaynak bunu ayrıca bir
+akademik hata olarak tanımlamaz. Mevcut `SECTION_WORD_COUNT` davranışı
+değişmemiştir ve keyword satırı section içeriğinin parçası olarak sayılmaya
+devam eder.
 
 ```text
 comu.bachelor

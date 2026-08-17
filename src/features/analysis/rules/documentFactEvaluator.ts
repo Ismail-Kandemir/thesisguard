@@ -10,6 +10,7 @@ const DOCUMENT_FACT_READERS: Record<
 > = {
   hasTables: (document) => document.tables.hasTables,
   hasFigures: (document) => document.figures.hasFigures,
+  hasAbbreviations: (document) => document.abbreviations.hasAbbreviations,
 };
 
 export function isSupportedDocumentFact(

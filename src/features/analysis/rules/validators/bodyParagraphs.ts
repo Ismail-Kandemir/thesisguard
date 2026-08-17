@@ -11,7 +11,7 @@ const BODY_EXCLUDED_HEADING_NAMES = new Set([
 ]);
 
 export function getBodyParagraphs(
-  document: NormalizedDocument,
+  document: Readonly<NormalizedDocument>,
 ): readonly Paragraph[] {
   const stylesById = new Map(
     document.styles.map((style) => [style.id, style]),

@@ -37,6 +37,11 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     tableOfContents: parseTableOfContents(xmlDocument),
     tables: parseDocumentTables(xmlDocument),
     figures: parseDocumentFigures(xmlDocument),
+    abbreviations: {
+      items: [],
+      count: 0,
+      hasAbbreviations: false,
+    },
     sections: parseDocumentSections(xmlDocument),
   };
 }
@@ -103,7 +108,7 @@ function roundToTwoDecimals(value: number): number {
 }
 
 function parseParagraphs(xmlDocument: Document): Paragraph[] {
-  return Array.from(xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "p")).map(
+  return getBodyDescendants(xmlDocument, "p").map(
     (paragraphElement, index) => {
       const runs = parseRuns(paragraphElement);
 

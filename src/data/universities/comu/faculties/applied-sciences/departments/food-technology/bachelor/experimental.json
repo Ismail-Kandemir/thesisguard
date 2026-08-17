@@ -92,6 +92,7 @@
       "expected": {
         "sections": [
           { "section": "İntihal (Aşırma) Beyan Sayfası" },
+          { "section": "Kabul ve Onay Sayfası", "aliases": ["Kabul ve Onay"] },
           { "section": "Teşekkür" },
           { "section": "Özet" },
           { "section": "Abstract" },

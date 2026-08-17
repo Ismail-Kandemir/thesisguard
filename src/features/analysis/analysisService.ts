@@ -1,5 +1,6 @@
 import { RuleEngine } from "./engine/RuleEngine";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
+import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
@@ -21,11 +22,16 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
 
-  return {
+  const documentWithFormatting: NormalizedDocument = {
     ...normalizedDocument,
     styles: parsedStyles?.styles ?? [],
     documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
     pageNumbering: parseHeaderFooterPageNumbering(headerFooterXmlParts),
+  };
+
+  return {
+    ...documentWithFormatting,
+    abbreviations: normalizeDocumentAbbreviations(documentWithFormatting),
   };
 }
 
@@ -39,10 +45,16 @@ export async function analyzeDocx(
     ? new RuleSetSelector().select(selection)
     : loadRuleSets();
   const rules = new RuleResolver().resolve(ruleSets);
-  const documentWithSectionHeadings = markRequiredSectionHeadings(
+  const documentWithMarkedSectionHeadings = markRequiredSectionHeadings(
     normalizedDocument,
     rules,
   );
+  const documentWithSectionHeadings: NormalizedDocument = {
+    ...documentWithMarkedSectionHeadings,
+    abbreviations: normalizeDocumentAbbreviations(
+      documentWithMarkedSectionHeadings,
+    ),
+  };
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();
   const results = ruleEngine.run(documentWithSectionHeadings, rules);

@@ -12,6 +12,54 @@
   ],
   "rules": [
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.margin.top",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "overrides": [
+        { "ruleId": "comu.bachelor.margin.top" }
+      ],
+      "title": "Üst Kenar Boşluğu",
+      "description": "Gıda Teknolojisi bitirme tezinde üst kenar boşluğunu tanımlar.",
+      "category": "margin",
+      "expected": { "value": 3, "unit": "cm" },
+      "severity": "error",
+      "score": 10,
+      "message": "Üst kenar boşluğu Gıda Teknolojisi tez formatı ile uyumlu değil.",
+      "solution": "Üst kenar boşluğunu 3 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.heading.heading1",
+      "type": "HEADING",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "overrides": [
+        { "ruleId": "comu.bachelor.heading.heading1" }
+      ],
+      "title": "Heading 1 Başlığı",
+      "description": "Gıda Teknolojisi birinci seviye başlık stilinin tez formatına uygunluğunu tanımlar.",
+      "category": "heading",
+      "expected": {
+        "value": "Heading1",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Heading 1 başlık stili Gıda Teknolojisi tez formatı ile uyumlu değil.",
+      "solution": "Heading 1 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.page-number",
       "type": "PAGE_NUMBER",
       "scope": {
@@ -122,6 +170,29 @@
       "score": 10,
       "message": "İntihal (Aşırma) Beyan Sayfası tespit edilemedi.",
       "solution": "Teze bağımsız bir İntihal (Aşırma) Beyan Sayfası bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.acceptance-approval",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Kabul ve Onay Sayfası",
+      "description": "Tezde Kabul ve Onay Sayfası bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Kabul ve Onay Sayfası",
+        "aliases": ["Kabul ve Onay"],
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Kabul ve Onay Sayfası tespit edilemedi.",
+      "solution": "Teze bağımsız bir Kabul ve Onay Sayfası bölümü ekleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -252,6 +323,31 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.list-of-abbreviations",
+      "type": "CONDITIONAL_REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Simgeler ve Kısaltmalar Listesi",
+      "description": "Tezde kısaltma kullanımı tespit edildiğinde Simgeler ve Kısaltmalar Listesi bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Simgeler ve Kısaltmalar Listesi",
+        "requiredWhen": {
+          "fact": "hasAbbreviations",
+          "equals": true
+        }
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Kısaltma içeren tezde Simgeler ve Kısaltmalar Listesi bölümü bulunmalıdır.",
+      "solution": "Tezde kısaltma kullanıldıysa Simgeler ve Kısaltmalar Listesi bölümünü ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count",
       "type": "SECTION_WORD_COUNT",
       "scope": {
@@ -292,6 +388,58 @@
       "score": 10,
       "message": "İngilizce Özet bölümü 200 kelime sınırını aşıyor.",
       "solution": "İngilizce Özet içeriğini en fazla 200 kelime olacak şekilde düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-keywords",
+      "type": "SECTION_KEYWORDS",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Türkçe Özet Anahtar Kelimeleri",
+      "description": "Türkçe Özet sonunda virgülle ayrılmış 3–5 Anahtar Kelime bulunmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "section": "Özet",
+        "labels": ["Anahtar Kelimeler"],
+        "min": 3,
+        "max": 5,
+        "separators": [","],
+        "placement": "section-end"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Türkçe Özet anahtar kelime sayısı veya konumu uygun değil.",
+      "solution": "Özet sonuna Anahtar Kelimeler: etiketiyle virgülle ayrılmış 3–5 anahtar kelime ekleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.summary-en-keywords",
+      "type": "SECTION_KEYWORDS",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "İngilizce Özet Anahtar Kelimeleri",
+      "description": "Abstract sonunda virgülle ayrılmış 3–5 Keyword bulunmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "section": "Abstract",
+        "labels": ["Keyword"],
+        "min": 3,
+        "max": 5,
+        "separators": [","],
+        "placement": "section-end"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Abstract keyword sayısı veya konumu uygun değil.",
+      "solution": "Abstract sonuna Keyword: etiketiyle virgülle ayrılmış 3–5 keyword ekleyin.",
       "enabled": true,
       "version": "1.0.0"
     }
