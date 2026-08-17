@@ -392,3 +392,36 @@ doğrular.
 | REQUIRED_SECTION regresyonu | Mevcut required-section kuralları değişmeden çalışır. |
 | SECTION_WORD_COUNT regresyonu | Mevcut word-count kuralları değişmeden çalışır. |
 | PAGE_NUMBER regresyonu | Mevcut page-number kuralları değişmeden çalışır. |
+
+## 24. Rule result durumları, skor ve rapor
+
+`NOT_APPLICABLE` PASS veya FAIL değildir. Toplam kontrol tüm sonuçları,
+değerlendirilen kontrol yalnız `PASSED + FAILED` sonuçlarını kapsar. Skor
+`PASSED / evaluated * 100` formülü ve mevcut `Math.round` davranışıyla hesaplanır;
+`evaluated=0` için skor deterministik olarak `0` olur.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Conditional condition false | `NOT_APPLICABLE`; `passed=false`; skora girmez. |
+| Conditional condition true + section var | `PASSED`; pay ve paydaya girer. |
+| Conditional condition true + section yok | `FAILED`; yalnız paydaya girer. |
+| Word-count target section yok | `NOT_APPLICABLE`; REQUIRED_SECTION hatası duplicate edilmez. |
+| Word-count target var ve aralık içinde | `PASSED`. |
+| Word-count target var ve aralık dışında | `FAILED`. |
+| Yalnız NOT_APPLICABLE sonuçlar / boş sonuç listesi | `evaluated=0`, `score=0`; NaN/Infinity oluşmaz. |
+| 20 PASSED + 1 FAILED + 2 NOT_APPLICABLE | `evaluated=21`; skor `Math.round(20/21*100)=95`. |
+| Başarılı filtresi | Yalnız `PASSED`; `NOT_APPLICABLE` içermez. |
+| Hatalar filtresi | Yalnız `FAILED`; `NOT_APPLICABLE` içermez. |
+| Uygulanmayan filtresi | Yalnız `NOT_APPLICABLE`. |
+| Tümü filtresi | Tüm sonuçlar; sıra FAILED, PASSED, NOT_APPLICABLE. |
+| Table yok + figure yok | İki conditional sonuç da `NOT_APPLICABLE`; toplam 29 ise evaluated 27. |
+| Table var/list yok + figure yok | Liste kuralı `FAILED`, figure kuralı `NOT_APPLICABLE`; diğer 27 pass ise skor `Math.round(27/28*100)=96`. |
+| Table var/list var + figure yok | Liste kuralı `PASSED`, figure kuralı `NOT_APPLICABLE`; diğerleri pass ise skor 100. |
+| Figure var/list yok + table yok | Figure liste kuralı `FAILED`, table kuralı `NOT_APPLICABLE`. |
+| Figure var/list var + table yok | Figure liste kuralı `PASSED`, table kuralı `NOT_APPLICABLE`. |
+| Table + figure birlikte | Her conditional kural kendi section varlığına göre bağımsız PASSED/FAILED olur. |
+| REQUIRED_SECTION regresyonu | Gerçek PASS/FAIL davranışı korunur. |
+| SECTION_ORDER regresyonu | Gerçek PASS/FAIL davranışı korunur. |
+| PAGE_NUMBER regresyonu | Gerçek PASS/FAIL davranışı korunur. |
+| Formatting validator regresyonu | Font, size, spacing, alignment, heading ve margin PASS/FAIL davranışı korunur. |
+| Uygulanmayan sonuç kartı | “Uygulanmadı” metni ve nötr stil gösterir; başarı/başarısızlık olarak sunulmaz. |

@@ -290,6 +290,7 @@ export type {
 
 export type {
   RuleResult,
+  RuleResultStatus,
   RuleResultValue,
 } from "./RuleResult";
 

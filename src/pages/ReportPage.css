@@ -37,7 +37,7 @@
 
 .report-page__summary {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 16px;
 }
 
@@ -107,6 +107,11 @@
   border-left-color: #15803d;
 }
 
+.report-page__result-card--not-applicable {
+  gap: 8px;
+  border-left-color: #64748b;
+}
+
 .report-page__result-title {
   align-items: flex-start;
 }
@@ -130,6 +135,10 @@
 
 .report-page__result-card--passed .report-page__status {
   color: #166534;
+}
+
+.report-page__result-card--not-applicable .report-page__status {
+  color: #475569;
 }
 
 .report-page__message {

@@ -10,6 +10,7 @@ import type {
   NormalizedDocument,
   RuleDefinition,
   RuleResult,
+  RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 
@@ -32,7 +33,7 @@ export class ConditionalRequiredSectionValidator implements RuleValidator {
       return createResult(
         rule,
         expected,
-        true,
+        "NOT_APPLICABLE",
         "Uygulanmadı",
         createNotApplicableMessage(document, expected),
       );
@@ -41,7 +42,7 @@ export class ConditionalRequiredSectionValidator implements RuleValidator {
     return createResult(
       rule,
       expected,
-      hasSection,
+      hasSection ? "PASSED" : "FAILED",
       hasSection ? "Bulundu" : "Tespit edilmedi",
       hasSection
         ? `${expected.section} bölümü bulundu.`
@@ -136,14 +137,15 @@ function hasExpectedSection(
 function createResult(
   rule: RuleDefinition,
   expected: ConditionalRequiredSectionRuleExpected,
-  passed: boolean,
+  status: RuleResultStatus,
   actual: string,
   message: string,
 ): RuleResult {
   return {
     ruleId: rule.id,
     ruleName: rule.title,
-    passed,
+    status,
+    passed: status === "PASSED",
     severity: rule.severity,
     expected: `${formatCondition(expected.requiredWhen)} ${expected.section} bölümü bulunmalı`,
     actual,

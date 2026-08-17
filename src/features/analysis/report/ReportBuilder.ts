@@ -3,26 +3,34 @@ import type { AnalysisReport, RuleResult } from "../types";
 export class ReportBuilder {
   build(results: RuleResult[]): AnalysisReport {
     const totalRules = results.length;
-    const passedRules = countPassedRules(results);
+    const passedRules = countRules(results, "PASSED");
+    const failedRules = countRules(results, "FAILED");
+    const notApplicableRules = countRules(results, "NOT_APPLICABLE");
+    const evaluatedRules = passedRules + failedRules;
 
     return {
       totalRules,
+      evaluatedRules,
       passedRules,
-      failedRules: totalRules - passedRules,
-      score: calculateScore(passedRules, totalRules),
+      failedRules,
+      notApplicableRules,
+      score: calculateScore(passedRules, evaluatedRules),
       results,
     };
   }
 }
 
-function countPassedRules(results: RuleResult[]): number {
-  return results.filter((result) => result.passed).length;
+function countRules(
+  results: readonly RuleResult[],
+  status: RuleResult["status"],
+): number {
+  return results.filter((result) => result.status === status).length;
 }
 
-function calculateScore(passedRules: number, totalRules: number): number {
-  if (totalRules === 0) {
+function calculateScore(passedRules: number, evaluatedRules: number): number {
+  if (evaluatedRules === 0) {
     return 0;
   }
 
-  return Math.round((passedRules / totalRules) * 100);
+  return Math.round((passedRules / evaluatedRules) * 100);
 }

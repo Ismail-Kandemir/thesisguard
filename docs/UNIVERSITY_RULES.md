@@ -141,10 +141,9 @@ ifadeleri tek başına koşul oluşturmaz.
 
 Bu conditional kurallar liste içeriğinin doğruluğunu, listedeki sayfa
 numaralarını, caption yapılarını, tablo/şekil numaralandırmasını veya görsel
-içeriğini kontrol etmez. Mevcut `RuleResult` modelinde skipped/not-applicable
-durumu bulunmadığı için koşul false olduğunda sonuç `Uygulanmadı` actual
-değeriyle pass/no-op olarak temsil edilir ve mevcut skor hesabında pass olarak
-sayılır.
+içeriğini kontrol etmez. Koşul false olduğunda sonuç `NOT_APPLICABLE` durumuyla
+ve `Uygulanmadı` actual değeriyle temsil edilir. `NOT_APPLICABLE` ne PASS ne de
+FAIL'dir ve skor paydasına dahil edilmez.
 
 ## Akademik seçim akışı
 

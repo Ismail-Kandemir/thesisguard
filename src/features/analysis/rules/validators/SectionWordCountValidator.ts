@@ -6,6 +6,7 @@ import type {
   NormalizedDocument,
   RuleDefinition,
   RuleResult,
+  RuleResultStatus,
   SectionWordCountRuleExpected,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
@@ -20,7 +21,7 @@ export class SectionWordCountValidator implements RuleValidator {
       return createResult(
         rule,
         expected,
-        true,
+        "NOT_APPLICABLE",
         "Uygulanmadı",
         `${expected.section} bölümü bulunmadığı için kelime sayısı kontrolü uygulanmadı.`,
       );
@@ -30,7 +31,7 @@ export class SectionWordCountValidator implements RuleValidator {
       return createResult(
         rule,
         expected,
-        false,
+        "FAILED",
         "Güvenle hesaplanamadı",
         `${expected.section} bölümü birden fazla kez bulunduğu için kelime sayısı güvenle hesaplanamadı.`,
       );
@@ -45,7 +46,7 @@ export class SectionWordCountValidator implements RuleValidator {
     return createResult(
       rule,
       expected,
-      passed,
+      passed ? "PASSED" : "FAILED",
       `${wordCount} kelime`,
       createMessage(expected, wordCount, passed),
     );
@@ -117,14 +118,15 @@ function findSectionOccurrences(
 function createResult(
   rule: RuleDefinition,
   expected: SectionWordCountRuleExpected,
-  passed: boolean,
+  status: RuleResultStatus,
   actual: string,
   message: string,
 ): RuleResult {
   return {
     ruleId: rule.id,
     ruleName: rule.title,
-    passed,
+    status,
+    passed: status === "PASSED",
     severity: rule.severity,
     expected: formatExpected(expected),
     actual,

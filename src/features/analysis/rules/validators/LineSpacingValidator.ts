@@ -30,6 +30,7 @@ export class LineSpacingValidator implements RuleValidator {
     return {
       ruleId: rule.id,
       ruleName: rule.title,
+      status: passed ? "PASSED" : "FAILED",
       passed,
       severity: rule.severity,
       expected: expectedLineSpacing,

@@ -44,6 +44,7 @@ function createMissingValidatorResult(rule: RuleDefinition): RuleResult {
   return {
     ruleId: rule.id,
     ruleName: rule.title,
+    status: "FAILED",
     passed: false,
     severity: rule.severity,
     expected: getExpectedValue(rule.expected),

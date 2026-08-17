@@ -9,7 +9,7 @@ import type {
 import { Button, Card, Container } from '../shared'
 import './ReportPage.css'
 
-type ResultFilter = 'all' | 'failed' | 'passed'
+type ResultFilter = 'all' | 'failed' | 'passed' | 'not-applicable'
 
 interface ReportPageProps {
   analysisReport?: AnalysisReport
@@ -20,6 +20,7 @@ const FILTERS: readonly { id: ResultFilter; label: string }[] = [
   { id: 'all', label: 'Tümü' },
   { id: 'failed', label: 'Hatalar' },
   { id: 'passed', label: 'Başarılı' },
+  { id: 'not-applicable', label: 'Uygulanmayan' },
 ]
 
 export function ReportPage({ analysisReport, onNewAnalysis }: ReportPageProps) {
@@ -60,9 +61,11 @@ export function ReportPage({ analysisReport, onNewAnalysis }: ReportPageProps) {
 
       <section className="report-page__summary" aria-label="Rapor özeti">
         <SummaryItem label="Uyumluluk skoru" value={`%${analysisReport.score}`} />
-        <SummaryItem label="Toplam kural" value={analysisReport.totalRules} />
+        <SummaryItem label="Toplam kontrol" value={analysisReport.totalRules} />
+        <SummaryItem label="Değerlendirilen" value={analysisReport.evaluatedRules} />
         <SummaryItem label="Başarılı kural" value={analysisReport.passedRules} />
         <SummaryItem label="Başarısız kural" value={analysisReport.failedRules} />
+        <SummaryItem label="Uygulanmayan" value={analysisReport.notApplicableRules} />
       </section>
 
       <section className="report-page__details" aria-labelledby="result-heading">
@@ -117,24 +120,24 @@ function SummaryItem({ label, value }: SummaryItemProps) {
 }
 
 function RuleResultCard({ result }: { result: RuleResult }) {
+  const presentation = getResultPresentation(result)
+
   return (
     <Card
       className={[
         'report-page__result-card',
-        result.passed
-          ? 'report-page__result-card--passed'
-          : 'report-page__result-card--failed',
+        `report-page__result-card--${presentation.className}`,
       ].join(' ')}
     >
       <div className="report-page__result-title">
         <h3>{result.ruleName}</h3>
         <span className="report-page__status">
-          <span aria-hidden="true">{result.passed ? '✓' : '✕'}</span>
-          {result.passed ? 'Başarılı' : 'Başarısız'}
+          <span aria-hidden="true">{presentation.symbol}</span>
+          {presentation.label}
         </span>
       </div>
 
-      {result.passed ? (
+      {result.status !== 'FAILED' ? (
         <p className="report-page__success-message">{result.message}</p>
       ) : (
         <>
@@ -161,11 +164,15 @@ function getVisibleResults(
 ): RuleResult[] {
   const filteredResults = results.filter((result) => {
     if (filter === 'failed') {
-      return !result.passed
+      return result.status === 'FAILED'
     }
 
     if (filter === 'passed') {
-      return result.passed
+      return result.status === 'PASSED'
+    }
+
+    if (filter === 'not-applicable') {
+      return result.status === 'NOT_APPLICABLE'
     }
 
     return true
@@ -173,7 +180,7 @@ function getVisibleResults(
 
   return filter === 'all'
     ? [...filteredResults].sort(
-        (first, second) => Number(first.passed) - Number(second.passed),
+        (first, second) => getStatusOrder(first) - getStatusOrder(second),
       )
     : filteredResults
 }
@@ -187,7 +194,31 @@ function getEmptyFilterMessage(filter: ResultFilter): string {
     return 'Başarılı kural bulunamadı.'
   }
 
+  if (filter === 'not-applicable') {
+    return 'Uygulanmayan kural bulunamadı.'
+  }
+
   return 'Gösterilecek kural sonucu bulunamadı.'
+}
+
+function getStatusOrder(result: RuleResult): number {
+  return { FAILED: 0, PASSED: 1, NOT_APPLICABLE: 2 }[result.status]
+}
+
+function getResultPresentation(result: RuleResult): {
+  className: 'passed' | 'failed' | 'not-applicable'
+  symbol: string
+  label: string
+} {
+  if (result.status === 'PASSED') {
+    return { className: 'passed', symbol: '✓', label: 'Başarılı' }
+  }
+
+  if (result.status === 'FAILED') {
+    return { className: 'failed', symbol: '✕', label: 'Başarısız' }
+  }
+
+  return { className: 'not-applicable', symbol: '–', label: 'Uygulanmadı' }
 }
 
 function formatRuleResultValue(value: RuleResultValue): string {
