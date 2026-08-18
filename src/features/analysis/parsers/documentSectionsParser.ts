@@ -1,22 +1,14 @@
-import type { DocumentSection } from "../types";
+import type { DocumentSection, Paragraph } from "../types";
 
-const WORD_NAMESPACE =
-  "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-
-export function parseDocumentSections(
-  xmlDocument: Document,
-): DocumentSection[] {
+export function parseDocumentSections(paragraphs: readonly Paragraph[]): DocumentSection[] {
   const sections: DocumentSection[] = [];
 
-  for (const [index, paragraph] of Array.from(
-    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "p"),
-  ).entries()) {
-    const displayName = Array.from(
-      paragraph.getElementsByTagNameNS(WORD_NAMESPACE, "t"),
-    )
-      .map((textElement) => textElement.textContent ?? "")
-      .join("")
-      .trim();
+  for (const [index, paragraph] of paragraphs.entries()) {
+    if (paragraph.isTableOfContentsEntry) {
+      continue;
+    }
+
+    const displayName = paragraph.text.trim();
     const normalizedName = normalizeSectionName(displayName);
 
     if (normalizedName.length > 0) {
@@ -26,6 +18,7 @@ export function parseDocumentSections(
         paragraphId: `paragraph-${index + 1}`,
         paragraphIndex: index,
         isRuleDefinedHeading: false,
+        isObjectReferenceExcluded: false,
       });
     }
   }

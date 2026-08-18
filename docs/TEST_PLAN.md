@@ -599,3 +599,190 @@ eklenmez.
 | Input immutability | Rule, document, section ve paragraph dizileri mutate edilmez. |
 | Mevcut Özet/Abstract REQUIRED_SECTION | Presence PASS/FAIL davranışı değişmez. |
 | Duplicate keyword değerleri | Kaynak ayrı hata tanımlamadığı için görünür entry olarak ayrı ayrı sayılır. |
+
+## 32. DOCX numbering metadata ve number-prefix-aware section detection
+
+Bu altyapı senaryoları yeni bir akademik heading-numbering kuralı tanımlamaz.
+
+| Grup | Senaryo | Beklenen sonuç |
+| --- | --- | --- |
+| Manual prefix | `1. GİRİŞ` / expected `Giriş` | Exact remainder eşleşir; REQUIRED_SECTION `PASSED`. |
+| Manual prefix | `2. GENEL BİLGİLER` / expected `Genel Bilgiler` | Section eşleşir. |
+| Manual prefix | `3. MATERYAL VE METOT` / expected `Materyal ve Metot` | Section eşleşir. |
+| Manual prefix | `4. BULGULAR VE TARTIŞMA` / expected `Bulgular ve Tartışma` | Section eşleşir. |
+| Manual prefix | `5. SONUÇ` / expected `Sonuç` | Section eşleşir. |
+| Multilevel | `2.1. Alt Başlık` | Text source, level 1 ve label `2.1.` normalize edilir. |
+| Multilevel | `2.1.1. Alt Alt Başlık` | Text source, level 2 ve label `2.1.1.` normalize edilir. |
+| No prefix | `GİRİŞ` / expected `Giriş` | Mevcut exact normalized-name davranışıyla eşleşir. |
+| False positive | `1. deney sonucunda...` | `Giriş` section'ıyla eşleşmez ve rule-defined heading olmaz. |
+| False positive | `1. Elma`, `2. Armut` | Mevcut akademik section adlarıyla eşleşmez; section heading olmaz. |
+| Automatic | Text `GİRİŞ`, direct `numPr` level 0 | Section `Giriş` eşleşir; source `word`, numId/level ve destekleniyorsa visible label bulunur. |
+| Missing XML | `word/numbering.xml` yok | Parser crash olmaz; definitions boş kalır. |
+| Style inherited | Paragraph direct `numPr` yok, style zincirinde numbering var | En yakın style numbering referansı normalize edilir. |
+| Direct precedence | Paragraph ve style farklı numbering taşıyor | Direct paragraph `numPr` kullanılır. |
+| Unsupported | Decimal dışı format veya eksik parent counter | Word metadata korunur; `visibleLabel=null`, tahmin yapılmaz. |
+| Order | `1. GİRİŞ → 2. GENEL BİLGİLER → 3. SONUÇ` | SECTION_ORDER relative sırayı doğru bulur. |
+| Content range | Numaralı main heading'ler | Sonraki rule-defined heading doğru content boundary olur. |
+| Word count | Prefix'siz `ÖZET` | SECTION_WORD_COUNT sonucu değişmez. |
+| Keywords | Prefix'siz `ÖZET` / `ABSTRACT` | SECTION_KEYWORDS section lookup ve placement sonucu değişmez. |
+| Conditional | Numaralı rule-defined conditional heading | Ortak matcher ile section presence doğru bulunur. |
+| TOC | TOC style/content-control içindeki numaralı cached entries | Gerçek section occurrence olarak kullanılmaz. |
+| Immutability | XML, document, paragraph, style ve rule inputları | Mutate edilmez; yeni document/paragraph/section dizileri üretilir. |
+| Rule count | Experimental selection | Resolved toplam 33 kalır. |
+| Rule count | Source Research selection | Resolved toplam 31 kalır. |
+
+## 33. Generic HEADING_NUMBERING ve ÇOMÜ production kuralları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Manual `1. GİRİŞ`, expected level 0 | `PASSED`. |
+| Automatic Word numbered `GİRİŞ`, level 0, unresolved label | `numId` ve level güvenilir olduğu için `PASSED`. |
+| Unnumbered `GİRİŞ` | `FAILED`; actual numaralandırılmamış olarak raporlanır. |
+| Manual `1.1. GİRİŞ`, expected level 0 | `FAILED`; bulunan düzey 2 olarak raporlanır. |
+| Expected Giriş bulunmuyor | Presence hatası tekrarlanmaz; başka hedef de yoksa `NOT_APPLICABLE`. |
+| Duplicate Giriş | Rastgele occurrence seçilmez; deterministic `FAILED`. |
+| Bazı expected section'lar missing, bulunanların tümü uygun | Presence responsibility separation korunur; numbering `PASSED`. |
+| Prefix-aware REQUIRED_SECTION | `1. GİRİŞ`, `Giriş` olarak eşleşmeye devam eder. |
+| SECTION_ORDER | Numaralı section'ların relative sırası değişmez. |
+| SECTION_WORD_COUNT | Prefix'siz Özet sınırları değişmez. |
+| SECTION_KEYWORDS | Özet/Abstract lookup ve placement değişmez. |
+| CONDITIONAL_REQUIRED_SECTION | Ortak matcher davranışı değişmez. |
+| Manual/Word equivalence | Aynı section ve level iki storage biçiminde aynı sonucu üretir. |
+| Missing numbering.xml | Word definitions boş olabilir; parser ve text numbering çalışmaya devam eder. |
+| TOC numaralı cached entry | Section occurrence listesine girmediği için numbering sonucu üretmez. |
+| `1. Elma`, `2. Armut`, `3. Muz` | Expected akademik section adıyla eşleşmez; değerlendirilmez. |
+| `1. deney sonucunda sıcaklık arttı.` | Akademik heading olarak değerlendirilmez. |
+| Ön bölüm ve arka bölüm başlıkları | Numbering expected listesinde bulunmadıkları için değerlendirilmez. |
+| Experimental seçim | Yalnız experimental heading-numbering ID'si resolve edilir. |
+| Source Research seçim | Yalnız source-research heading-numbering ID'si resolve edilir. |
+| Experimental-only section | Source Research rule expected listesinde bulunmaz. |
+| Source-research-only section | Experimental rule expected listesinde bulunmaz. |
+| Immutability | Document, sections, paragraphs, numbering, rule ve expected arrays mutate edilmez. |
+| Invalid expected configuration | Açık configuration error üretilir. |
+| Unsupported rule type | Validator açık type error üretir. |
+| Resolver inheritance | Experimental 34, Source Research 32 rule resolve edilir. |
+| Registry exact ID | İki production ID `HeadingNumberingValidator` ile çalışır; missing-validator sonucu oluşmaz. |
+
+Production kontrolü yalnız expected named main section'ın numbered olmasını ve
+level 0 olmasını doğrular. Exact punctuation, sıra, skipped number, parent-child
+hiyerarşisi, maksimum depth ve Heading2/Heading3 numbering production failure
+sebebi değildir.
+
+## 34. Generic PAGE_NUMBER_SEQUENCE ve ÇOMÜ production kuralı
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Ön bölümler `lowerRoman`, Giriş bölümü `start=1`, `fmt` eksik | OOXML varsayılanı `decimal` kabul edilir; `PASSED`. |
+| Giriş sonrası bölümde `fmt` ve `start` eksik | Önceki `decimal` biçimi miras alınır. |
+| Ön bölüm `decimal` | `FAILED`. |
+| Giriş bölümü `lowerRoman` | `FAILED`. |
+| Girişte Arap rakamı var fakat başlangıç 1 değil | `FAILED`. |
+| Sayfa numarası section metadata'sı yok | Özellik tespit edilemediği için `FAILED`. |
+| Giriş section'ı yok | REQUIRED_SECTION hatası tekrarlanmaz; `NOT_APPLICABLE`. |
+| Duplicate Giriş | Geçiş rastgele seçilmez; `FAILED`. |
+| Manuel `1. GİRİŞ` | Ortak prefix-aware matcher ile transition section bulunur. |
+| Word automatic heading, text `GİRİŞ` | Metin section olarak eşleşir; numbering metadata metne eklenmez. |
+| TOC cached `1. GİRİŞ` | Gerçek occurrence sayılmaz. |
+| `1. Elma`, `2. Armut` | Transition section false-positive üretmez. |
+| `1. deney sonucunda...` | Transition section false-positive üretmez. |
+| Invalid format veya `restartAt < 1` | Açık configuration error üretilir. |
+| Immutability | Document, section ve rule inputları mutate edilmez. |
+| Registry / RuleEngine | Production ID validator'a bağlıdır; missing-validator sonucu oluşmaz. |
+| Resolver inheritance | Experimental 35, Source Research 33 rule resolve edilir. |
+| Mevcut PAGE_NUMBER | Alt bilgi/orta hizalama kontrolü değişmez. |
+| Heading numbering regression | Manual ve Word automatic eşdeğerliği, prefix matching ve TOC koruması değişmez. |
+
+## 35. Generic table/figure caption normalizasyonu
+
+| Grup | Senaryo | Beklenen sonuç |
+| --- | --- | --- |
+| Table | Table + preceding `Tablo 1.` | Caption `before` ilişkilendirilir. |
+| Table | Table + following caption | Caption `after` olarak normalize edilir; akademik karar verilmez. |
+| Table | Table + caption yok | `captionId=null`, position `none`. |
+| Table | Caption + boş paragraph + table | Boş paragraph aşılır; `before`. |
+| Table | Caption + görünür body paragraph + table | Görünür içerik sınırdır; association kurulmaz. |
+| Table | Birden fazla table | Her occurrence bağımsız ve document order içinde kalır. |
+| Table | Nested table | Count korunur; nested occurrence block/caption association almaz. |
+| Table | İki bitişik caption + table | Rastgele seçim yapılmaz; `ambiguous`. |
+| Table | Nesnesiz `Tablo 1. Başlık` | Orphan caption olur; `hasTables=false` kalır. |
+| Table | `Tablo 1’de...` | Caption değildir. |
+| Figure | Figure + following caption | Caption `after` ilişkilendirilir. |
+| Figure | Figure + preceding caption | Caption `before` olarak normalize edilir. |
+| Figure | Figure + caption yok | Position `none`. |
+| Figure | Birden fazla figure | Her drawing ayrı occurrence olarak sayılır. |
+| Figure | Aynı paragraph'ta çoklu drawing + tek caption | Caption paylaşılmaz; occurrence'lar `ambiguous`. |
+| Figure | Anchored drawing | Görsel konum tahmin edilmez; `ambiguous`. |
+| Figure | Inline drawing | Body block neighborhood association kullanılabilir. |
+| Figure | İki caption adayı | `ambiguous`. |
+| Figure | Nesnesiz `Şekil 1. Başlık` | Orphan caption; `hasFigures=false`. |
+| Figure | `Şekil 2 incelendiğinde...` | Caption değildir. |
+| Normalize | `Tablo 1.` | kind table, number `1`. |
+| Normalize | `Tablo 2.1.` | kind table, number `2.1`. |
+| Normalize | `Şekil 1.` | kind figure, number `1`. |
+| Normalize | `Şekil 3.2.` | kind figure, number `3.2`. |
+| Normalize | `TABLO` / `ŞEKİL` | Türkçe case normalizasyonuyla tanınır. |
+| Normalize | Prefix sonrası nokta yok | Caption değildir. |
+| Normalize | `Tablo 1.` ve boş title | Caption metadata'sı üretilebilir. |
+| Normalize | `Çizelge 1.` / `Figure 1.` | Bu sürümde desteklenmez. |
+| Regression | `tables.count` / `hasTables` | Tüm `w:tbl`, nested dahil önceki sonuç korunur. |
+| Regression | `figures.count` / `hasFigures` | Her `w:drawing` önceki gibi sayılır. |
+| Regression | Tablolar/Şekiller Listesi conditional | Aynı facts kullanıldığı için sonuç değişmez. |
+| Regression | Section/TOC/numbering/page sequence | Caption parser bu modelleri değiştirmez. |
+| Regression | Body formatting | Caption paragraph link'i mevcut formatting metadata'sını kullanır. |
+| Regression | Immutability | Paragraph, block, caption ve occurrence inputları mutate edilmez. |
+| Rule count | Experimental | 35 kalır. |
+| Rule count | Source Research | 33 kalır. |
+
+## 36. ÇOMÜ table/figure caption production kuralları
+
+| Senaryo | Placement | Format |
+| --- | --- | --- |
+| Table yok | `NOT_APPLICABLE` | `NOT_APPLICABLE` |
+| Figure yok | `NOT_APPLICABLE` | `NOT_APPLICABLE` |
+| Table + caption üstte + left + 1 satır | `PASSED` | `PASSED` |
+| Table caption altta | `FAILED` | Association varsa ayrıca format değerlendirilir. |
+| Table caption yok | `FAILED` | Duplicate failure yok; `NOT_APPLICABLE`. |
+| Table caption üstte fakat center | `PASSED` | `FAILED`. |
+| Table caption üstte fakat 1.5 satır | `PASSED` | `FAILED`. |
+| Figure + caption altta + left + 1 satır | `PASSED` | `PASSED` |
+| Figure caption üstte | `FAILED` | Association varsa ayrıca format değerlendirilir. |
+| Figure caption yok | `FAILED` | Duplicate failure yok; `NOT_APPLICABLE`. |
+| Figure caption altta fakat center | `PASSED` | `FAILED`. |
+| Figure caption altta fakat 1.5 satır | `PASSED` | `FAILED`. |
+| 3 table, biri yanlış | Aggregate `FAILED`. | Güvenilir caption'lar değerlendirilir. |
+| 3 figure, biri yanlış | Aggregate `FAILED`. | Güvenilir caption'lar değerlendirilir. |
+| Ambiguous top-level/inline association | False PASS yok; `FAILED`. | `NOT_APPLICABLE`. |
+| Orphan caption, object yok | `NOT_APPLICABLE`. | `NOT_APPLICABLE`. |
+| Yalnız nested table | Count korunur; placement `NOT_APPLICABLE`. | `NOT_APPLICABLE`. |
+| Yalnız anchored figure | Teknik limitation; placement `NOT_APPLICABLE`. | `NOT_APPLICABLE`. |
+| Style-inherited left + 240 OOXML spacing | Effective 1 satır; format `PASSED`. | `PASSED`. |
+| Invalid placement/format expected | Açık configuration error. | Açık configuration error. |
+| Registry / RuleEngine | Dört production ID kayıtlı validator ile çalışır. | Missing-validator yok. |
+| Resolver | Experimental 39, Source Research 37. | Child setlerde duplicate yok. |
+
+## 37. Generic OBJECT_IN_TEXT_REFERENCE ve ÇOMÜ kuralları
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Table/Figure yok | İlgili rule `NOT_APPLICABLE`. |
+| `Tablo 1.` caption + body `Tablo 1’de` | Table reference `PASSED`. |
+| Caption var, body reference yok | `FAILED`. |
+| `Şekil 3.2.` caption + body `ŞEKİL 3.2'de` | Figure reference `PASSED`. |
+| Reference object'tan önce/sonra | İkisi de kabul edilir. |
+| Yalnız caption kendisi token içeriyor | Reference sayılmaz; `FAILED`. |
+| Yalnız Tablolar/Şekiller Listesi | Reference sayılmaz. |
+| TOC cached entry | Reference sayılmaz. |
+| Rule-defined heading token'ı | Reference sayılmaz. |
+| `tablolarda`, `şekillerde`, `tablolama`, `şekillendirme` | Reference değildir. |
+| Yanlış object kind | Coverage sağlamaz. |
+| Aynı nesneye çoklu reference | Tek coverage olarak yeterlidir. |
+| İki nesneden yalnız biri referenced | Eksik identity listesiyle `FAILED`. |
+| Duplicate aynı kind/number caption | False PASS yok; ambiguity `FAILED`. |
+| Missing/ambiguous caption identity | Reference rule duplicate placement failure üretmez. |
+| Yalnız nested table / anchored figure | `NOT_APPLICABLE`. |
+| Orphan caption | Object/reference rule tetiklemez. |
+| Turkish uppercase ve `'` / `’` | Unicode güvenli eşleşir. |
+| Multi-level number | Exact normalized number ile eşleşir. |
+| Immutability | Document/model/rule inputları mutate edilmez. |
+| Registry / RuleEngine | İki production ID kayıtlı validator ile çalışır. |
+| Resolver | Experimental 41, Source Research 39. |

@@ -1,4 +1,4 @@
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import {
   evaluateDocumentCondition,
   getDocumentFactValue,
@@ -126,12 +126,10 @@ function hasExpectedSection(
   document: Readonly<NormalizedDocument>,
   expected: ConditionalRequiredSectionRuleExpected,
 ): boolean {
-  const expectedNames = [expected.section, ...(expected.aliases ?? [])].map(
-    normalizeSectionName,
-  );
+  const expectedNames = [expected.section, ...(expected.aliases ?? [])];
 
   return document.sections.some((section) =>
-    expectedNames.includes(section.normalizedName),
+    sectionMatchesAnyExpectedName(section, expectedNames),
   );
 }
 

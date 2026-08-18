@@ -60,9 +60,12 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
     const stylesXml = zip.file(STYLES_XML_PATH)
       ? await readXmlPart(file, STYLES_XML_PATH, zip)
       : null;
+    const numberingXml = zip.file(NUMBERING_XML_PATH)
+      ? await readXmlPart(file, NUMBERING_XML_PATH, zip)
+      : null;
     const headerFooterXmlParts = await readHeaderFooterXmlParts(file, zip);
 
-    return { documentXml, stylesXml, headerFooterXmlParts };
+    return { documentXml, stylesXml, numberingXml, headerFooterXmlParts };
   } catch (error) {
     throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
   }

@@ -1,9 +1,12 @@
 import { RuleEngine } from "./engine/RuleEngine";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
+import { normalizeDocumentNumbering } from "./parsers/documentNumberingNormalizer";
+import { parseNumberingXml } from "./parsers/numberingXmlParser";
 import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
+import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
 import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRuleSets } from "./rules/RuleLoader";
@@ -17,7 +20,7 @@ import type {
 } from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
-  const { documentXml, stylesXml, headerFooterXmlParts } =
+  const { documentXml, stylesXml, numberingXml, headerFooterXmlParts } =
     await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
@@ -26,12 +29,19 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     ...normalizedDocument,
     styles: parsedStyles?.styles ?? [],
     documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
-    pageNumbering: parseHeaderFooterPageNumbering(headerFooterXmlParts),
+    numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
+    pageNumbering: {
+      ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
+      sections: normalizedDocument.pageNumbering.sections,
+    },
   };
 
+  const documentWithNumbering = normalizeDocumentNumbering(documentWithFormatting);
+
   return {
-    ...documentWithFormatting,
-    abbreviations: normalizeDocumentAbbreviations(documentWithFormatting),
+    ...documentWithNumbering,
+    abbreviations: normalizeDocumentAbbreviations(documentWithNumbering),
+    objectReferences: normalizeDocumentObjectReferences(documentWithNumbering),
   };
 }
 
@@ -52,6 +62,9 @@ export async function analyzeDocx(
   const documentWithSectionHeadings: NormalizedDocument = {
     ...documentWithMarkedSectionHeadings,
     abbreviations: normalizeDocumentAbbreviations(
+      documentWithMarkedSectionHeadings,
+    ),
+    objectReferences: normalizeDocumentObjectReferences(
       documentWithMarkedSectionHeadings,
     ),
   };

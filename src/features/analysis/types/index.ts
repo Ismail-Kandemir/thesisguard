@@ -23,11 +23,16 @@ export type RuleSeverity = "info" | "warning" | "error";
 
 export type RuleType =
   | "PAGE_NUMBER"
+  | "PAGE_NUMBER_SEQUENCE"
+  | "OBJECT_CAPTION_PLACEMENT"
+  | "OBJECT_CAPTION_FORMAT"
+  | "OBJECT_IN_TEXT_REFERENCE"
   | "CONDITIONAL_REQUIRED_SECTION"
   | "REQUIRED_SECTION"
   | "SECTION_ORDER"
   | "SECTION_WORD_COUNT"
   | "SECTION_KEYWORDS"
+  | "HEADING_NUMBERING"
   | "ABBREVIATION_LIST_CONSISTENCY";
 
 export interface PageNumberRuleExpected {
@@ -74,6 +79,31 @@ export interface SectionWordCountRuleExpected {
   max?: number;
 }
 
+export type PageNumberFormat = "decimal" | "lowerRoman";
+
+export interface PageNumberSequenceRuleExpected {
+  transitionSection: string;
+  aliases?: string[];
+  beforeFormat: PageNumberFormat;
+  fromFormat: PageNumberFormat;
+  restartAt?: number;
+}
+
+export interface ObjectCaptionPlacementRuleExpected {
+  object: CaptionKind;
+  position: "before" | "after";
+}
+
+export interface ObjectCaptionFormatRuleExpected {
+  object: CaptionKind;
+  alignment: ParagraphAlignment;
+  lineSpacing: number;
+}
+
+export interface ObjectInTextReferenceRuleExpected {
+  object: CaptionKind;
+}
+
 export interface SectionKeywordsRuleExpected {
   section: string;
   labels: string[];
@@ -86,6 +116,16 @@ export interface SectionKeywordsRuleExpected {
 export interface AbbreviationListConsistencyRuleExpected {
   section: string;
   aliases?: string[];
+}
+
+export interface HeadingNumberingSectionExpectation {
+  section: string;
+  aliases?: string[];
+  level: number;
+}
+
+export interface HeadingNumberingRuleExpected {
+  sections: HeadingNumberingSectionExpectation[];
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
@@ -122,11 +162,16 @@ export type RuleExpectedValue =
   | number
   | boolean
   | PageNumberRuleExpected
+  | PageNumberSequenceRuleExpected
+  | ObjectCaptionPlacementRuleExpected
+  | ObjectCaptionFormatRuleExpected
+  | ObjectInTextReferenceRuleExpected
   | ConditionalRequiredSectionRuleExpected
   | RequiredSectionRuleExpected
   | SectionOrderRuleExpected
   | SectionWordCountRuleExpected
   | SectionKeywordsRuleExpected
+  | HeadingNumberingRuleExpected
   | AbbreviationListConsistencyRuleExpected
   | {
       value: string | number | boolean;
@@ -168,6 +213,7 @@ export interface DocxPackageInspection {
 export interface DocxAnalysisXmlParts {
   documentXml: string;
   stylesXml: string | null;
+  numberingXml: string | null;
   headerFooterXmlParts: HeaderFooterXmlPart[];
 }
 
@@ -206,6 +252,32 @@ export interface StyleDefinition {
   underline: boolean | null;
   lineSpacing: number | null;
   alignment: ParagraphAlignment | null;
+  numbering: NumberingReference | null;
+}
+
+export interface NumberingReference {
+  numId: string;
+  level: number;
+}
+
+export interface NumberingLevelDefinition {
+  level: number;
+  format: string;
+  levelText: string;
+  start: number;
+}
+
+export interface NumberingDefinition {
+  numId: string;
+  abstractNumId: string;
+  levels: NumberingLevelDefinition[];
+}
+
+export interface ParagraphNumbering {
+  source: "none" | "text" | "word";
+  numId: string | null;
+  level: number | null;
+  visibleLabel: string | null;
 }
 
 export interface DocumentDefaults {
@@ -228,6 +300,8 @@ export interface Paragraph {
   alignment: ParagraphAlignment | null;
   lineSpacing: number | null;
   styleId: string | null;
+  numbering: ParagraphNumbering;
+  isTableOfContentsEntry: boolean;
   isEmpty: boolean;
 }
 
@@ -255,6 +329,13 @@ export interface PageNumberField {
 export interface PageNumbering {
   hasPageNumbers: boolean;
   fields: PageNumberField[];
+  sections: PageNumberSection[];
+}
+
+export interface PageNumberSection {
+  endParagraphIndex: number;
+  format: string | null;
+  start: number | null;
 }
 
 export type TableOfContentsFieldType = "TOC";
@@ -276,11 +357,68 @@ export interface TableOfContents {
 export interface DocumentTables {
   count: number;
   hasTables: boolean;
+  items: DocumentTableOccurrence[];
 }
 
 export interface DocumentFigures {
   count: number;
   hasFigures: boolean;
+  items: DocumentFigureOccurrence[];
+}
+
+export type CaptionKind = "table" | "figure";
+export type CaptionPosition = "before" | "after" | "none" | "ambiguous";
+export type FigureDrawingType = "inline" | "anchor" | "unknown";
+
+export interface DocumentCaption {
+  id: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number;
+  text: string;
+  kind: CaptionKind;
+  label: "Tablo" | "Şekil";
+  number: string;
+}
+
+export interface DocumentTableOccurrence {
+  id: string;
+  blockIndex: number | null;
+  isNested: boolean;
+  captionId: string | null;
+  captionPosition: CaptionPosition;
+}
+
+export interface DocumentFigureOccurrence {
+  id: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  drawingType: FigureDrawingType;
+  captionId: string | null;
+  captionPosition: CaptionPosition;
+}
+
+export type DocumentBlock =
+  | { id: string; blockIndex: number; type: "paragraph"; paragraphId: string }
+  | { id: string; blockIndex: number; type: "table"; tableId: string };
+
+export interface DocumentCaptions {
+  items: DocumentCaption[];
+  orphanCaptionIds: string[];
+}
+
+export interface DocumentObjectReference {
+  kind: CaptionKind;
+  number: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number;
+  matchedText: string;
+}
+
+export interface DocumentObjectReferences {
+  items: DocumentObjectReference[];
 }
 
 export interface DocumentAbbreviation {
@@ -300,17 +438,22 @@ export interface DocumentSection {
   paragraphId: string;
   paragraphIndex: number;
   isRuleDefinedHeading: boolean;
+  isObjectReferenceExcluded: boolean;
 }
 
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
   documentDefaults: DocumentDefaults;
+  numberingDefinitions: NumberingDefinition[];
   pageMargins: PageMargins;
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;
   tables: DocumentTables;
   figures: DocumentFigures;
+  blocks: DocumentBlock[];
+  captions: DocumentCaptions;
+  objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
   sections: DocumentSection[];
 }

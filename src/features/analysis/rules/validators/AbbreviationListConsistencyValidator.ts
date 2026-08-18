@@ -1,5 +1,5 @@
 import { detectAbbreviations } from "../../parsers/documentAbbreviationsNormalizer";
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import { parseAbbreviationListEntries } from "../abbreviationListParser";
 import { getSectionContentParagraphs } from "../sectionContent";
 import type {
@@ -125,11 +125,11 @@ function findSectionOccurrences(
   sections: readonly DocumentSection[],
   expected: AbbreviationListConsistencyRuleExpected,
 ): DocumentSection[] {
-  const names = [expected.section, ...(expected.aliases ?? [])].map(
-    normalizeSectionName,
-  );
+  const names = [expected.section, ...(expected.aliases ?? [])];
 
-  return sections.filter((section) => names.includes(section.normalizedName));
+  return sections.filter((section) =>
+    sectionMatchesAnyExpectedName(section, names),
+  );
 }
 
 function createResult(

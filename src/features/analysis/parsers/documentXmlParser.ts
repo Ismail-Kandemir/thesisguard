@@ -1,14 +1,14 @@
 import type {
-  DocumentFigures,
-  DocumentTables,
   NormalizedDocument,
   PageMargins,
   Paragraph,
   ParagraphAlignment,
+  ParagraphNumbering,
   Run,
 } from "../types";
 import { parseTableOfContents } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
+import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -21,8 +21,11 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     throw new Error("document.xml gecerli XML degil.");
   }
 
+  const paragraphs = parseParagraphs(xmlDocument);
+  const visualStructure = normalizeDocumentCaptions(xmlDocument, paragraphs);
+
   return {
-    paragraphs: parseParagraphs(xmlDocument),
+    paragraphs,
     styles: [],
     documentDefaults: {
       fontFamily: null,
@@ -33,34 +36,21 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     pageNumbering: {
       hasPageNumbers: false,
       fields: [],
+      sections: parsePageNumberSections(xmlDocument),
     },
     tableOfContents: parseTableOfContents(xmlDocument),
-    tables: parseDocumentTables(xmlDocument),
-    figures: parseDocumentFigures(xmlDocument),
+    tables: visualStructure.tables,
+    figures: visualStructure.figures,
+    blocks: visualStructure.blocks,
+    captions: visualStructure.captions,
+    objectReferences: { items: [] },
     abbreviations: {
       items: [],
       count: 0,
       hasAbbreviations: false,
     },
-    sections: parseDocumentSections(xmlDocument),
-  };
-}
-
-function parseDocumentTables(xmlDocument: Document): DocumentTables {
-  const count = getBodyDescendants(xmlDocument, "tbl").length;
-
-  return {
-    count,
-    hasTables: count > 0,
-  };
-}
-
-function parseDocumentFigures(xmlDocument: Document): DocumentFigures {
-  const count = getBodyDescendants(xmlDocument, "drawing").length;
-
-  return {
-    count,
-    hasFigures: count > 0,
+    numberingDefinitions: [],
+    sections: parseDocumentSections(paragraphs),
   };
 }
 
@@ -119,10 +109,106 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
         alignment: parseAlignment(paragraphElement),
         lineSpacing: parseLineSpacing(paragraphElement),
         styleId: parseParagraphStyleId(paragraphElement),
+        numbering: parseDirectNumbering(paragraphElement),
+        isTableOfContentsEntry: isTableOfContentsEntry(paragraphElement),
         isEmpty: runs.every((run) => run.text.length === 0),
       };
     },
   );
+}
+
+function parsePageNumberSections(xmlDocument: Document) {
+  const body = xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "body").item(0);
+
+  if (!body) {
+    return [];
+  }
+
+  const paragraphs = Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "p"));
+  const sections = paragraphs.flatMap((paragraph, paragraphIndex) => {
+    const paragraphProperties = Array.from(paragraph.children).find(
+      (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pPr",
+    );
+    const sectionProperties = paragraphProperties
+      ? Array.from(paragraphProperties.children).find(
+          (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "sectPr",
+        )
+      : null;
+
+    return sectionProperties
+      ? [parsePageNumberSection(sectionProperties, paragraphIndex)]
+      : [];
+  });
+  const finalSectionProperties = Array.from(body.children).find(
+    (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "sectPr",
+  );
+
+  if (finalSectionProperties) {
+    sections.push(
+      parsePageNumberSection(finalSectionProperties, Math.max(paragraphs.length - 1, 0)),
+    );
+  }
+
+  return sections;
+}
+
+function parsePageNumberSection(sectionProperties: Element, endParagraphIndex: number) {
+  const pageNumberType = Array.from(sectionProperties.children).find(
+    (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pgNumType",
+  );
+
+  return {
+    endParagraphIndex,
+    format: pageNumberType ? getWordAttribute(pageNumberType, "fmt") : null,
+    start: pageNumberType ? parseNumericWordAttribute(pageNumberType, "start") : null,
+  };
+}
+
+function parseDirectNumbering(paragraphElement: Element): ParagraphNumbering {
+  const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
+  const numberingProperties = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "numPr")
+    : null;
+  const numIdElement = numberingProperties
+    ? getFirstDescendant(numberingProperties, "numId")
+    : null;
+  const levelElement = numberingProperties
+    ? getFirstDescendant(numberingProperties, "ilvl")
+    : null;
+  const numId = numIdElement ? getWordAttribute(numIdElement, "val") : null;
+  const levelValue = levelElement ? getWordAttribute(levelElement, "val") : null;
+  const level = levelValue === null ? 0 : Number(levelValue);
+
+  if (numId === null || numId === "0" || !Number.isInteger(level) || level < 0) {
+    return { source: "none", numId: null, level: null, visibleLabel: null };
+  }
+
+  return { source: "word", numId, level, visibleLabel: null };
+}
+
+function isTableOfContentsEntry(paragraphElement: Element): boolean {
+  const styleId = parseParagraphStyleId(paragraphElement)?.toLocaleLowerCase("en-US");
+
+  if (styleId?.startsWith("toc")) {
+    return true;
+  }
+
+  let ancestor = paragraphElement.parentElement;
+
+  while (ancestor) {
+    if (ancestor.localName === "sdt") {
+      const gallery = getFirstDescendant(ancestor, "docPartGallery");
+      const value = gallery ? getWordAttribute(gallery, "val") : null;
+
+      if (value?.toLocaleLowerCase("en-US").includes("table of contents")) {
+        return true;
+      }
+    }
+
+    ancestor = ancestor.parentElement;
+  }
+
+  return false;
 }
 
 function parseRuns(paragraphElement: Element): Run[] {

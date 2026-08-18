@@ -54,5 +54,9 @@ function createMissingValidatorResult(rule: RuleDefinition): RuleResult {
 }
 
 function getExpectedValue(expected: RuleDefinition["expected"]): string | number | boolean {
-  return typeof expected === "object" ? expected.value : expected;
+  return typeof expected === "object"
+    ? "value" in expected
+      ? expected.value
+      : JSON.stringify(expected)
+    : expected;
 }

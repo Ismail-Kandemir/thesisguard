@@ -1,4 +1,4 @@
-import { normalizeSectionName } from "../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../parsers/sectionNameMatcher";
 import type {
   ConditionalRequiredSectionRuleExpected,
   NormalizedDocument,
@@ -10,23 +10,48 @@ export function markRequiredSectionHeadings(
   document: NormalizedDocument,
   rules: readonly RuleDefinition[],
 ): NormalizedDocument {
-  const requiredSectionNames = new Set(
-    rules
-      .filter(isRuleDefinedSectionRule)
-      .flatMap((rule) => [
-        rule.expected.section,
-        ...(rule.expected.aliases ?? []),
-      ])
-      .map(normalizeSectionName),
-  );
+  const requiredSectionNames = rules
+    .filter(isRuleDefinedSectionRule)
+    .flatMap((rule) => [
+      rule.expected.section,
+      ...(rule.expected.aliases ?? []),
+    ]);
+  const objectReferenceExcludedNames = rules
+    .filter(isObjectReferenceExcludedSectionRule)
+    .flatMap((rule) => [rule.expected.section, ...(rule.expected.aliases ?? [])]);
 
   return {
     ...document,
     sections: document.sections.map((section) => ({
       ...section,
-      isRuleDefinedHeading: requiredSectionNames.has(section.normalizedName),
+      isRuleDefinedHeading: sectionMatchesAnyExpectedName(
+        section,
+        requiredSectionNames,
+      ),
+      isObjectReferenceExcluded: sectionMatchesAnyExpectedName(
+        section,
+        objectReferenceExcludedNames,
+      ),
     })),
   };
+}
+
+function isObjectReferenceExcludedSectionRule(
+  rule: RuleDefinition,
+): rule is RuleDefinition & {
+  type: "CONDITIONAL_REQUIRED_SECTION";
+  expected: ConditionalRequiredSectionRuleExpected;
+} {
+  return (
+    rule.enabled &&
+    rule.type === "CONDITIONAL_REQUIRED_SECTION" &&
+    typeof rule.expected === "object" &&
+    rule.expected !== null &&
+    "section" in rule.expected &&
+    "requiredWhen" in rule.expected &&
+    (rule.expected.requiredWhen.fact === "hasTables" ||
+      rule.expected.requiredWhen.fact === "hasFigures")
+  );
 }
 
 function isRuleDefinedSectionRule(

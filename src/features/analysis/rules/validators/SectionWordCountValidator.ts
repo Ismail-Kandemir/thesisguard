@@ -1,4 +1,4 @@
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import { getSectionContentParagraphs } from "../sectionContent";
 import { countWords } from "../wordCount";
 import type {
@@ -106,12 +106,10 @@ function findSectionOccurrences(
   sections: readonly DocumentSection[],
   expected: SectionWordCountRuleExpected,
 ): DocumentSection[] {
-  const expectedNames = [expected.section, ...(expected.aliases ?? [])].map(
-    normalizeSectionName,
-  );
+  const expectedNames = [expected.section, ...(expected.aliases ?? [])];
 
   return sections.filter((section) =>
-    expectedNames.includes(section.normalizedName),
+    sectionMatchesAnyExpectedName(section, expectedNames),
   );
 }
 

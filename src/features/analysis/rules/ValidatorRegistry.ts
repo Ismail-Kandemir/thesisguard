@@ -2,8 +2,13 @@ import type { RuleValidator } from "./validators/RuleValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
 import { HeadingValidator } from "./validators/HeadingValidator";
+import { HeadingNumberingValidator } from "./validators/HeadingNumberingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
+import { PageNumberSequenceValidator } from "./validators/PageNumberSequenceValidator";
+import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlacementValidator";
+import { ObjectCaptionFormatValidator } from "./validators/ObjectCaptionFormatValidator";
+import { ObjectInTextReferenceValidator } from "./validators/ObjectInTextReferenceValidator";
 import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
 import { SectionOrderValidator } from "./validators/SectionOrderValidator";
 import { SectionKeywordsValidator } from "./validators/SectionKeywordsValidator";
@@ -20,6 +25,20 @@ const BOTTOM_MARGIN_RULE_ID = "comu.bachelor.margin.bottom";
 const PAGE_NUMBER_RULE_ID = "comu.bachelor.page-number";
 const FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.page-number";
+const FOOD_TECHNOLOGY_PAGE_NUMBER_SEQUENCE_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.page-number-sequence";
+const FOOD_TECHNOLOGY_TABLE_CAPTION_PLACEMENT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.table-caption-placement";
+const FOOD_TECHNOLOGY_FIGURE_CAPTION_PLACEMENT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.figure-caption-placement";
+const FOOD_TECHNOLOGY_TABLE_CAPTION_FORMAT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.table-caption-format";
+const FOOD_TECHNOLOGY_FIGURE_CAPTION_FORMAT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.figure-caption-format";
+const FOOD_TECHNOLOGY_TABLE_IN_TEXT_REFERENCE_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.table-in-text-reference";
+const FOOD_TECHNOLOGY_FIGURE_IN_TEXT_REFERENCE_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.figure-in-text-reference";
 const FOOD_TECHNOLOGY_TOP_MARGIN_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.margin.top";
 const FOOD_TECHNOLOGY_HEADING_1_RULE_ID =
@@ -62,6 +81,10 @@ const FOOD_TECHNOLOGY_EXPERIMENTAL_SECTION_ORDER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.experimental.section-order";
 const FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.source-research.section-order";
+const FOOD_TECHNOLOGY_EXPERIMENTAL_HEADING_NUMBERING_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.experimental.heading-numbering";
+const FOOD_TECHNOLOGY_SOURCE_RESEARCH_HEADING_NUMBERING_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.source-research.heading-numbering";
 const FOOD_TECHNOLOGY_SUMMARY_TR_WORD_COUNT_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count";
 const FOOD_TECHNOLOGY_SUMMARY_EN_WORD_COUNT_RULE_ID =
@@ -85,6 +108,13 @@ export class ValidatorRegistry {
     [FOOD_TECHNOLOGY_TOP_MARGIN_RULE_ID, new MarginValidator("top")],
     [FOOD_TECHNOLOGY_HEADING_1_RULE_ID, new HeadingValidator()],
     [FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
+    [FOOD_TECHNOLOGY_PAGE_NUMBER_SEQUENCE_RULE_ID, new PageNumberSequenceValidator()],
+    [FOOD_TECHNOLOGY_TABLE_CAPTION_PLACEMENT_RULE_ID, new ObjectCaptionPlacementValidator()],
+    [FOOD_TECHNOLOGY_FIGURE_CAPTION_PLACEMENT_RULE_ID, new ObjectCaptionPlacementValidator()],
+    [FOOD_TECHNOLOGY_TABLE_CAPTION_FORMAT_RULE_ID, new ObjectCaptionFormatValidator()],
+    [FOOD_TECHNOLOGY_FIGURE_CAPTION_FORMAT_RULE_ID, new ObjectCaptionFormatValidator()],
+    [FOOD_TECHNOLOGY_TABLE_IN_TEXT_REFERENCE_RULE_ID, new ObjectInTextReferenceValidator()],
+    [FOOD_TECHNOLOGY_FIGURE_IN_TEXT_REFERENCE_RULE_ID, new ObjectInTextReferenceValidator()],
     [
       FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID,
       new RequiredSectionValidator(),
@@ -139,6 +169,14 @@ export class ValidatorRegistry {
     [
       FOOD_TECHNOLOGY_SOURCE_RESEARCH_SECTION_ORDER_RULE_ID,
       new SectionOrderValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_EXPERIMENTAL_HEADING_NUMBERING_RULE_ID,
+      new HeadingNumberingValidator(),
+    ],
+    [
+      FOOD_TECHNOLOGY_SOURCE_RESEARCH_HEADING_NUMBERING_RULE_ID,
+      new HeadingNumberingValidator(),
     ],
     [
       FOOD_TECHNOLOGY_SUMMARY_TR_WORD_COUNT_RULE_ID,

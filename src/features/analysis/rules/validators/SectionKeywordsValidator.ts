@@ -1,4 +1,4 @@
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesExpectedName } from "../../parsers/sectionNameMatcher";
 import { getSectionContentParagraphs } from "../sectionContent";
 import { parseSectionKeywordLines } from "../sectionKeywordsParser";
 import type {
@@ -169,8 +169,7 @@ function findSectionOccurrences(
   sections: readonly DocumentSection[],
   sectionName: string,
 ): DocumentSection[] {
-  const normalizedName = normalizeSectionName(sectionName);
-  return sections.filter((section) => section.normalizedName === normalizedName);
+  return sections.filter((section) => sectionMatchesExpectedName(section, sectionName));
 }
 
 function createResult(

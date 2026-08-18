@@ -1,4 +1,4 @@
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import type {
   DocumentSection,
   NormalizedDocument,
@@ -104,17 +104,17 @@ function isSectionOrderItem(value: unknown): value is SectionOrderItem {
   );
 }
 
-function getNormalizedNames(item: SectionOrderItem): string[] {
-  return [item.section, ...(item.aliases ?? [])].map(normalizeSectionName);
+function getNames(item: SectionOrderItem): string[] {
+  return [item.section, ...(item.aliases ?? [])];
 }
 
 function locateSection(
   item: SectionOrderItem,
   sections: readonly DocumentSection[],
 ): LocatedSection | null {
-  const names = getNormalizedNames(item);
+  const names = getNames(item);
   const occurrence = sections.find((section) =>
-    names.includes(section.normalizedName),
+    sectionMatchesAnyExpectedName(section, names),
   );
   return occurrence ? { item, occurrence } : null;
 }
@@ -125,8 +125,8 @@ function findDuplicateExpectedSection(
 ): SectionOrderItem | null {
   return (
     items.find((item) => {
-      const names = getNormalizedNames(item);
-      return sections.filter((section) => names.includes(section.normalizedName)).length > 1;
+      const names = getNames(item);
+      return sections.filter((section) => sectionMatchesAnyExpectedName(section, names)).length > 1;
     }) ?? null
   );
 }

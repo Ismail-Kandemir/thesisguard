@@ -1,6 +1,7 @@
 import type {
   DocumentDefaults,
   EffectiveFormatting,
+  ParagraphAlignment,
   Run,
   StyleDefinition,
 } from "../types";
@@ -43,6 +44,35 @@ export class EffectiveFormattingResolver {
         findFirstStyleValue(styleChain, (style) => style.lineSpacing) ??
         this.documentDefaults.lineSpacing,
     };
+  }
+
+  resolveParagraphAlignment(
+    paragraphStyleId: string | null,
+    paragraphAlignment: ParagraphAlignment | null,
+  ): ParagraphAlignment | null {
+    const styleChain = paragraphStyleId
+      ? this.inheritanceResolver.resolve(paragraphStyleId)
+      : [];
+
+    return (
+      paragraphAlignment ??
+      findFirstStyleValue(styleChain, (style) => style.alignment)
+    );
+  }
+
+  resolveParagraphLineSpacing(
+    paragraphStyleId: string | null,
+    paragraphLineSpacing: number | null,
+  ): number | null {
+    const styleChain = paragraphStyleId
+      ? this.inheritanceResolver.resolve(paragraphStyleId)
+      : [];
+
+    return (
+      paragraphLineSpacing ??
+      findFirstStyleValue(styleChain, (style) => style.lineSpacing) ??
+      this.documentDefaults.lineSpacing
+    );
   }
 }
 

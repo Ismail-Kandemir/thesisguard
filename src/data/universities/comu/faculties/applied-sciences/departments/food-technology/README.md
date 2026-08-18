@@ -152,3 +152,65 @@ tanımlanmadığından görünür entry olarak sayılır. Keyword'lerin bilimsel
 kalitesi, anlamı ve Türkçe/İngilizce semantik çeviri eşdeğerliği kontrol
 edilmez. Mevcut 200 kelimelik `SECTION_WORD_COUNT` davranışı değiştirilmemiştir;
 keyword satırı mevcut section kelime hesabına dahil olmaya devam eder.
+
+## Ana bölüm numaralandırması
+
+Çalışma türü child setleri kendi `HEADING_NUMBERING` kuralını taşır. Experimental
+kural Giriş, Genel Bilgiler ve Literatür Çalışması, Materyal ve Metot, Bulgular ve
+Tartışma ve Sonuç; Source Research kuralı Giriş, Genel Bilgiler ve Sonuç
+başlıklarını level 0 numbered section olarak doğrular.
+
+Kontrol manuel (`1. GİRİŞ`) ve Word automatic numbering'i aynı kabul eder.
+Automatic numbering'de güvenilir `numId` ve level metadata'sı yeterlidir;
+`visibleLabel=null` tek başına hata değildir. Missing bölüm varlık kurallarına
+bırakılır, duplicate section güvenle doğrulanamadığı için failure olur.
+
+Ön/arka bölüm başlıkları ve Kaynaklar numbering kapsamı dışındadır. Heading2 ve
+Heading3 örnekleri, exact noktalama, sequence, skipped number, parent-child
+hiyerarşisi ve maksimum depth production requirement'a dönüştürülmemiştir. TOC
+cached entry'leri, normal numbered listeler ve body cümleleri academic heading
+olarak değerlendirilmez.
+
+## Sayfa numarası biçim sırası
+
+Ortak `bachelor.json` setindeki `PAGE_NUMBER_SEQUENCE` kuralı, ön sayfalarda
+küçük Romen rakamı kullanılmasını ve `Giriş` bölümünün bulunduğu Word bölümünde
+Arap rakamlarına geçilerek numaranın 1'den yeniden başlatılmasını doğrular.
+Kural hem Experimental hem Source Research seçimlerine miras kalır.
+
+`Giriş` bulunmazsa eksik bölüm hatası tekrarlanmaz ve sonuç `NOT_APPLICABLE`
+olur. Birden fazla Giriş occurrence'ı güvenli geçiş seçilemediği için `FAILED`
+olur. Manuel `1. GİRİŞ` prefix'i ile prefix'siz/Word automatic heading aynı ortak
+section matcher üzerinden eşleşir; TOC cached entry'leri occurrence değildir.
+
+## Tablo ve şekil başlığı production kuralları
+
+Ortak bachelor seti dört caption rule'u taşır:
+
+- `table-caption-placement`: tablo başlığı üstte.
+- `figure-caption-placement`: şekil başlığı altta.
+- `table-caption-format`: sola yaslı, 1 satır.
+- `figure-caption-format`: sola yaslı, 1 satır.
+
+Placement document-order association sonucunu kullanır; validator raw XML veya
+caption regex'i çalıştırmaz. Nested table ve anchored figure teknik olarak
+güvenilir placement sunmadığından akademik violation olarak raporlanmaz. Missing
+ve ambiguous caption güvenilir inline/top-level occurrence için placement
+failure'dır.
+
+Format validator yalnız ilişkilendirilmiş caption paragraph'larını effective
+style inheritance ile değerlendirir. Caption yokluğu placement failure'ı iken
+format sonucu `NOT_APPLICABLE` olur. Caption style ID, font, punto, bold ve italic
+bu kuralların kapsamında değildir.
+
+## Metin içi tablo ve şekil atıfları
+
+`table-in-text-reference` ve `figure-in-text-reference` kuralları güvenilir
+caption identity bulunan her nesne için caption/list/TOC/heading dışındaki metin
+paragraflarında aynı tür ve numarayı arar. `Tablo 1`, `Tablo 2.1’de`, `Şekil 1`
+ve `Şekil 3.2'de` gibi doğal Türkçe kullanımlar desteklenir.
+
+Reference konumu ve tekrar sayısı değerlendirilmez. Missing caption ayrı
+placement sorumluluğudur; nested table ve anchored figure reference kapsamına
+alınmaz. Duplicate aynı tür caption numarası false PASS yerine ambiguity failure
+üretir.

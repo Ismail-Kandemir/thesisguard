@@ -300,3 +300,78 @@ comu.bachelor
 Selector eksik veya bilinmeyen çalışma türünde sessiz fallback yapmaz ve
 `AcademicSelectionError` üretir. Bir child seçildiğinde diğer çalışma türünün
 seti seçilen zincire dahil edilmez.
+
+## Gıda Teknolojisi ana bölüm numaralandırması
+
+Resmî kılavuzun 4.6 başlık örnekleri ve uyulması istenen Ek-7 içindekiler yapısı,
+akademik ana metin bölümlerini ana bölüm düzeyinde numaralı gösterir. Çalışma
+türlerinin body section setleri farklı olduğundan iki child production kuralı
+tanımlanır:
+
+- `comu.applied-sciences.food-technology.bachelor.experimental.heading-numbering`
+- `comu.applied-sciences.food-technology.bachelor.source-research.heading-numbering`
+
+Experimental kuralı Giriş, Genel Bilgiler ve Literatür Çalışması, Materyal ve
+Metot, Bulgular ve Tartışma ve Sonuç bölümlerini; Source Research kuralı Giriş,
+Genel Bilgiler ve Sonuç bölümlerini level 0 numbered heading olarak doğrular.
+Konuya göre değişen source-research ana/alt bölümleri sabit isimli production
+expectation değildir.
+
+Manuel text prefix ile Word automatic numbering eşdeğerdir. Word `numId` ve level
+metadata'sı güvenilir olduğunda görünür label'ın çözülememesi failure değildir.
+Exact noktalama, sequential numbering, skipped number, parent-child hierarchy,
+maximum depth ve Heading2/Heading3 numbering kaynak gücü yetersiz olduğu için bu
+production kurallarının kapsamında değildir.
+
+İntihal Beyanı, Kabul ve Onay, Teşekkür, Özet, Abstract, İçindekiler, listeler,
+Kaynaklar, Ekler ve Özgeçmiş numbering expected listelerinde bulunmaz. Missing
+section hataları REQUIRED_SECTION sorumluluğundadır; hiçbir target bulunmazsa
+HEADING_NUMBERING `NOT_APPLICABLE` olur. Duplicate target ise güvenli ve
+deterministik failure üretir. TOC cached entries ile arbitrary numbered list/body
+paragrafları gerçek section occurrence olmadıkça değerlendirilmez.
+
+## Gıda Teknolojisi sayfa numarası sırası
+
+Kılavuzun 4.3 maddesi ön sayfalarda küçük Romen, ana metin ve kalan sayfalarda
+ardışık normal rakam ister. İki resmî DOCX şablonu da Giriş geçişinde
+`w:pgNumType w:start="1"` kullanır; önceki bölümlerde `lowerRoman` tanımlıdır.
+Bu ortak davranış
+`comu.applied-sciences.food-technology.bachelor.page-number-sequence` ID'li
+`PAGE_NUMBER_SEQUENCE` kuralıyla modellenir.
+
+Kural mevcut `PAGE_NUMBER` kontrolünü tekrarlamaz: PAGE alanının alt bilgi/orta
+konumunu değil, Word section metadata'sındaki biçim geçişini ve başlangıç
+değerini doğrular. Eksik Giriş `NOT_APPLICABLE`, duplicate Giriş `FAILED` olur.
+
+## Gıda Teknolojisi tablo ve şekil başlıkları
+
+Kılavuz tablo başlıklarının tablonun üstünde, şekil başlıklarının şeklin altında
+olmasını; her iki başlık türünün sola yaslı ve tek satır aralığında yazılmasını
+açıkça ister. Ortak bachelor setinde iki generic davranışla dört production rule
+bulunur: table/figure placement ve table/figure format.
+
+Placement yalnız güvenilir occurrence'ları değerlendirir. Nested table doğrudan
+body block'u olmadığı için, anchored figure ise render edilmiş konumu OOXML
+sırasından kesin belirlenemediği için kapsam dışıdır. Yalnız bunlardan oluşan
+belgede sonuç `NOT_APPLICABLE` olur. Güvenilir occurrence'ta missing veya
+ambiguous caption placement failure'dır.
+
+Format kuralı yalnız caption association kurulmuş occurrence'ları değerlendirir
+ve effective style inheritance üzerinden alignment ile line spacing değerlerini
+çözer. Caption eksikliği placement tarafından raporlandığında format
+`NOT_APPLICABLE` olur; aynı eksiklik score'u iki kez düşürmez. Font, punto,
+bold/italic ve `ResimYazs` style ID'si production şartı değildir.
+
+## Gıda Teknolojisi metin içi tablo ve şekil atıfları
+
+Kılavuz tablo ve şekillere metin içinde atıf yapılmasını açıkça zorunlu tutar.
+Ortak bachelor setindeki iki `OBJECT_IN_TEXT_REFERENCE` kuralı, güvenilir caption
+numarası bulunan her top-level table ve inline figure için caption dışındaki tez
+metninde en az bir aynı kind/number referansı arar.
+
+Atfın nesneden önce gelmesi, exact cümle biçimi, birden fazla atıf, numbering
+sequence ve ekler için özel semantik kaynak tarafından zorunlu tutulmadığından
+kontrol edilmez. Caption, table/figure listesi, TOC ve heading metinleri reference
+sayılmaz. Missing/ambiguous caption placement hatasını tekrar cezalandırmaz;
+güvenilir identity yoksa `NOT_APPLICABLE` olur. Duplicate caption number güvenli
+eşleştirme yapılamadığı için açık failure üretir.

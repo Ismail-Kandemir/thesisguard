@@ -1,5 +1,6 @@
 import type {
   DocumentDefaults,
+  NumberingReference,
   ParagraphAlignment,
   StyleDefinition,
 } from "../types";
@@ -76,8 +77,32 @@ function parseStyle(styleElement: Element): StyleDefinition | null {
     name: parseElementValue(styleElement, "name"),
     basedOn: parseElementValue(styleElement, "basedOn"),
     nextStyle: parseElementValue(styleElement, "next"),
+    numbering: parseNumberingReference(styleElement),
     ...parseStyleProperties(styleElement),
   };
+}
+
+function parseNumberingReference(styleElement: Element): NumberingReference | null {
+  const paragraphProperties = getFirstDescendant(styleElement, "pPr");
+  const numberingProperties = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "numPr")
+    : null;
+  const numId = numberingProperties
+    ? parseElementValue(numberingProperties, "numId")
+    : null;
+  const level = numberingProperties
+    ? parseNumericElementValue(numberingProperties, "ilvl") ?? 0
+    : null;
+
+  return numId !== null && numId !== "0" && level !== null
+    ? { numId, level }
+    : null;
+}
+
+function parseNumericElementValue(parent: Element, localName: string): number | null {
+  const element = getFirstDescendant(parent, localName);
+
+  return element ? parseNumericAttribute(element, "val") : null;
 }
 
 function parseStyleProperties(styleElement: Element): StyleProperties {

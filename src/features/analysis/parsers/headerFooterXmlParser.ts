@@ -16,6 +16,7 @@ export function parseHeaderFooterPageNumbering(
   return {
     hasPageNumbers: fields.length > 0,
     fields,
+    sections: [],
   };
 }
 

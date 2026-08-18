@@ -4,18 +4,16 @@ import type {
   RuleDefinition,
   RuleResult,
 } from "../../types";
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import type { RuleValidator } from "./RuleValidator";
 
 export class RequiredSectionValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertRequiredSectionRule(rule);
     const expected = getRequiredSectionExpected(rule.expected);
-    const expectedNames = [expected.section, ...(expected.aliases ?? [])].map(
-      normalizeSectionName,
-    );
+    const expectedNames = [expected.section, ...(expected.aliases ?? [])];
     const hasSection = document.sections.some((section) =>
-      expectedNames.includes(section.normalizedName),
+      sectionMatchesAnyExpectedName(section, expectedNames),
     );
     const passed = !expected.required || hasSection;
 
