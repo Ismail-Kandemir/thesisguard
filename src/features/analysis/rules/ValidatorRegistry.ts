@@ -6,6 +6,7 @@ import { HeadingNumberingValidator } from "./validators/HeadingNumberingValidato
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { PageNumberSequenceValidator } from "./validators/PageNumberSequenceValidator";
+import { ObjectAlignmentValidator } from "./validators/ObjectAlignmentValidator";
 import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlacementValidator";
 import { ObjectCaptionFormatValidator } from "./validators/ObjectCaptionFormatValidator";
 import { ObjectInTextReferenceValidator } from "./validators/ObjectInTextReferenceValidator";
@@ -31,6 +32,10 @@ const FOOD_TECHNOLOGY_TABLE_CAPTION_PLACEMENT_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.table-caption-placement";
 const FOOD_TECHNOLOGY_FIGURE_CAPTION_PLACEMENT_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.figure-caption-placement";
+const FOOD_TECHNOLOGY_TABLE_OBJECT_ALIGNMENT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.table-object-alignment";
+const FOOD_TECHNOLOGY_FIGURE_OBJECT_ALIGNMENT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.figure-object-alignment";
 const FOOD_TECHNOLOGY_TABLE_CAPTION_FORMAT_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.table-caption-format";
 const FOOD_TECHNOLOGY_FIGURE_CAPTION_FORMAT_RULE_ID =
@@ -109,6 +114,8 @@ export class ValidatorRegistry {
     [FOOD_TECHNOLOGY_HEADING_1_RULE_ID, new HeadingValidator()],
     [FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
     [FOOD_TECHNOLOGY_PAGE_NUMBER_SEQUENCE_RULE_ID, new PageNumberSequenceValidator()],
+    [FOOD_TECHNOLOGY_TABLE_OBJECT_ALIGNMENT_RULE_ID, new ObjectAlignmentValidator()],
+    [FOOD_TECHNOLOGY_FIGURE_OBJECT_ALIGNMENT_RULE_ID, new ObjectAlignmentValidator()],
     [FOOD_TECHNOLOGY_TABLE_CAPTION_PLACEMENT_RULE_ID, new ObjectCaptionPlacementValidator()],
     [FOOD_TECHNOLOGY_FIGURE_CAPTION_PLACEMENT_RULE_ID, new ObjectCaptionPlacementValidator()],
     [FOOD_TECHNOLOGY_TABLE_CAPTION_FORMAT_RULE_ID, new ObjectCaptionFormatValidator()],

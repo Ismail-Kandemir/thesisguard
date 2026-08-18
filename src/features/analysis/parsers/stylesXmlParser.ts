@@ -1,6 +1,7 @@
 import type {
   DocumentDefaults,
   NumberingReference,
+  ObjectAlignment,
   ParagraphAlignment,
   StyleDefinition,
 } from "../types";
@@ -15,6 +16,7 @@ interface StyleProperties {
   underline: boolean | null;
   lineSpacing: number | null;
   alignment: ParagraphAlignment | null;
+  tableAlignment: ObjectAlignment | null;
 }
 
 interface ParsedStylesXml {
@@ -74,6 +76,7 @@ function parseStyle(styleElement: Element): StyleDefinition | null {
 
   return {
     id,
+    type: parseStyleType(styleElement),
     name: parseElementValue(styleElement, "name"),
     basedOn: parseElementValue(styleElement, "basedOn"),
     nextStyle: parseElementValue(styleElement, "next"),
@@ -108,6 +111,7 @@ function parseNumericElementValue(parent: Element, localName: string): number | 
 function parseStyleProperties(styleElement: Element): StyleProperties {
   const runProperties = getFirstDescendant(styleElement, "rPr");
   const paragraphProperties = getFirstDescendant(styleElement, "pPr");
+  const tableProperties = getFirstDirectChild(styleElement, "tblPr");
 
   return {
     fontFamily: parseFont(runProperties),
@@ -117,7 +121,22 @@ function parseStyleProperties(styleElement: Element): StyleProperties {
     underline: parseUnderline(runProperties),
     lineSpacing: parseSpacing(paragraphProperties),
     alignment: parseAlignment(paragraphProperties),
+    tableAlignment: parseTableAlignment(tableProperties),
   };
+}
+
+function parseStyleType(styleElement: Element): StyleDefinition["type"] {
+  const type = getWordAttribute(styleElement, "type");
+
+  switch (type) {
+    case "paragraph":
+    case "character":
+    case "table":
+    case "numbering":
+      return type;
+    default:
+      return "unknown";
+  }
 }
 
 function parseFont(runProperties: Element | null): string | null {
@@ -198,6 +217,26 @@ function parseAlignment(paragraphProperties: Element | null): ParagraphAlignment
   }
 }
 
+function parseTableAlignment(tableProperties: Element | null): ObjectAlignment | null {
+  const alignmentElement = tableProperties
+    ? getFirstDescendant(tableProperties, "jc")
+    : null;
+  const value = alignmentElement ? getWordAttribute(alignmentElement, "val") : null;
+
+  switch (value) {
+    case "left":
+    case "start":
+      return "left";
+    case "right":
+    case "end":
+      return "right";
+    case "center":
+      return "center";
+    default:
+      return null;
+  }
+}
+
 function parseElementValue(parent: Element, localName: string): string | null {
   const element = getFirstDescendant(parent, localName);
 
@@ -224,6 +263,12 @@ function parseToggleValue(value: string | null | undefined): boolean {
 
 function getFirstDescendant(element: Element, localName: string): Element | null {
   return element.getElementsByTagNameNS(WORD_NAMESPACE, localName).item(0);
+}
+
+function getFirstDirectChild(element: Element, localName: string): Element | null {
+  return Array.from(element.children).find(
+    (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === localName,
+  ) ?? null;
 }
 
 function getWordAttribute(element: Element, localName: string): string | null {

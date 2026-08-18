@@ -214,3 +214,76 @@ Reference konumu ve tekrar sayısı değerlendirilmez. Missing caption ayrı
 placement sorumluluğudur; nested table ve anchored figure reference kapsamına
 alınmaz. Duplicate aynı tür caption numarası false PASS yerine ambiguity failure
 üretir.
+## Tablo ve ÅŸekil nesne hizalamasÄ±
+
+KÄ±lavuzun 4.4 maddesindeki tablo ve ÅŸekillerin ortalanarak yerleÅŸtirilmesi
+ÅŸartÄ±, caption alignment'dan ayrÄ± production rule olarak modellenir. Ortak
+`bachelor.json` setindeki ID'ler:
+
+- `comu.applied-sciences.food-technology.bachelor.table-object-alignment`
+- `comu.applied-sciences.food-technology.bachelor.figure-object-alignment`
+
+Tablo rule'u yalnÄ±z top-level academic table occurrence'larÄ±nÄ± deÄŸerlendirir.
+Direct `w:tblPr/w:jc` Ã¶nceliklidir; yoksa table style chain iÃ§indeki `w:jc`
+kullanÄ±lÄ±r. Nested table'lar akademik table alignment failure'Ä±na sokulmaz.
+
+Åekil rule'u yalnÄ±z tek inline drawing iÃ§eren ve gÃ¶rÃ¼nÃ¼r text iÃ§ermeyen paragraph
+yapÄ±sÄ±nda effective paragraph alignment'Ä±nÄ± kullanÄ±r. Anchored/floating figure,
+unknown drawing type, aynÄ± paragraph'ta birden fazla drawing veya drawing ile
+gÃ¶rÃ¼nÃ¼r text bulunan paragraph iÃ§in rendered konum tahmin edilmez. Bu durumlar
+`unknown` kabul edilir; false PASS Ã¼retilmez.
+
+Caption eksikliÄŸi object alignment'Ä±nÄ± engellemez. Caption konumu ve caption
+formatÄ± mevcut `OBJECT_CAPTION_PLACEMENT` ve `OBJECT_CAPTION_FORMAT` kurallarÄ±nda
+kalÄ±r. DoÄŸru yaygÄ±n kombinasyon: object center, caption left.
+
+## Tablo ve ÅŸekil baÅŸlÄ±ÄŸÄ± metin yapÄ±sÄ± source audit
+
+KÄ±lavuz ve resmi ÅŸablonlar `Tablo 1. BaÅŸlÄ±k` ve `Åekil 1. BaÅŸlÄ±k` biÃ§imini
+destekleyen Ã¶rnekler verir. Bu, mevcut parser'Ä±n strict caption detection
+formatÄ±nÄ± destekler; ancak exact label, nokta separator, title presence, tek
+paragraph, capitalization, alias yasaÄŸÄ± veya source suffix iÃ§in ayrÄ± production
+requirement gÃ¼cÃ¼ne ulaÅŸmaz.
+
+Bu nedenle bu rule setine `table-caption-structure` veya
+`figure-caption-structure` production rule'u eklenmemiÅŸtir. Caption yokluÄŸu
+placement rule'un, caption paragraph hizalamasÄ±/satÄ±r aralÄ±ÄŸÄ± format rule'un,
+metin iÃ§i coverage reference rule'un, object center ise object alignment rule'un
+sorumluluÄŸunda kalÄ±r. Ã–nceki caption numbering source-audit kararÄ± korunur;
+sequence, start-at-1, skipped number ve document-order numbering production
+kapsamÄ±na alÄ±nmaz.
+
+## Tablo ve ÅŸekil numaralandÄ±rmasÄ± source audit
+
+KÄ±lavuz 4.4 maddesi ve iki resmi Word ÅŸablonu `Tablo 1.` / `Tablo 2.` ve
+`Åekil 1.` / `Åekil 2.` biÃ§imindeki numaralÄ± baÅŸlÄ±k Ã¶rneklerini destekler. Bu
+destek, mevcut caption parser'Ä±n normalize ettiÄŸi `number` metadata'sÄ±nÄ±n akademik
+olarak anlamlÄ± olduÄŸunu gÃ¶sterir. Ancak kaynaklar ayrÄ± bir `her tablo/ÅŸekil
+numaralandÄ±rÄ±lmalÄ±dÄ±r` cÃ¼mlesi kurmaz ve sequence semantiklerini tanÄ±mlamaz.
+
+Bu nedenle ortak `bachelor.json` setine yeni caption-numbering production rule'u
+eklenmemiÅŸtir. Production davranÄ±ÅŸÄ± mevcut dÃ¶rt caption rule'u ve iki in-text
+reference rule'u ile sÄ±nÄ±rlÄ±dÄ±r. `Tablo 1 -> Tablo 3`, `Tablo 2 -> Tablo 1`,
+duplicate caption number, `Tablo 2.1`, `Tablo A.1` veya appendix restart gibi
+durumlar bu sprintte ayrÄ± numbering failure sebebi deÄŸildir. Duplicate caption
+number yalnÄ±z reference coverage gÃ¼venilirliÄŸini bozduÄŸunda mevcut
+`OBJECT_IN_TEXT_REFERENCE` validator tarafÄ±ndan raporlanÄ±r.
+## Tablo ve Şekil Listesi İçerik Tutarlılığı
+
+Bu kaynak auditinde production kapsamı genişletilmedi. Kılavuz, tablolar veya
+şekiller kullanıldığında ilgili liste section'ının bulunmasını destekler; bu
+zaten `list-of-tables` ve `list-of-figures` `CONDITIONAL_REQUIRED_SECTION`
+kurallarıyla karşılanır.
+
+Resmi literatür ve laboratuvar DOCX şablonlarında `TABLOLAR LİSTESİ` ve
+`ŞEKİLLER LİSTESİ` başlıkları Word `TOC \h \z \c "Tablo"` ve
+`TOC \h \z \c "Şekil"` field yapılarıyla bulunur, ancak OOXML field cache'inde
+görünür list entry'si yoktur. Bu yapı otomatik liste kullanımına teknik örnektir;
+kılavuz otomatik field'ı veya cached page number doğruluğunu akademik başarı
+koşulu yapmaz.
+
+Bu nedenle `OBJECT_LIST_CONSISTENCY`, `table-list-consistency` ve
+`figure-list-consistency` production rule'ları eklenmemiştir. Belgedeki her
+object'in listede bulunması, listedeki her entry'nin gerçek object'e karşılık
+gelmesi, exact title eşitliği, sıra, duplicate entry yasağı, dot leader ve page
+accuracy bu rule setinde kontrol edilmez.

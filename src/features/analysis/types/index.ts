@@ -24,6 +24,7 @@ export type RuleSeverity = "info" | "warning" | "error";
 export type RuleType =
   | "PAGE_NUMBER"
   | "PAGE_NUMBER_SEQUENCE"
+  | "OBJECT_ALIGNMENT"
   | "OBJECT_CAPTION_PLACEMENT"
   | "OBJECT_CAPTION_FORMAT"
   | "OBJECT_IN_TEXT_REFERENCE"
@@ -100,6 +101,11 @@ export interface ObjectCaptionFormatRuleExpected {
   lineSpacing: number;
 }
 
+export interface ObjectAlignmentRuleExpected {
+  object: CaptionKind;
+  alignment: ObjectAlignment;
+}
+
 export interface ObjectInTextReferenceRuleExpected {
   object: CaptionKind;
 }
@@ -163,6 +169,7 @@ export type RuleExpectedValue =
   | boolean
   | PageNumberRuleExpected
   | PageNumberSequenceRuleExpected
+  | ObjectAlignmentRuleExpected
   | ObjectCaptionPlacementRuleExpected
   | ObjectCaptionFormatRuleExpected
   | ObjectInTextReferenceRuleExpected
@@ -242,6 +249,7 @@ export type ParagraphAlignment =
 
 export interface StyleDefinition {
   id: string;
+  type: "paragraph" | "character" | "table" | "numbering" | "unknown";
   name: string | null;
   basedOn: string | null;
   nextStyle: string | null;
@@ -252,6 +260,7 @@ export interface StyleDefinition {
   underline: boolean | null;
   lineSpacing: number | null;
   alignment: ParagraphAlignment | null;
+  tableAlignment: ObjectAlignment | null;
   numbering: NumberingReference | null;
 }
 
@@ -369,6 +378,8 @@ export interface DocumentFigures {
 export type CaptionKind = "table" | "figure";
 export type CaptionPosition = "before" | "after" | "none" | "ambiguous";
 export type FigureDrawingType = "inline" | "anchor" | "unknown";
+export type ObjectAlignment = "left" | "center" | "right" | "unknown";
+export type ObjectAlignmentSource = "direct" | "style" | "paragraph" | "unknown";
 
 export interface DocumentCaption {
   id: string;
@@ -385,6 +396,9 @@ export interface DocumentTableOccurrence {
   id: string;
   blockIndex: number | null;
   isNested: boolean;
+  tableStyleId: string | null;
+  alignment: ObjectAlignment;
+  alignmentSource: ObjectAlignmentSource;
   captionId: string | null;
   captionPosition: CaptionPosition;
 }
@@ -395,6 +409,8 @@ export interface DocumentFigureOccurrence {
   paragraphIndex: number;
   blockIndex: number | null;
   drawingType: FigureDrawingType;
+  alignment: ObjectAlignment;
+  alignmentSource: ObjectAlignmentSource;
   captionId: string | null;
   captionPosition: CaptionPosition;
 }

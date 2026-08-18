@@ -198,6 +198,36 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.table-object-alignment",
+      "type": "OBJECT_ALIGNMENT",
+      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "title": "Tablo Nesne Hizalaması",
+      "description": "Tabloların metin alanı içinde yatay olarak ortalanmasını doğrular.",
+      "category": "format",
+      "expected": { "object": "table", "alignment": "center" },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablo nesnesi ortalanmış olmalıdır.",
+      "solution": "Tabloyu metin alanı içinde yatay olarak ortalayın; tablo başlığını sola yaslı bırakın.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.figure-object-alignment",
+      "type": "OBJECT_ALIGNMENT",
+      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "title": "Şekil Nesne Hizalaması",
+      "description": "Güvenilir biçimde değerlendirilebilen şekillerin metin alanı içinde yatay olarak ortalanmasını doğrular.",
+      "category": "format",
+      "expected": { "object": "figure", "alignment": "center" },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil nesnesi ortalanmış olmalıdır.",
+      "solution": "Inline şekli taşıyan paragrafı ortalayın; şekil başlığını sola yaslı bırakın.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.table-caption-placement",
       "type": "OBJECT_CAPTION_PLACEMENT",
       "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },

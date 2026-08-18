@@ -375,3 +375,154 @@ kontrol edilmez. Caption, table/figure listesi, TOC ve heading metinleri referen
 sayılmaz. Missing/ambiguous caption placement hatasını tekrar cezalandırmaz;
 güvenilir identity yoksa `NOT_APPLICABLE` olur. Duplicate caption number güvenli
 eşleştirme yapılamadığı için açık failure üretir.
+## GÄ±da Teknolojisi tablo ve ÅŸekil nesne hizalamasÄ±
+
+GÄ±da Teknolojisi Bitirme Tezi HazÄ±rlama KÄ±lavuzu 4.4 maddesi tablo ve
+ÅŸekillerin ortalanarak yerleÅŸtirilmesini ister. Bu requirement caption
+hizalamasÄ±ndan ayrÄ±dÄ±r: caption paragraph'Ä± iÃ§in mevcut production beklentisi
+sola yaslÄ± ve 1 satÄ±r aralÄ±ÄŸÄ±dÄ±r; object alignment ise tablonun veya inline
+ÅŸeklin kendisinin yatay ortalanmasÄ±nÄ± deÄŸerlendirir.
+
+Ortak GÄ±da Teknolojisi bachelor setinde iki generic `OBJECT_ALIGNMENT` production
+rule'u bulunur:
+
+- `comu.applied-sciences.food-technology.bachelor.table-object-alignment`
+- `comu.applied-sciences.food-technology.bachelor.figure-object-alignment`
+
+Tablo alignment'Ä± top-level `w:tbl` occurrence'larÄ± iÃ§in Ã¶lÃ§Ã¼lÃ¼r. Direct
+`w:tblPr/w:jc` deÄŸeri `center`, `left`, `right`, `start` veya `end` ise normalize
+edilir. Direct deÄŸer yoksa `w:tblPr/w:tblStyle` ile baÄŸlanan table style
+zincirindeki `w:tblPr/w:jc` kullanÄ±lÄ±r. Direct deÄŸer style'dan Ã¶nceliklidir.
+Width, autofit, indentation, cell margin veya rendered sayfa koordinatÄ± iÃ§in Word
+layout engine yazÄ±lmaz; gÃ¼venilir alignment yoksa deÄŸer `unknown` kalÄ±r.
+
+Åekil alignment'Ä± yalnÄ±z gÃ¼venilir inline drawing yapÄ±sÄ±nda Ã¶lÃ§Ã¼lÃ¼r: drawing'i
+taÅŸÄ±yan paragraph tek inline drawing iÃ§ermeli ve gÃ¶rÃ¼nÃ¼r text iÃ§ermemelidir. Bu
+durumda direct veya style inheritance ile Ã§Ã¶zÃ¼len paragraph alignment `center`,
+`left` veya `right` olarak object alignment'a aktarÄ±lÄ±r. `wp:anchor`, unknown
+drawing type, aynÄ± paragraph'ta birden fazla drawing veya drawing ile gÃ¶rÃ¼nÃ¼r
+text/tabs/spaces bulunan paragraph gÃ¼venilir bireysel object center Ã¶lÃ§Ã¼mÃ¼
+saÄŸlamadÄ±ÄŸÄ± iÃ§in `unknown` kabul edilir.
+
+Rule caption varlÄ±ÄŸÄ±na baÄŸlÄ± deÄŸildir. Caption eksik olsa bile top-level table
+veya gÃ¼venilir inline figure alignment'Ä± Ã¶lÃ§Ã¼lebiliyorsa object alignment ayrÄ±
+deÄŸerlendirilir; caption eksikliÄŸi mevcut `OBJECT_CAPTION_PLACEMENT`
+sorumluluÄŸunda kalÄ±r. Nested table'lar mevcut academic object yaklaÅŸÄ±mÄ±nÄ± korumak
+iÃ§in production object alignment kapsamÄ±na alÄ±nmaz. Orphan caption, body
+reference, Tablolar/Åekiller Listesi, TOC ve section heading object occurrence
+deÄŸildir.
+
+Bilinen tÃ¼m object'ler center ise rule `PASSED` olur. DeÄŸerlendirilebilir object
+left veya right ise `FAILED` olur. TÃ¼m occurrence'lar `unknown` ise teknik olarak
+uygulanamadÄ±ÄŸÄ± iÃ§in `NOT_APPLICABLE` olur. BazÄ± object'ler center, bazÄ±larÄ±
+unknown ise false PASS vermemek iÃ§in rule `FAILED` olur ve mesaj unknown
+occurrence'larÄ± akademik yanlÄ±ÅŸ gibi deÄŸil, teknik olarak belirlenemedi diye
+raporlar.
+
+## Tablo ve ÅŸekil baÅŸlÄ±ÄŸÄ± metin yapÄ±sÄ± kaynak kararÄ±
+
+KÄ±lavuz ve resmi Word ÅŸablonlarÄ± tablo/ÅŸekil baÅŸlÄ±klarÄ±nÄ± `Tablo 1. ...` ve
+`Åekil 1. ...` benzeri gÃ¶rÃ¼nÃ¼r yapÄ±larla Ã¶rneklendirir. Bu Ã¶rnekler mevcut
+caption parser'Ä±n desteklediÄŸi label + decimal number + nokta biÃ§iminin gÃ¼venli
+bir detection formatÄ± olduÄŸunu destekler. Ancak kaynaklar exact label,
+label-number order, nokta separator, baÅŸlÄ±k/title presence, tek paragraph,
+capitalization, alias yasaÄŸÄ±, source suffix veya title uzunluÄŸÃ¼ iÃ§in ayrÄ± ve
+STRONG production requirement kurmaz.
+
+Bu nedenle ortak GÄ±da Teknolojisi bachelor setine `OBJECT_CAPTION_STRUCTURE`
+production rule'u eklenmemiÅŸtir. Caption tamamen yoksa mevcut
+`OBJECT_CAPTION_PLACEMENT` failure Ã¼retir. Caption iliÅŸkisi varsa mevcut
+`OBJECT_CAPTION_FORMAT`, `OBJECT_IN_TEXT_REFERENCE` ve `OBJECT_ALIGNMENT`
+kurallarÄ± kendi sorumluluklarÄ±nÄ± deÄŸerlendirir. Structure rule eklenmediÄŸi iÃ§in
+missing caption, punctuation veya title eksikliÄŸi ikinci kez cezalandÄ±rÄ±lmaz.
+
+Mevcut `DocumentCaption` modeli raw gÃ¶rÃ¼nÃ¼r `text`, `kind`, canonical `label`,
+normalize `number`, `paragraphId`, `paragraphIndex` ve `blockIndex` alanlarÄ±nÄ±
+taÅŸÄ±r. Title metni ayrÄ± metadata olarak tutulmaz; gerekirse raw `text` Ã¼zerinden
+gelecekte generic candidate/structure modeli tasarlanabilir. Bu sprintte parser
+false-positive korumasÄ±nÄ± gevÅŸetecek candidate detection geniÅŸletmesi
+yapÄ±lmamÄ±ÅŸtÄ±r.
+
+Body reference cÃ¼mleleri, Tablolar/Åekiller Listesi, TOC cached entry'leri,
+section heading'leri, orphan caption'lar, nested table'lar ve anchored figure'lar
+object-specific caption structure production sonucuna dÃ¶nÃ¼ÅŸmez. Ã‡ok seviyeli
+numaralar metadata olarak korunur; sequence, 1'den baÅŸlama, skipped number ve
+document-order numbering kararlarÄ± Ã¶nceki source audit gereÄŸi production kapsamÄ±
+dÄ±ÅŸÄ±nda kalmaya devam eder.
+
+## Tablo ve ÅŸekil baÅŸlÄ±ÄŸÄ± numaralandÄ±rmasÄ± kaynak kararÄ±
+
+GÄ±da Teknolojisi Bitirme Tezi HazÄ±rlama KÄ±lavuzu 4.4 maddesi tablo ve ÅŸekil
+baÅŸlÄ±klarÄ±nÄ±n konumunu, hizalamasÄ±nÄ±, satÄ±r aralÄ±ÄŸÄ±nÄ± ve metin iÃ§i atÄ±f
+zorunluluÄŸunu aÃ§Ä±kÃ§a tanÄ±mlar. AynÄ± maddede verilen Ã¶rneklerde `Åekil 2.` ve
+`Tablo 2.` biÃ§imi kullanÄ±lÄ±r. Resmi literatÃ¼r ve laboratuvar ÅŸablonlarÄ± da
+`Tablo 1.` ve `Åekil 1.` Ã¶rneklerini iÃ§erir. Bu kaynaklar tablo/ÅŸekil
+baÅŸlÄ±klarÄ±nÄ±n numaralÄ± gÃ¶sterildiÄŸini destekler; ancak `Tablo ve ÅŸekiller
+numaralandÄ±rÄ±lmalÄ±dÄ±r` gibi ayrÄ± ve aÃ§Ä±k bir presence cÃ¼mlesi iÃ§ermez.
+
+Bu nedenle bu sprintte ayrÄ± `OBJECT_CAPTION_NUMBERING` production kuralÄ±
+eklenmemiÅŸtir. Mevcut caption normalizer yalnÄ±z paragraf baÅŸÄ±ndaki `Tablo
+<decimal>.` ve `Åekil <decimal>.` biÃ§imlerini caption olarak normalize eder;
+gÃ¼venilir top-level tablo veya inline ÅŸekil iÃ§in bu caption bulunmazsa mevcut
+`OBJECT_CAPTION_PLACEMENT` kuralÄ± zaten baÅŸlÄ±k tespit edilemedi failure'Ä±
+Ã¼retir. AyrÄ± number-presence rule'u aynÄ± eksikliÄŸi tekrar raporlama riski
+taÅŸÄ±dÄ±ÄŸÄ±ndan production'a baÄŸlanmamÄ±ÅŸtÄ±r.
+
+KÄ±lavuz veya ÅŸablonlar tablo/ÅŸekil numaralarÄ±nÄ±n 1'den baÅŸlamasÄ±nÄ±, ardÄ±ÅŸÄ±k
+ilerlemesini, atlama yapmamasÄ±nÄ±, duplicate numara kullanmamasÄ±nÄ±, belge
+sÄ±rasÄ±yla aynÄ± olmasÄ±nÄ±, bÃ¶lÃ¼m numarasÄ±na baÄŸlÄ± Ã§ok seviyeli sequence'i, eklerde
+restart davranÄ±ÅŸÄ±nÄ± veya `Tablo A.1` gibi appendix/harfli/roman semantiklerini
+aÃ§Ä±kÃ§a tanÄ±mlamaz. Bunlar production failure sebebi deÄŸildir.
+
+Caption number metadata'sÄ± yine de generic altyapÄ± iÃ§in yeterlidir: her
+`DocumentCaption` raw gÃ¶rÃ¼nÃ¼r metni, canonical label'Ä±, normalize `number`
+deÄŸerini, paragraph order'Ä±nÄ± ve block order'Ä±nÄ± taÅŸÄ±r; tablo/ÅŸekil occurrence
+association ise `captionId` Ã¼zerinden kurulur. Validatorlar raw XML okumamalÄ± ve
+caption regex'ini kopyalamamalÄ±dÄ±r.
+
+Duplicate caption number ownership mevcut `OBJECT_IN_TEXT_REFERENCE` kuralÄ±nda
+kalÄ±r. AynÄ± tÃ¼r ve numaraya sahip birden fazla gÃ¼venilir nesne varsa reference
+coverage gÃ¼venilir belirlenemez ve validator false PASS yerine ambiguity failure
+Ã¼retir. AyrÄ± numbering kuralÄ± eklenmediÄŸi iÃ§in aynÄ± akademik problem ikinci kez
+raporlanmaz.
+## Table/Figure List Content Consistency Source Decision
+
+Resmi bölüm sayfasında yayımlanan Gıda Teknolojisi Bitirme Tezi Hazırlama
+Kılavuzu ve iki resmi Word şablonu bu sprintte yeniden incelendi. Kaynaklar,
+bitirme ödevinde tablo varsa `TABLOLAR LİSTESİ`, şekil varsa `ŞEKİLLER LİSTESİ`
+bölümünün bulunmasını destekler. Bu gereklilik mevcut
+`CONDITIONAL_REQUIRED_SECTION` kurallarıyla zaten modellenmiştir:
+
+- `comu.applied-sciences.food-technology.bachelor.list-of-tables`
+- `comu.applied-sciences.food-technology.bachelor.list-of-figures`
+
+Aynı kaynaklar listelerdeki her girdinin gerçek object/caption ile birebir
+eşleşmesini, belgedeki her tablo/şeklin listede bulunmasını, fazladan entry
+yasağını, exact caption title eşitliğini, liste sırasını, duplicate entry
+yasağını, noktalı leader kullanımını veya sayfa numarası doğruluğunu ayrı ve
+yeterince güçlü bir production requirement olarak tanımlamaz. Bu nedenle ortak
+Gıda Teknolojisi bachelor setine `OBJECT_LIST_CONSISTENCY` rule type'ı veya şu
+production ID'ler eklenmemiştir:
+
+- `comu.applied-sciences.food-technology.bachelor.table-list-consistency`
+- `comu.applied-sciences.food-technology.bachelor.figure-list-consistency`
+
+İki resmi DOCX şablonunun OOXML yapısı ayrıca kontrol edildi. Literatür
+şablonunda `TABLOLAR LİSTESİ` paragraph 145, `ŞEKİLLER LİSTESİ` paragraph 147;
+laboratuvar şablonunda sırasıyla paragraph 146 ve 148 olarak bulunur. Bu
+paragraph'lar `GiriBalklar` stilindedir ve Word field içerir:
+`TOC \h \z \c "Tablo"` ile `TOC \h \z \c "Şekil"`. Field result cache'inde görünür
+liste entry'si yoktur; sonraki field-end paragraph boş, ardından `1.GİRİŞ`
+heading'i gelir. Şablonlarda bu alanların otomatik field olarak bulunması
+teknik bir örnektir; kılavuz manuel doğru listeyi reddeden veya Word field
+kullanımını başarı koşulu yapan açık bir akademik şart kurmaz.
+
+Gelecekte başka bir kaynak full coverage'i STRONG desteklerse generic model
+`DocumentObjectListEntry` benzeri ayrı bir normalize nesneyle tasarlanmalıdır.
+Entry identity yalnız `kind + number` üzerinden kurulmalı, list entry gerçek
+caption olarak `document.captions` içine eklenmemeli ve parser yalnız ilgili
+`Tablolar Listesi` / `Şekiller Listesi` section content'i içinde çalışmalıdır.
+Missing list section failure'ı conditional presence kuralında kalmalı; content
+validator aynı yokluğu ikinci kez raporlamamalıdır. Sayfa numarası doğruluğu Word
+layout engine olmadan güvenilir hesaplanamayacağı için production kapsamına
+alınmamalıdır; cached page text yalnız metadata olabilir.

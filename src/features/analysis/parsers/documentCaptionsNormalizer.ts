@@ -9,7 +9,10 @@ import type {
   DocumentTableOccurrence,
   DocumentTables,
   FigureDrawingType,
+  ObjectAlignment,
+  ObjectAlignmentSource,
   Paragraph,
+  ParagraphAlignment,
 } from "../types";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
@@ -200,6 +203,8 @@ function parseTables(
         id,
         blockIndex: directId ? blockIndexByTableId.get(directId) ?? null : null,
         isNested: directId === undefined,
+        tableStyleId: parseTableStyleId(element),
+        ...parseTableAlignment(element),
         captionId: null,
         captionPosition: "none",
       };
@@ -218,6 +223,18 @@ function parseFigures(
       .filter((block) => block.type === "paragraph")
       .map((block) => [block.paragraphId, block.blockIndex]),
   );
+  const drawingCountByParagraph = new Map<Element, number>();
+
+  for (const drawing of Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing"))) {
+    const paragraphElement = findAncestor(drawing, "p");
+
+    if (paragraphElement) {
+      drawingCountByParagraph.set(
+        paragraphElement,
+        (drawingCountByParagraph.get(paragraphElement) ?? 0) + 1,
+      );
+    }
+  }
 
   return Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing")).map(
     (drawing, index) => {
@@ -233,11 +250,70 @@ function parseFigures(
         paragraphIndex,
         blockIndex: paragraph ? blockIndexByParagraphId.get(paragraph.id) ?? null : null,
         drawingType: getDrawingType(drawing),
+        ...parseFigureAlignment(
+          drawing,
+          paragraph,
+          paragraphElement ? drawingCountByParagraph.get(paragraphElement) ?? 0 : 0,
+        ),
         captionId: null,
         captionPosition: "none",
       };
     },
   );
+}
+
+function parseTableStyleId(tableElement: Element): string | null {
+  const tableProperties = getFirstDirectChild(tableElement, "tblPr");
+  const tableStyle = tableProperties ? getFirstDirectChild(tableProperties, "tblStyle") : null;
+
+  return tableStyle ? getWordAttribute(tableStyle, "val") : null;
+}
+
+function parseTableAlignment(
+  tableElement: Element,
+): { alignment: ObjectAlignment; alignmentSource: ObjectAlignmentSource } {
+  const tableProperties = getFirstDirectChild(tableElement, "tblPr");
+  const alignmentElement = tableProperties ? getFirstDirectChild(tableProperties, "jc") : null;
+  const alignment = alignmentElement
+    ? toObjectAlignment(getWordAttribute(alignmentElement, "val"))
+    : "unknown";
+
+  return {
+    alignment,
+    alignmentSource: alignment === "unknown" ? "unknown" : "direct",
+  };
+}
+
+function parseFigureAlignment(
+  drawing: Element,
+  paragraph: Paragraph | undefined,
+  drawingCountInParagraph: number,
+): { alignment: ObjectAlignment; alignmentSource: ObjectAlignmentSource } {
+  if (!paragraph || getDrawingType(drawing) !== "inline" || drawingCountInParagraph !== 1 || !paragraph.isEmpty) {
+    return { alignment: "unknown", alignmentSource: "unknown" };
+  }
+
+  const alignment = toObjectAlignment(paragraph.alignment);
+
+  return {
+    alignment,
+    alignmentSource: alignment === "unknown" ? "unknown" : "paragraph",
+  };
+}
+
+function toObjectAlignment(value: ParagraphAlignment | string | null): ObjectAlignment {
+  switch (value) {
+    case "left":
+    case "start":
+      return "left";
+    case "right":
+    case "end":
+      return "right";
+    case "center":
+      return "center";
+    default:
+      return "unknown";
+  }
 }
 
 export function associateCaptionOccurrences(
@@ -387,4 +463,14 @@ function findAncestor(element: Element, localName: string): Element | null {
   }
 
   return null;
+}
+
+function getFirstDirectChild(element: Element, localName: string): Element | null {
+  return Array.from(element.children).find(
+    (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === localName,
+  ) ?? null;
+}
+
+function getWordAttribute(element: Element, localName: string): string | null {
+  return element.getAttributeNS(WORD_NAMESPACE, localName);
 }

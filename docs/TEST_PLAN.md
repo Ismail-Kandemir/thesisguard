@@ -1,4 +1,194 @@
+## Table/Figure List Content Consistency Source-Audit Matrix
+
+Bu sprintte `OBJECT_LIST_CONSISTENCY` production rule'u eklenmedi. Resmi ÇOMÜ
+kaynakları tablo varsa `Tablolar Listesi`, şekil varsa `Şekiller Listesi` section
+presence şartını destekler; full coverage, phantom entry, exact title, order,
+duplicate entry, dot leader ve page accuracy için STRONG requirement üretmez.
+Mevcut `CONDITIONAL_REQUIRED_SECTION`, caption placement/format, object alignment
+ve in-text reference davranışları korunur.
+
+| Kod | Senaryo | Beklenen sonuç |
+| --- | --- | --- |
+| A | Table yok | Table list consistency production sonucu yok; liste presence koşulu `Uygulanmadı`. |
+| B | Figure yok | Figure list consistency production sonucu yok; liste presence koşulu `Uygulanmadı`. |
+| C | Table var, Tablolar Listesi yok | Conditional section `Başarısız`; content consistency duplicate failure yok. |
+| D | Figure var, Şekiller Listesi yok | Conditional section `Başarısız`; content consistency duplicate failure yok. |
+| E | 1 table, actual `Tablo 1`, list `Tablo 1` | Yeni production sonucu yok; mevcut kurallar etkilenmez. |
+| F | 1 figure, actual `Şekil 1`, list `Şekil 1` | Yeni production sonucu yok; mevcut kurallar etkilenmez. |
+| G | Actual table 1,2,3; list 1,2 | Full coverage source STRONG olmadığı için yeni failure yok. |
+| H | Actual figure 1,2,3; list 1,3 | Eksik `Şekil 2` production failure'ı yok. |
+| I | Actual table 1,2; list 1,2,3 | Phantom entry production failure'ı yok. |
+| J | Actual figure 1; list figure 2 | Identity mismatch production failure'ı yok. |
+| K | List heading var, entry yok | Presence rule `Başarılı` olabilir; content rule yok. |
+| L | Actual caption identity yok | Placement/reference sorumluluğu korunur; list failure yok. |
+| M | Ambiguous caption | Placement/reference ambiguity sahipliği korunur. |
+| N | Duplicate actual identity | `OBJECT_IN_TEXT_REFERENCE` false PASS vermemeli; list rule yok. |
+| O | Duplicate list identity | Duplicate entry akademik rule'u yok. |
+| P | Multi-level `Tablo 2.1` | Caption metadata korunur; list coverage production yok. |
+| Q | Actual `Tablo 1`, `Tablo 3`; list aynı | Numbering sequence failure yok. |
+| R | Caption title farklı, number aynı | Exact title production failure'ı yok. |
+| S | Page number yanlış | Page accuracy Word layout olmadan güvenilir değil; production failure yok. |
+| T | Manual list | Otomatik field zorunlu olmadığı için reddedilmez. |
+| U | Word-generated field list | Field cache görünür entry olarak incelenebilir; production rule yok. |
+| V | Stale field cache | Değerli runtime fixture; bu sprintte failure üretmez. |
+| W | TOC entry | Object-list entry veya body reference sayılmamalı. |
+| X | Body reference | List entry sayılmamalı. |
+| Y | Actual caption | List entry gerçek caption olarak normalize edilmemeli. |
+| Z | Orphan caption | Object coverage'a sokulmamalı. |
+| AA | Nested table | Kaynak/identity belirsizliği nedeniyle list coverage failure yok. |
+| AB | Anchored figure | Association belirsizse coverage failure yok. |
+| AC | Wrong-kind entry | Production failure yok; gelecekteki parser section içinde kind ayırmalı. |
+| AD | Caption placement regression | Mevcut placement sonuçları değişmemeli. |
+| AE | Caption format regression | Mevcut format sonuçları değişmemeli. |
+| AF | Object alignment regression | `OBJECT_ALIGNMENT` sonuçları değişmemeli. |
+| AG | In-text reference regression | List/TOC/caption exclusion korunmalı. |
+| AH | Conditional lists regression | Existing presence rules değişmemeli. |
+| AI | Section matcher regression | `Tablolar Listesi` / `Şekiller Listesi` heading detection korunmalı. |
+| AJ | Registry | Yeni list-consistency validator kaydı beklenmez. |
+| AK | RuleEngine | Missing-validator sonucu yok; çünkü production rule eklenmedi. |
+| AL | RuleResolver | Experimental 43, Source Research 41 kalmalı. |
+| AM | RuleSetSelector | Child inheritance ve isolation değişmemeli. |
+| AN | Immutability | Document/rule inputları mutate edilmemeli. |
+
 # ThesisGuard Test Plan
+
+## Table/Figure Caption Structure Source-Audit Matrix
+
+Bu sprintte ayrÄ± `OBJECT_CAPTION_STRUCTURE` production rule'u eklenmedi. KÄ±lavuz
+ve resmi ÅŸablonlar `Tablo 1. BaÅŸlÄ±k` / `Åekil 1. BaÅŸlÄ±k` gÃ¶rÃ¼nÃ¼r yapÄ±sÄ±nÄ±
+destekleyen Ã¶rnekler verir; ancak exact label, separator, title presence, single
+paragraph, capitalization, alias yasaÄŸÄ± veya title uzunluÄŸu iÃ§in ayrÄ± STRONG
+production requirement tanÄ±mlamaz. Mevcut caption parser davranÄ±ÅŸÄ± korunur.
+
+| Kod | Senaryo | Mevcut parser sonucu | Production beklentisi |
+| --- | --- | --- | --- |
+| A | `Tablo 1. SonuÃ§lar` | Caption: table, number `1` | Mevcut placement/format/reference kurallarÄ± deÄŸerlendirir; ayrÄ± structure failure yok. |
+| B | `Åekil 1. Sistem` | Caption: figure, number `1` | AynÄ±. |
+| C | `Tablo 1.` | Caption: table, number `1` | Title presence STRONG olmadÄ±ÄŸÄ± iÃ§in ayrÄ± structure failure yok. |
+| D | `Åekil 1.` | Caption: figure, number `1` | AynÄ±. |
+| E | `Tablo 1 SonuÃ§lar` | Caption deÄŸil | Placement missing-caption failure Ã¼retebilir; punctuation structure rule yok. |
+| F | `Åekil 1 Sistem` | Caption deÄŸil | AynÄ±. |
+| G | `Tablo 1: SonuÃ§lar` | Caption deÄŸil | Structure rule yok; parser davranÄ±ÅŸÄ± deÄŸiÅŸmez. |
+| H | `Åekil 1: Sistem` | Caption deÄŸil | AynÄ±. |
+| I | `1. Tablo SonuÃ§lar` | Caption deÄŸil | Label-number order production rule yok. |
+| J | `1. Åekil Sistem` | Caption deÄŸil | AynÄ±. |
+| K | `TABLO 1. SonuÃ§lar` | Caption: table, number `1` | Case-insensitive parser davranÄ±ÅŸÄ± korunur; capitalization failure yok. |
+| L | `tablo 1. SonuÃ§lar` | Caption: table, number `1` | AynÄ±. |
+| M | `Ã‡izelge 1. SonuÃ§lar` | Caption deÄŸil | Alias support/yasak production rule yok. |
+| N | `Figure 1. System` | Caption deÄŸil | AynÄ±. |
+| O | `Tablo 2.1. SonuÃ§lar` | Caption: table, number `2.1` | Multi-level number metadata korunur; sequence rule yok. |
+| P | `Åekil 3.2. Sistem` | Caption: figure, number `3.2` | AynÄ±. |
+| Q | `Tablo 1'de gÃ¶rÃ¼ldÃ¼ÄŸÃ¼ Ã¼zere...` | Caption deÄŸil | Body reference caption'a dÃ¶nÃ¼ÅŸmez. |
+| R | `Åekil 1 incelendiÄŸinde...` | Caption deÄŸil | Body reference caption'a dÃ¶nÃ¼ÅŸmez. |
+| S | Caption missing | Caption yok | Placement sorumluluÄŸu; structure `NOT_APPLICABLE` olmalÄ±ydÄ±, rule yok. |
+| T | Caption association ambiguous | Ambiguous association | Placement failure; object-specific structure rule yok. |
+| U | Orphan caption | Orphan caption metadata'sÄ± | GerÃ§ek object yoksa object-specific rule tetiklenmez. |
+| V | Nested table | Count korunur, top-level association yok | Akademik caption structure failure yok. |
+| W | Anchored figure | Figure drawing type `anchor` | Association gÃ¼venilir deÄŸil; structure rule yok. |
+| X | Caption BEFORE table | Placement mevcut rule'a gÃ¶re deÄŸerlendirilir | KorunmalÄ±. |
+| Y | Caption AFTER figure | Placement mevcut rule'a gÃ¶re deÄŸerlendirilir | KorunmalÄ±. |
+| Z | Caption wrong placement | Placement `FAILED` | KorunmalÄ±. |
+| AA | Caption wrong formatting | Format `FAILED` | KorunmalÄ±. |
+| AB | Object alignment | `OBJECT_ALIGNMENT` ayrÄ± metadata kullanÄ±r | KorunmalÄ±. |
+| AC | In-text reference | Caption/list/TOC dÄ±ÅŸÄ± reference tokenlarÄ± | KorunmalÄ±. |
+| AD | Duplicate caption number/reference ambiguity | Reference validator false PASS vermez | KorunmalÄ±. |
+| AE | Full-correct production smoke | Yeni structure rule olmadÄ±ÄŸÄ± iÃ§in rule count deÄŸiÅŸmez | Experimental 43, Source Research 41. |
+| AF | Immutability | Parser/validator input mutate etmez | KorunmalÄ±. |
+| AG | Registry | Structure ID kayÄ±tlÄ± deÄŸil | Missing-validator yok Ã§Ã¼nkÃ¼ production rule yok. |
+| AH | RuleEngine | Yeni structure result yok | Mevcut behavior korunur. |
+| AI | Resolver inheritance | Child JSON'larda duplicate yok | Experimental 43, Source Research 41. |
+
+## Generic OBJECT_ALIGNMENT ve GÄ±da Teknolojisi object centering
+
+Bu matris caption alignment deÄŸil, gerÃ§ek tablo/ÅŸekil nesnesinin yatay
+ortalanmasÄ± iÃ§indir. Caption format rule'u caption paragraph'Ä±nÄ± sola yaslÄ±
+beklemeye devam eder.
+
+| Kod | Senaryo | Beklenen sonuÃ§ |
+| --- | --- | --- |
+| A | Object yok | Table/Figure object alignment `NOT_APPLICABLE`. |
+| B | Tek top-level table center | Table object alignment `PASSED`. |
+| C | Tek table left | Table object alignment `FAILED`. |
+| D | Tek table right | Table object alignment `FAILED`. |
+| E | 3 table, hepsi center | Table object alignment `PASSED`. |
+| F | 3 table, biri left | Table object alignment `FAILED`; sorunlu occurrence mesajda listelenir. |
+| G | Table caption LEFT + table CENTER | Caption format `PASSED`; object alignment `PASSED`. |
+| H | Table caption CENTER + table CENTER | Object alignment `PASSED`; caption format `FAILED`. |
+| I | Table caption LEFT + table LEFT | Caption format `PASSED`; object alignment `FAILED`. |
+| J | Inline figure center paragraph | Figure object alignment `PASSED`. |
+| K | Inline figure left paragraph | Figure object alignment `FAILED`. |
+| L | Inline figure right paragraph | Figure object alignment `FAILED`. |
+| M | Figure center + caption LEFT | Object alignment ve caption format `PASSED`. |
+| N | Figure center + caption CENTER | Object alignment `PASSED`; caption format `FAILED`. |
+| O | Figure left + caption LEFT | Object alignment `FAILED`; caption format `PASSED`. |
+| P | Alignment style inheritance | Table style veya figure paragraph style effective center ise `PASSED`. |
+| Q | Direct alignment style'Ä± override ediyor | Direct value kullanÄ±lÄ±r. |
+| R | Missing table caption + centered table | Object alignment caption'dan baÄŸÄ±msÄ±z `PASSED`; caption placement ayrÄ± deÄŸerlendirir. |
+| S | Missing figure caption + centered inline figure | Object alignment caption'dan baÄŸÄ±msÄ±z `PASSED`; caption placement ayrÄ± deÄŸerlendirir. |
+| T | Anchored figure | Teknik olarak belirlenemedi; false PASS yok, yalnÄ±z anchored figure varsa `NOT_APPLICABLE`. |
+| U | Unknown drawing type | Teknik olarak belirlenemedi; false PASS yok. |
+| V | Multiple drawings same paragraph | Bireysel center gÃ¼venilir belirlenemediÄŸi iÃ§in `unknown`; false PASS yok. |
+| W | Nested table | Production object alignment kapsamÄ±na alÄ±nmaz; yanlÄ±ÅŸ academic failure yok. |
+| X | Orphan caption | Object alignment tetiklemez. |
+| Y | Body `Tablo 1'de` | Object deÄŸildir. |
+| Z | Tablolar Listesi | Object deÄŸildir. |
+| AA | TOC | Object deÄŸildir. |
+| AB | Caption placement regression | Table caption Ã¼stte, figure caption altta davranÄ±ÅŸÄ± korunur. |
+| AC | Caption format regression | Caption sola yaslÄ± + 1 satÄ±r davranÄ±ÅŸÄ± korunur. |
+| AD | In-text reference regression | Tablo 2 / Åekil 2 eksik atÄ±f fixture'Ä± yalnÄ±z reference failure Ã¼retir. |
+| AE | Numbering audit regression | Caption numbering sequence/start/skip production rule'u eklenmez. |
+| AF | Section regression | Required/order/word-count/keywords/heading-numbering davranÄ±ÅŸlarÄ± korunur. |
+| AG | Body formatting regression | Figure-only empty centered paragraph body alignment failure Ã¼retmez. |
+| AH | Immutability | Document, blocks, paragraphs, tables, figures, captions, references, rule ve expected mutate edilmez. |
+| AI | Registry smoke | Ä°ki production ID `ObjectAlignmentValidator` ile kayÄ±tlÄ±dÄ±r. |
+| AJ | RuleEngine smoke | Missing-validator sonucu yoktur. |
+| AK | Resolver inheritance/isolation | Experimental 43, Source Research 41 rule resolve eder; child JSON'larda duplicate yoktur. |
+| AL | Full-correct Experimental fixture | Object'ler gerÃ§ekten center ise 43 total / 42 evaluated / 42 passed / 0 failed / 1 N/A beklenir. |
+
+## Table/Figure Caption Numbering Source-Audit Matrix
+
+Bu sprintte ayrÄ± `OBJECT_CAPTION_NUMBERING` production rule'u eklenmedi. Resmi
+kÄ±lavuz ve ÅŸablonlar numaralÄ± `Tablo n.` / `Åekil n.` baÅŸlÄ±k Ã¶rneklerini
+destekler; fakat sequence, 1'den baÅŸlama, skipped number, duplicate number,
+document-order consistency, bÃ¶lÃ¼m bazlÄ± Ã§ok seviyeli numbering, appendix restart
+ve harfli/roman numbering davranÄ±ÅŸlarÄ±nÄ± aÃ§Ä±kÃ§a tanÄ±mlamaz. Bu nedenle aÅŸaÄŸÄ±daki
+matris manuel runtime testlerinde mevcut caption placement/format/reference
+regression'Ä±nÄ± korumak ve yeni production failure beklenmediÄŸini doÄŸrulamak iÃ§in
+kullanÄ±lÄ±r.
+
+| Kod | Senaryo | Beklenen sonuÃ§ |
+| --- | --- | --- |
+| A | Object yok | Caption placement/format/reference ilgili object iÃ§in `NOT_APPLICABLE`; numbering production rule yok. |
+| B | Tek `Tablo 1.` + gÃ¼venilir top-level table | Mevcut placement/format/reference semantiÄŸine gÃ¶re deÄŸerlendirilir; ayrÄ± numbering failure yok. |
+| C | Tek `Åekil 1.` + gÃ¼venilir inline figure | Mevcut placement/format/reference semantiÄŸine gÃ¶re deÄŸerlendirilir; ayrÄ± numbering failure yok. |
+| D | `Tablo 1.` -> `Tablo 2.` | Sequence production kontrolÃ¼ yok; mevcut kurallar bozulmamalÄ±. |
+| E | `Åekil 1.` -> `Åekil 2.` | Sequence production kontrolÃ¼ yok; mevcut kurallar bozulmamalÄ±. |
+| F | `Tablo 1.` -> `Tablo 3.` | Kaynak sequence'i desteklemediÄŸi iÃ§in yeni production failure yok. |
+| G | `Åekil 1.` -> `Åekil 3.` | Kaynak sequence'i desteklemediÄŸi iÃ§in yeni production failure yok. |
+| H | Ä°lk tablo `Tablo 2.` | Start-at-1 production kontrolÃ¼ yok. |
+| I | Ä°lk ÅŸekil `Åekil 2.` | Start-at-1 production kontrolÃ¼ yok. |
+| J | Duplicate `Tablo 1.` | AyrÄ± numbering rule yok; mevcut in-text reference validator ambiguity varsa false PASS vermeden `FAILED` Ã¼retir. |
+| K | Duplicate `Åekil 1.` | AyrÄ± numbering rule yok; mevcut in-text reference validator ambiguity varsa false PASS vermeden `FAILED` Ã¼retir. |
+| L | Reverse order `Tablo 2.` -> `Tablo 1.` | Document-order numbering production kontrolÃ¼ yok. |
+| M | Multi-level `Tablo 2.1.` -> `Tablo 2.2.` | Caption normalizer `number` metadata'sÄ±nÄ± korur; sequence inference yok. |
+| N | Mixed `Tablo 1.` -> `Tablo 2.1.` | Integer sequence algoritmasÄ± uygulanmaz; production failure yok. |
+| O | Body `Tablo 1'de` | Caption sayÄ±lmaz; object reference olarak normalize edilebilir. |
+| P | Tablolar Listesi `Tablo 1` | Caption/reference coverage kaynaÄŸÄ± sayÄ±lmaz. |
+| Q | TOC cached entry | Caption/reference/section false-positive Ã¼retmemeli. |
+| R | Orphan `Tablo 1.` caption | GerÃ§ek object sequence'e girmez; object occurrence yoksa ilgili kurallar `NOT_APPLICABLE`. |
+| S | Nested table | Count korunur; caption association ve placement gÃ¼venilir deÄŸilse akademik numbering failure yok. |
+| T | Anchored figure | Rendered layout tahmin edilmez; ayrÄ± numbering failure yok. |
+| U | Caption missing veya numarasÄ±z `Tablo. ...` | Mevcut placement gÃ¼venilir object iÃ§in baÅŸlÄ±k tespit edilemedi failure'Ä± Ã¼retebilir; ayrÄ± duplicate numbering failure yok. |
+| V | Ambiguous caption association | Placement tarafÄ±ndan gÃ¼venli failure; numbering production rule yok. |
+| W | Table/Figure sequence isolation | AyrÄ± sequence kontrolÃ¼ yok; reference coverage kind/number izolasyonu korunur. |
+| X | Reference regression | Tablo 2 ve Åekil 2 atÄ±fsÄ±z fixture yalnÄ±z ilgili reference rule'larÄ±nÄ± fail etmeli. |
+| Y | Caption placement regression | Table Ã¼stte PASS, figure altta PASS; missing/ambiguous gÃ¼venli failure. |
+| Z | Caption format regression | Sola yaslÄ± + 1 satÄ±r PASS; bilinen fixture dÃ¶rt caption failure davranÄ±ÅŸÄ±nÄ± korur. |
+| AA | Full-correct Experimental regression | Yeni numbering rule olmadÄ±ÄŸÄ± iÃ§in baseline toplam 41, deÄŸerlendirilen 40, baÅŸarÄ±lÄ± 40, baÅŸarÄ±sÄ±z 0, uygulanmayan 1 kalmalÄ±. |
+| AB | Immutability | Document, captions, occurrences, references, paragraphs, blocks, rule ve expected mutate edilmemeli. |
+| AC | Registry smoke | Yeni production ID eklenmediÄŸi iÃ§in registry mapping eklenmez; mevcut ID'ler missing-validator Ã¼retmemeli. |
+| AD | RuleEngine smoke | Eksik validator davranÄ±ÅŸÄ± deÄŸiÅŸmez; yeni numbering result beklenmez. |
+| AE | Resolver inheritance | Experimental 41, Source Research 39 resolved rule olarak kalmalÄ±. |
 
 ## 1. Amaç
 

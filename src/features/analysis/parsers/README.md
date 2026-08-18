@@ -1,4 +1,71 @@
+## Table/Figure List Entry Infrastructure Decision
+
+Bu sprintte object-list entry normalizer eklenmedi. Resmi ÇOMÜ kaynakları liste
+section presence gerekliliğini destekler, ancak içerik coverage'i için production
+rule gücü yeterli değildir. Bu nedenle `NormalizedDocument` içinde
+`objectLists`/`DocumentObjectListEntry` benzeri yeni metadata yoktur.
+
+Gelecekte kaynakla desteklenen generic `OBJECT_LIST_CONSISTENCY` gerekirse list
+entry'leri gerçek caption'lardan ayrı normalize edilmelidir. Parser yalnız
+`Tablolar Listesi` veya `Şekiller Listesi` section content'i içinde paragraf
+başındaki güvenilir `Tablo <decimal>` / `Şekil <decimal>` yapısını entry adayı
+saymalı; TOC, body reference, actual caption ve section heading paragraflarını
+entry olarak kullanmamalıdır. Identity namespace'i `table:<number>` ve
+`figure:<number>` ayrımını korumalıdır.
+
+Word field cache metadata olarak okunabilir, fakat field update yapılmamalı ve
+cached page text gerçek rendered page konumu varsayılmamalıdır. Missing list
+section `CONDITIONAL_REQUIRED_SECTION` sorumluluğunda kalmalı; future consistency
+validator aynı yokluğu ikinci kez failure yapmamalıdır.
+
 Okunan belge iceriginin analiz edilebilir yapilara donusturulecegi klasordur.
+
+# Table/figure caption number metadata
+
+`documentCaptionsNormalizer`, `Tablo 1.`, `Tablo 2.1.`, `Åekil 1.` ve
+`Åekil 3.2.` gibi caption prefix'lerinden normalize `number` metadata'sÄ± Ã¼retir.
+Bu metadata raw caption text, label, paragraph order, block order ve object
+association (`captionId`) ile birlikte generic numbering consistency altyapÄ±sÄ± iÃ§in
+yeterli modeldir. Yeni validatorlar raw XML okumamalÄ± ve caption regex'ini
+kopyalamamalÄ±dÄ±r.
+
+NumarasÄ±z `Tablo. ...` veya `Åekil. ...` paragraflarÄ± bu sÃ¼rÃ¼mde caption olarak
+normalize edilmez. GÃ¼venilir top-level table veya inline figure iÃ§in bu durum
+mevcut placement validator tarafÄ±ndan baÅŸlÄ±k tespit edilemedi olarak
+raporlanabilir; ayrÄ± caption-numbering production rule'u yoktur.
+
+Parser ile akademik caption-structure validation ayrÄ± tutulur. Mevcut strict
+detection yalnÄ±z paragraph baÅŸÄ±ndaki `Tablo <decimal>.` ve `Åekil <decimal>.`
+yapÄ±sÄ±nÄ± caption kabul eder; title metnini ayrÄ± alan olarak normalize etmez, raw
+caption `text` iÃ§inde korur. `Tablo 1.` ve `Åekil 1.` boÅŸ title ile de caption
+metadata'sÄ± Ã¼retebilir. `Tablo 1:`, `Tablo 1`, `1. Tablo`, `Ã‡izelge 1.` ve
+`Figure 1.` bu sÃ¼rÃ¼mde caption deÄŸildir.
+
+Gelecekte kaynakla desteklenen bir `OBJECT_CAPTION_STRUCTURE` rule'u gerekirse
+candidate detection ile valid caption validation ayrÄ± tasarlanmalÄ±dÄ±r. Bu sprintte
+source gÃ¼cÃ¼ yeterli olmadÄ±ÄŸÄ± iÃ§in parser regex'i geniÅŸletilmedi; body reference,
+TOC, liste entry ve normal cÃ¼mle false-positive korumasÄ± korunur.
+
+# Table/figure object alignment metadata
+
+`documentCaptionsNormalizer`, gerçek object occurrence'larÄ± iÃ§in caption'dan
+baÄŸÄ±msÄ±z yatay hizalama metadata'sÄ± Ã¼retir. Top-level table direct
+`w:tblPr/w:jc` deÄŸeri `left`, `center`, `right`, `start` veya `end` ise
+`alignment` alanÄ±na normalize edilir; `w:tblPr/w:tblStyle` ise style inheritance
+iÃ§in `tableStyleId` olarak korunur. Style Ã§Ã¶zÃ¼mÃ¼ validator tarafÄ±nda mevcut
+`document.styles` Ã¼zerinden yapÄ±lÄ±r.
+
+Inline figure iÃ§in yalnÄ±z tek drawing iÃ§eren ve gÃ¶rÃ¼nÃ¼r text iÃ§ermeyen taÅŸÄ±yÄ±cÄ±
+paragraph gÃ¼venilir kabul edilir. Direct paragraph alignment varsa object
+alignment olarak normalize edilir; style-inherited paragraph alignment validator
+tarafÄ±nda Ã§Ã¶zÃ¼lÃ¼r. `wp:anchor`, unknown drawing type, aynÄ± paragraph'ta birden
+fazla drawing veya drawing ile gÃ¶rÃ¼nÃ¼r text/tabs/spaces birlikteyse alignment
+`unknown` kalÄ±r.
+
+Validatorlar rendered page coordinate, vertical centering, indentation/autofit
+layout simulation veya floating object position tahmini yapmaz. Caption paragraph
+alignment'Ä± object alignment kararÄ±na, object alignment metadata'sÄ± da caption
+format kararÄ±na karÄ±ÅŸmaz.
 # Kısaltma normalizasyonu
 
 `documentAbbreviationsNormalizer`, daha önce parse edilmiş görünür body paragraph
