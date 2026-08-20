@@ -2,6 +2,7 @@ import type { RuleValidator } from "./validators/RuleValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
 import { HeadingValidator } from "./validators/HeadingValidator";
+import { HeadingLevelFormatValidator } from "./validators/HeadingLevelFormatValidator";
 import { HeadingNumberingValidator } from "./validators/HeadingNumberingValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
@@ -48,6 +49,8 @@ const FOOD_TECHNOLOGY_TOP_MARGIN_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.margin.top";
 const FOOD_TECHNOLOGY_HEADING_1_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.heading.heading1";
+const FOOD_TECHNOLOGY_BODY_LEVEL_0_HEADING_FORMAT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format";
 const FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.table-of-contents";
 const FOOD_TECHNOLOGY_REFERENCES_RULE_ID =
@@ -112,6 +115,10 @@ export class ValidatorRegistry {
     [PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
     [FOOD_TECHNOLOGY_TOP_MARGIN_RULE_ID, new MarginValidator("top")],
     [FOOD_TECHNOLOGY_HEADING_1_RULE_ID, new HeadingValidator()],
+    [
+      FOOD_TECHNOLOGY_BODY_LEVEL_0_HEADING_FORMAT_RULE_ID,
+      new HeadingLevelFormatValidator(),
+    ],
     [FOOD_TECHNOLOGY_PAGE_NUMBER_RULE_ID, new PageNumberValidator()],
     [FOOD_TECHNOLOGY_PAGE_NUMBER_SEQUENCE_RULE_ID, new PageNumberSequenceValidator()],
     [FOOD_TECHNOLOGY_TABLE_OBJECT_ALIGNMENT_RULE_ID, new ObjectAlignmentValidator()],

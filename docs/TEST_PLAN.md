@@ -976,3 +976,139 @@ sebebi değildir.
 | Immutability | Document/model/rule inputları mutate edilmez. |
 | Registry / RuleEngine | İki production ID kayıtlı validator ile çalışır. |
 | Resolver | Experimental 41, Source Research 39. |
+
+## Table/Figure Source Attribution Source-Audit Matrix
+
+Bu sprintte `OBJECT_SOURCE_ATTRIBUTION` production rule'u eklenmedi. Kılavuz dış
+kaynaktan alınan tablo/şekil için kaynağın caption ismi sonunda verilmesini
+destekler; ancak DOCX/OOXML object provenance sağlamadığı için bu requirement
+güvenilir otomatik failure'a dönüştürülmez.
+
+| Kod | Senaryo | Beklenen sonuç |
+| --- | --- | --- |
+| A | Object yok | Yeni source-attribution sonucu yok; mevcut object kuralları kendi koşullarına göre `NOT_APPLICABLE` olabilir. |
+| B | Kendi üretilmiş table | Source eksik diye yeni failure yok. |
+| C | Kendi üretilmiş figure | Source eksik diye yeni failure yok. |
+| D | Dış kaynaktan table + caption sonunda citation | Akademik olarak uygun örnek; production source sonucu yok. |
+| E | Dış kaynaktan table + source yok | Provenance bilinmediği için otomatik source failure yok; manuel akademik inceleme gerekir. |
+| F | Dış kaynaktan figure + caption sonunda citation | Akademik olarak uygun örnek; production source sonucu yok. |
+| G | Dış kaynaktan figure + source yok | Provenance bilinmediği için otomatik source failure yok; manuel akademik inceleme gerekir. |
+| H | Caption içinde `(Yazar, 2024)` | Source candidate olabilir; production rule olmadığı için PASS/FAIL üretilmez. |
+| I | Caption sonunda `(Kaynak: FAO, 2024)` | Exact syntax zorunlu olmadığı ve rule olmadığı için özel sonuç yok. |
+| J | Caption'dan sonra ayrı source paragraph | Kılavuz caption sonunu desteklediği için production'a bağlanmaz. |
+| K | Normal parantezli caption | `Şekil 1. ... (Örnek Şekil Gösterimi)` source sayılmaz. |
+| L | Bibliography citation | Object source note sayılmaz; Kaynaklar bölümü ayrı required-section sorumluluğudur. |
+| M | Body paragraph citation | Object source note sayılmaz; in-text object reference ile karıştırılmaz. |
+| N | Missing caption | Mevcut `OBJECT_CAPTION_PLACEMENT` sorumluluğu; source duplicate failure yok. |
+| O | Orphan caption | Gerçek object provenance veya source coverage'a sokulmaz. |
+| P | Nested table | Count korunur; source attribution failure yok. |
+| Q | Anchored figure | Rendered/provenance belirsizliği nedeniyle source attribution failure yok. |
+| R | Caption placement regression | Table üstte, figure altta davranışı korunmalı. |
+| S | Caption format regression | Sola yaslı + 1 satır davranışı korunmalı. |
+| T | Object alignment regression | Center object davranışı korunmalı. |
+| U | In-text reference regression | Caption/list/TOC/heading exclusion korunmalı. |
+| V | Registry | Yeni source-attribution validator kaydı beklenmez. |
+| W | RuleEngine | Missing-validator sonucu yok; çünkü production source rule yok. |
+| X | Resolver inheritance | Experimental 43, Source Research 41 kalmalı. |
+## References / Bibliography / In-Text Citation Source-Audit Matrix
+
+Bu sprintte bibliography/citation için yeni production rule eklenmedi. Kaynaklar
+bölümü presence ve relative order mevcut kurallarda kalır; bibliography entry
+formatı, alfabetik sıralama, in-text citation formatı ve citation-bibliography
+matching için production-safe parser/model bulunmadığından yeni failure yoktur.
+
+| Kod | Senaryo | Beklenen sonuç |
+| --- | --- | --- |
+| A | Kaynaklar yok | Mevcut `references` REQUIRED_SECTION `FAILED`; yeni bibliography duplicate failure yok. |
+| B | Kaynaklar var boş | Presence `PASSED` olabilir; entry non-empty production rule yok. |
+| C | Tek bibliography entry | Entry format/order production sonucu yok. |
+| D | Birden fazla entry | Entry format/order production sonucu yok. |
+| E | Alphabetic doğru | Akademik olarak uygun olabilir; production order sonucu yok. |
+| F | Alphabetic yanlış | Kılavuz harf sırasını desteklese de parser güvenli olmadığı için production failure yok. |
+| G | Body citation + bibliography match | Production consistency sonucu yok. |
+| H | Body citation + bibliography missing | Matching güvenilir değil; production failure yok. |
+| I | Bibliography entry + body citation missing | Matching güvenilir değil; production failure yok. |
+| J | Author-year citation | Gelecekte normalize edilebilir aday; bu sprintte production sonucu yok. |
+| K | Numeric citation `[1]` | Resmi kaynak desteklemez; production parser olmadığı için özel failure yok. |
+| L | Tek yıl `(2024)` | Citation sayılmamalı. |
+| M | Caption içindeki citation | Bibliography consistency kapsamına alınmamalı. |
+| N | TOC içindeki `KAYNAKLAR` | Gerçek section heading sayılmamalı. |
+| O | Kaynaklar -> Ekler boundary | Future extraction Kaynaklar section sonunda durmalı; bu sprintte parser yok. |
+| P | Kaynaklar -> Özgeçmiş boundary | Future extraction Özgeçmiş'te durmalı; bu sprintte parser yok. |
+| Q | DOI yok | DOI `varsa` olduğu için production failure yok. |
+| R | URL yok | Sadece çevrimiçi kaynak türünde örneklenir; generic failure yok. |
+| S | Erişim tarihi yok | Generic production failure yok. |
+| T | Dergi adı italic değil | Bibliography-specific format rule yok; body formatting ownership değişmez. |
+| U | Kitap adı italic değil | Bibliography-specific format rule yok. |
+| V | Yazar formatı farklı | Grammar production rule yok. |
+| W | `ve ark.` / `vd.` kullanımı | Örneklerde görülür; parser üretimi yok. |
+| X | Bibliography entry placeholder | Şablon convention'ı production requirement'a dönüştürülmez. |
+| Y | Registry | Yeni bibliography/citation validator kaydı beklenmez. |
+| Z | RuleEngine | Missing-validator sonucu yok; production rule eklenmedi. |
+| AA | Resolver inheritance | Experimental 43, Source Research 41 kalmalı. |
+## HEADING_LEVEL_FORMAT ve ÇOMÜ akademik ana bölüm başlığı biçimi
+
+Bu sprintte yalnız güvenilir identity kurulabilen level 0 akademik body heading
+occurrence'ları için production rule eklendi:
+`comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format`.
+Alt/alt-alt konu başlıkları isimden bağımsız production kontrolüne alınmadı.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Doğru manual level 0 heading | `PASSED`. |
+| Doğru Word automatic level 0 heading | `PASSED`. |
+| Level 0 yanlış font | `FAILED`; sorunlu heading mesajda gösterilir. |
+| Level 0 yanlış punto | `FAILED`; bulunan/beklenen punto raporlanır. |
+| Level 0 bold eksik | `FAILED`. |
+| Birden fazla level 0 heading, yalnız biri yanlış | Aggregate `FAILED`. |
+| Style inheritance ile doğru font/punto/bold | `PASSED`. |
+| Direct font family style'ı override eder ve yanlışsa | `FAILED`. |
+| Direct font size style'ı override eder ve yanlışsa | `FAILED`. |
+| Missing section | Duplicate failure yok; ilgili heading değerlendirilmeye alınmaz. |
+| Section var ama numbering yok | `HEADING_NUMBERING` sahipliği; format rule duplicate failure üretmez. |
+| Section var ama wrong level | `HEADING_NUMBERING` sahipliği; format rule değerlendirime almaz. |
+| Hiç güvenilir level 0 heading yok | `NOT_APPLICABLE`. |
+| Normal numbered list | Academic heading format kontrolüne girmez. |
+| `1. deney sonucunda...` | Section identity olmadığı için heading sayılmaz. |
+| Table caption `Tablo 1.` | Section identity olmadığı için heading sayılmaz. |
+| Figure caption `Şekil 1.` | Section identity olmadığı için heading sayılmaz. |
+| TOC cached entry | Section parser korumasıyla gerçek heading sayılmaz. |
+| Level 1 doğru | Production kontrolü yok. |
+| Level 1 yanlış | Production kontrolü yok. |
+| Level 2 doğru | Production kontrolü yok. |
+| Level 2 yanlış | Production kontrolü yok. |
+| Case `GİRİŞ` / `Giriş` | Case production kontrolü yok; section matching Türkçe normalize kalır. |
+| Alignment yanlış | Source-backed production property olmadığı için bu rule raporlamaz. |
+| Spacing yanlış | Source-backed production property olmadığı için bu rule raporlamaz. |
+| Page break yok | Rendered layout güvenilir olmadığı için bu rule raporlamaz. |
+| Immutability | Document, paragraph, styles, rule ve expected mutate edilmez. |
+| Registry / RuleEngine | Yeni production ID validator'a bağlıdır; missing-validator yok. |
+| Resolver inheritance | Experimental 44, Source Research 42 resolved rule üretir. |
+
+## ÇOMÜ section start / page break source audit
+
+Bu sprintte production page-start rule'u eklenmedi. Aşağıdaki senaryolar şu an
+runtime failure üretmemelidir; gelecekte normalize model ve source-backed validator
+eklenirse minimum regresyon seti olarak kullanılmalıdır.
+
+| Senaryo | Beklenen sonuç |
+| --- | --- |
+| Giriş önceki paragraf `sectPr` default/`nextPage` ile ayrılmış | Şablon gözlemi olarak raporlanabilir; mevcut production sonucu yok. |
+| Giriş önünde explicit boundary yok | Production failure yok; doğal pagination bilinemez. |
+| Kaynaklar önceki paragraf `sectPr` default/`nextPage` ile ayrılmış | Şablon gözlemi olarak raporlanabilir; mevcut production sonucu yok. |
+| Kaynaklar önünde explicit boundary yok | Production failure yok. |
+| Heading direct `pageBreakBefore` | Gelecekte explicit page-boundary adayı; şu an production sonucu yok. |
+| Önceki paragrafta `w:br w:type="page"` | Gelecekte explicit page-boundary adayı; şu an production sonucu yok. |
+| Önceki paragrafta `sectPr type=nextPage` | Gelecekte explicit page-boundary adayı; şu an production sonucu yok. |
+| Önceki paragrafta `sectPr type=oddPage/evenPage` | Gelecekte explicit boundary adayı; tek/çift semantik korunmalı. |
+| Önceki paragrafta `sectPr type=continuous` | Yeni sayfa kabul edilmemeli. |
+| Yalnız boş paragraflar | Yeni sayfa kanıtı sayılmamalı. |
+| Doğal sayfa taşması | Word layout motoru olmadan unknown; production failure yok. |
+| Missing section | `REQUIRED_SECTION` ownership'i korunur; page-start failure yok. |
+| Duplicate section | Rastgele occurrence seçilmemeli; mevcut ownership korunur. |
+| TOC cached entry | Gerçek section start sayılmamalı. |
+| Conditional liste section yok ve koşul false | Page-start failure yok. |
+| Manual numbering heading | Page-start sonucu varsa section identity aynı kullanılmalı. |
+| Word automatic numbering heading | Manual numbering ile aynı akademik sonuç hedeflenmeli. |
+| Heading format hatalı | `HEADING_LEVEL_FORMAT` ownership'i korunur. |
+| Page-number section metadata | `PAGE_NUMBER_SEQUENCE` ile karıştırılmamalı. |

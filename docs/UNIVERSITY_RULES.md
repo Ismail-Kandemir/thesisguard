@@ -526,3 +526,169 @@ Missing list section failure'ı conditional presence kuralında kalmalı; conten
 validator aynı yokluğu ikinci kez raporlamamalıdır. Sayfa numarası doğruluğu Word
 layout engine olmadan güvenilir hesaplanamayacağı için production kapsamına
 alınmamalıdır; cached page text yalnız metadata olabilir.
+
+## Table/Figure Source Attribution Source Decision
+
+Bu sprintte Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu 4.4 maddesi ve iki
+resmi Word şablonu tablo/şekil kaynak gösterimi açısından incelendi. Kılavuz,
+şekil bir kaynaktan alındıysa kaynağın şekil isminin sonuna, tablo ve şekiller bir
+kaynaktan alındıysa kaynağın tablo isminin sonuna yerleştirilmesini açıkça söyler
+ve örnekleri `(Pomeranz, 1987)` biçiminde caption sonu citation olarak verir. Bu
+akademik gereklilik yalnız dış kaynaktan alınan veya uyarlanan nesneler için
+geçerlidir; öğrencinin kendi ürettiği her tablo/şekil için kaynak yazılması
+gerektiğini söylemez.
+
+İki resmi DOCX şablonunda örnek tablo başlığı `Tablo 1. Sağlıklı bir insanın
+gastrointestinal kanal mikroflorası`, örnek şekil başlığı ise `Şekil 1.Bağırsak
+Mikroflorasına Etki Eden Faktörler (Örnek Şekil Gösterimi)` olarak bulunur. Bu
+caption'larda `(Kaynak: ...)` veya bibliyografik citation suffix yoktur. Şekilden
+sonra ayrı source paragraph yoktur. Tablodan sonra gelen `*kob/ml: Koloni
+oluşturan birim/ml` paragrafı tablo içi kısaltma/footnote açıklamasıdır; object
+source attribution örneği değildir. Şablonlardaki parantezli şekil açıklaması da
+source değil, örnek kullanım notudur.
+
+Bu nedenle `OBJECT_SOURCE_ATTRIBUTION` veya table/figure source-note production
+rule'u eklenmedi. Sebep akademik requirement'ın zayıf olması değil, applicability
+bilgisinin DOCX/OOXML'de güvenilir olmamasıdır. `w:tbl`, `w:drawing`, `wp:inline`
+ve `wp:anchor` nesnenin dış kaynaktan mı, öğrenci tarafından mı üretildiğini
+belirleyen güvenilir provenance metadata'sı sağlamaz. Her nesnede citation arayan
+bir validator, özgün öğrenci tabloları/şekilleri için false failure üretebilir.
+Caption içinde yıl, parantez veya `Kaynak` kelimesi arayan heuristic'ler de normal
+açıklamaları source sanabilir veya geçerli citation'ları kaçırabilir.
+
+Kaynak gösteriminin formatına ilişkin production davranışı da genişletilmedi.
+Kılavuz örneği `(Yazar, yıl)` biçimini destekler; `(Kaynak: ...)` exact syntax'ını,
+ayrı source paragraph'ı, font/punto/alignment/spacing değerlerini veya tablo ile
+şekil arasında farklı bir source-note davranışını zorunlu kılmaz. Missing caption,
+caption konumu, caption formatı, object hizalaması ve metin içi atıf sorumlulukları
+mevcut validatorlarda kalır; source attribution yokluğu bu sprintte production
+failure değildir.
+## References / Bibliography / In-Text Citation Source Decision
+
+Bu sprintte Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu ve iki resmi Word
+şablonu akademik kaynak gösterme sistemi açısından incelendi. Kılavuz tez
+yapısında `KAYNAKLAR` bölümünü gösterir ve metin içinde atıf yapılan kaynakların
+tez sonunda bu başlık altında listelenmesini ister. Bu presence requirement'ı
+mevcut `comu.applied-sciences.food-technology.bachelor.references`
+`REQUIRED_SECTION` kuralıyla zaten production'dadır. Bölüm sırası da experimental
+ve source-research `SECTION_ORDER` listelerinde `Sonuç -> Kaynaklar -> Özgeçmiş`
+relative sırasıyla zaten kapsanır; Ekler varsa Kaynaklar'dan sonra gelebilir.
+
+Resmi kaynaklarda normatif başlık `KAYNAKLAR`/`Kaynaklar` olarak kullanılır.
+`Kaynakça` veya `Referanslar` için resmi alias desteği bulunmadığından yeni alias
+eklenmedi. Mevcut section matcher case/diacritic normalization ve manuel numbering
+prefix desteğiyle bağımsız `Kaynaklar` heading'ini bulur; TOC cached entry'sindeki
+`KAYNAKLAR` gerçek section occurrence sayılmaz.
+
+Kılavuz ve şablonlar bibliography entry formatı için makale, kitap, kitap bölümü,
+çevrimiçi erişim ve tez örnekleri verir. Örneklerde soyad ve isim baş harfi, yıl,
+başlık, dergi/kitap adı, cilt/sayı/sayfa, DOI varsa DOI, çevrimiçi kaynaklarda
+erişim adresi ve örnek erişim tarihi bulunur. Dergi adı, dergi cildi ve kitap adı
+italic örneklenir. Kaynaklar için alfabetik/harf sırasına göre sıralama açıkça
+desteklenir. Ancak bu örnekler her entry türünü güvenilir biçimde parse edecek
+tek ve kapalı grammar oluşturmaz; DOI için `varsa` denir, URL ve erişim tarihi
+yalnız çevrimiçi kaynak örneğinde yer alır.
+
+Metin içi citation sistemi author-year biçimindedir: parantez içi
+`(Yazar, yıl)`, anlatısal `Yazar (yıl)`, `vd.` / `ve ark.` örnekleri ve aynı
+parantezde birden fazla kaynak kullanımına rastlanır. Numeric `[1]` sistemi resmi
+kaynaklarda desteklenmez. Buna rağmen `IN_TEXT_CITATION_FORMAT` veya
+`CITATION_BIBLIOGRAPHY_CONSISTENCY` production rule'u eklenmedi. Sebep akademik
+requirement'ın zayıf olması değil, DOCX'teki raw paragraph text'ten citation ve
+bibliography identity'sini false-positive/false-negative üretmeden normalize
+etmenin bu sprintte production-safe olmamasıdır.
+
+Bibliography/citation matching için önce ayrı normalize modeller gerekir; validator
+global regex ile çalışmamalıdır. Gelecekte kaynakla ve fixture'larla güvenli hale
+gelirse `DocumentCitation` ve `DocumentBibliographyEntry` benzeri modeller section
+boundary, paragraph ID, raw text, authors, year ve title metadata'sını taşımalı;
+entry extraction yalnız gerçek `Kaynaklar` section content'i içinde çalışmalı ve
+`Ekler`/`Özgeçmiş` gibi sonraki section'da durmalıdır. Body citation extraction ise
+caption, TOC, Tablolar Listesi, Şekiller Listesi, bibliography entry, object
+reference, heading number, tek yıl `(2024)`, yüzde, tablo/şekil numarası ve normal
+parantezleri citation saymamalıdır.
+
+Bu sprintte `BIBLIOGRAPHY_ORDER`, `BIBLIOGRAPHY_FORMAT`,
+`IN_TEXT_CITATION_FORMAT` ve `CITATION_BIBLIOGRAPHY_CONSISTENCY` rule type'ları
+eklenmedi. Existing production ownership korunur: Kaynaklar yoksa
+`REQUIRED_SECTION`, Kaynaklar yanlış relative sıradaysa `SECTION_ORDER` raporlar.
+Entry formatı, alfabetik sıralama, hanging indent, paragraph spacing, DOI/URL,
+italic kullanımı, yazar gösterimi, metin içi citation formatı ve iki yönlü
+citation-bibliography coverage bu rule setinde production failure değildir.
+## Hierarchical Heading Formatting Source Decision
+
+Gıda Teknolojisi kılavuzunun 4.2 maddesi metnin tamamı için Times New Roman 12
+puntoyu; ana ve alt başlıklar için kalın yazımı destekler. 4.6 başlık örnekleri
+ve Ek-7 içindekiler yapısı akademik ana bölümlerin `1.`, alt bölümlerin `1.1.`,
+alt-alt bölümlerin `1.1.1.` benzeri hiyerarşik numbering ile yazılabileceğini
+gösterir. Bu kaynaklar heading font family, font size ve bold için güçlü destek
+sağlar; uppercase, alignment, spacing before/after, heading line spacing,
+indentation, keep-next, keep-lines, page-break-before, başlık sonu nokta ve
+numbering-text arası boşluk için ayrı production requirement gücüne ulaşmaz.
+
+Bu sprintte generic `HEADING_LEVEL_FORMAT` rule type'ı eklendi, fakat yalnız
+production-safe identity kurulabilen akademik ana body heading'leri için
+etkinleştirildi. Ortak Gıda Teknolojisi bachelor setindeki
+`comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format`
+rule'u level 0 olarak güvenilir tanınan `Giriş`, `Genel Bilgiler ve Literatür
+Çalışması`, `Materyal ve Metot`, `Bulgular ve Tartışma`, `Genel Bilgiler` ve
+`Sonuç` heading occurrence'larında Times New Roman, 12 punto ve kalın yazımı
+doğrular.
+
+Validator style ID'yi akademik doğruluk kabul etmez. Her bulunan paragraph için
+run direct formatting, paragraph style, basedOn chain ve document defaults
+üzerinden mevcut `EffectiveFormattingResolver` ile effective font family, font
+size ve bold değerlerini çözer. Bir heading'de birden fazla görünür run varsa
+hepsi değerlendirilir; tek yanlış run aggregate rule sonucunu `FAILED` yapar.
+Direct font family veya font size style'dan önceliklidir. Mevcut run modeli direct
+`bold=false` ile bold bilgisinin hiç yazılmaması arasındaki tüm OOXML varyantlarını
+ayırmaz; ancak style/default zincirinde bold yoksa bold eksikliği failure üretir.
+
+Alt ve alt-alt başlıklar için ayrı production rule eklenmedi. Resmi DOCX
+şablonlarında `2.1.`, `2.2.1.` gibi örnekler bulunur; ancak konuya özgü child
+heading adları university JSON'da önceden bilinemez ve yalnız numbering level
+metadata'sına dayanmak normal numbered list, body paragraph prefix'i, bibliography
+entry veya başka non-heading içerikleri academic heading sanma riski taşır. Bu
+false-positive problemi çözülmeden level 1/2 formatting production'a alınmadı.
+
+Missing section, duplicate section veya yanlış numbering level bu rule'un
+sorumluluğu değildir. Section yoksa `REQUIRED_SECTION`, yanlış sıradaysa
+`SECTION_ORDER`, numbering yoksa veya yanlış level ise `HEADING_NUMBERING` raporlar.
+`HEADING_LEVEL_FORMAT` yalnız tekil bulunan, güvenilir biçimde beklenen level'da
+numaralandırılmış heading occurrence'larını değerlendirir; hiç böyle heading yoksa
+`NOT_APPLICABLE` olur.
+
+## Section Start / Page Break Source Decision
+
+Gıda Teknolojisi kılavuzu ön sayfalar, `Giriş`, akademik ana bölümler,
+`Kaynaklar`, varsa `Ekler` ve `Özgeçmiş` başlıklarını tez yapısında ve Ek-7
+içindekiler örneğinde gösterir. Ancak kılavuz bu başlıkların her birinin veya
+tüm ana bölümlerin açıkça "yeni sayfadan başlaması" gerektiğini söylemez; tek/çift
+sayfa, recto/right-hand page, section break zorunluluğu veya explicit page break
+zorunluluğu da tanımlamaz.
+
+Resmi literatür ve laboratuvar DOCX şablonları OOXML seviyesinde incelendiğinde
+çok sayıda bölüm geçişinin önceki paragrafın `w:pPr/w:sectPr` yapısıyla ve
+`w:type` yazılmadığı için OpenXML varsayılanı olan `nextPage` section break ile
+kurulduğu görülür. Örnekler arasında `Kabul ve Onay`, `Teşekkür`, listeler,
+`Giriş`, bazı body ana bölümleri ve `Kaynaklar` bulunur. Buna karşılık
+`pageBreakBefore` veya önceki run içinde `w:br w:type="page"` şablonlarda
+gözlenmedi; bazı başlıklar yalnız boş paragraflar veya doğal akışla ayrılmıştır.
+
+Bu nedenle bu sprintte `SECTION_PAGE_START`, `SECTION_START` veya benzeri bir
+production rule type eklenmedi. Karar akademik requirement'ın imkansız olması
+değil, source strength ve teknik gözlemlenebilirliğin production-safe failure için
+birlikte yeterli olmamasıdır. Şablondaki `sectPr` uygulama detayı akademik
+zorunluluk kabul edilmez; ayrıca explicit OOXML boundary yoksa Word layout motoru
+olmadan heading'in doğal sayfa taşmasıyla yeni sayfaya gelmediği güvenilir biçimde
+bilinemez.
+
+Gelecekte kaynak açık "yeni sayfa" hükmü veya kurum tarafından onaylı fixture
+beklentisi sağlanırsa page-boundary bilgisi validator içinde raw XML aranarak
+değil, paragraph/body seviyesinde normalize edilen generic metadata üzerinden
+değerlendirilmelidir. `w:pageBreakBefore`, önceki paragraftaki
+`w:br w:type="page"` ve önceki paragraph `sectPr` türleri tek source of truth ile
+çözülmeli; `continuous` section break yeni sayfa kabul edilmemeli, `oddPage` ve
+`evenPage` ise explicit boundary ama ayrıca tek/çift sayfa semantiği olarak
+korunmalıdır. Missing, duplicate, numbering ve heading-format failure ownership'i
+mevcut rule'larda kalmalıdır.

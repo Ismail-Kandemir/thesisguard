@@ -11,7 +11,7 @@ import { getBodyParagraphs } from "./bodyParagraphs";
 export class AlignmentValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedAlignment = getExpectedAlignment(rule.expected);
-    const actualAlignments = getBodyParagraphs(document).map(
+    const actualAlignments = getBodyParagraphs(document, { excludeCaptions: true }).map(
       (paragraph) => paragraph.alignment,
     );
     const passed =

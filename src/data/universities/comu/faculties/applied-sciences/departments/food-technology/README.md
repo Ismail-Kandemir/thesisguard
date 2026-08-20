@@ -287,3 +287,86 @@ Bu nedenle `OBJECT_LIST_CONSISTENCY`, `table-list-consistency` ve
 object'in listede bulunması, listedeki her entry'nin gerçek object'e karşılık
 gelmesi, exact title eşitliği, sıra, duplicate entry yasağı, dot leader ve page
 accuracy bu rule setinde kontrol edilmez.
+
+## Tablo ve şekil kaynak gösterimi source audit
+
+Kılavuz 4.4 maddesi, bir şekil veya tablonun bir kaynaktan alınması durumunda
+kaynak bilgisinin şekil/tablo isminin sonuna yerleştirilmesini destekler. Örnek
+syntax `(Pomeranz, 1987)` biçimindedir; `(Kaynak: ...)` exact yazımı, ayrı source
+paragraph veya source note için font/punto/hizalama/satır aralığı production
+şartı tanımlanmaz.
+
+Bu gereklilik yalnız dış kaynaktan alınan veya uyarlanan nesneler için geçerlidir.
+DOCX/OOXML `w:tbl`, `w:drawing`, `wp:inline` veya `wp:anchor` üzerinden nesnenin
+dış kaynaktan mı yoksa öğrencinin kendi üretimi mi olduğu güvenilir biçimde
+anlaşılamaz. Bu nedenle ortak bachelor rule setine table/figure source attribution
+production ID'si eklenmemiştir.
+
+Resmi literatür ve laboratuvar şablonlarında örnek table/figure caption'larında
+source citation yoktur. Tablo altındaki `*kob/ml` paragrafı tablo içi açıklamadır;
+şekil caption'ındaki `(Örnek Şekil Gösterimi)` de source note değildir. Bu audit
+mevcut caption placement, caption format, object alignment ve in-text reference
+kurallarını değiştirmez.
+## Kaynaklar ve akademik atıf source audit
+
+Kılavuz tez yapısında `KAYNAKLAR` bölümünü normatif başlık olarak kullanır ve
+metinde atıf yapılan kaynakların tez sonunda bu başlık altında listelenmesini
+ister. Bölüm presence'ı mevcut `references` REQUIRED_SECTION kuralının,
+relative sıra ise experimental/source-research SECTION_ORDER kurallarının
+sorumluluğundadır.
+
+Kaynakça örnekleri author-year sistemini, harf sırasını, makale/kitap/kitap
+bölümü/çevrimiçi erişim/tez formatlarını, DOI'nin varsa yazılmasını ve bazı
+alanlarda italic kullanımı gösterir. Bu örnekler bu sprintte production
+validator'a dönüştürülmedi. Bibliography entry identity, body citation identity ve
+iki yönlü eşleştirme için güvenilir normalize model yoktur; global regex ile
+false PASS/FAIL üretme riski yüksektir.
+
+Bu nedenle `BIBLIOGRAPHY_ORDER`, `BIBLIOGRAPHY_FORMAT`,
+`IN_TEXT_CITATION_FORMAT` veya `CITATION_BIBLIOGRAPHY_CONSISTENCY` production
+ID'si eklenmemiştir. `Kaynakça`/`Referanslar` alias'ı da resmi kaynakta
+desteklenmediği için eklenmemiştir.
+## Akademik ana bölüm başlığı biçimi
+
+Kılavuzun 4.2 maddesi metnin tamamı için Times New Roman 12 puntoyu ve ana/alt
+başlıklar için kalın yazımı desteklediğinden ortak bachelor rule setinde
+`comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format`
+production kuralı bulunur. Bu kural yalnız güvenilir biçimde level 0 olarak
+tanınan akademik body heading occurrence'larını değerlendirir:
+
+- Giriş
+- Genel Bilgiler ve Literatür Çalışması
+- Materyal ve Metot
+- Bulgular ve Tartışma
+- Genel Bilgiler
+- Sonuç
+
+Kontrol style ID'yi tek başına yeterli kabul etmez; direct run formatting, style
+inheritance ve document defaults üzerinden effective font family, font size ve
+bold değerlerini kullanır. Section yokluğu `REQUIRED_SECTION`, yanlış level veya
+numbering yokluğu `HEADING_NUMBERING` sorumluluğunda kalır.
+
+Konuya özgü alt ve alt-alt başlıkların adları önceden bilinmediği ve yalnız
+numbering level'a dayanmak normal numbered list/body paragraph false-positive riski
+taşıdığı için level 1/2 heading-format production rule'u eklenmemiştir. Case,
+alignment, spacing, indentation ve page-break davranışı da source-backed production
+property olarak modellenmemiştir.
+
+## Section start / page break kararı
+
+Resmi kılavuz tez yapısındaki ön bölüm, ana metin, kaynaklar, varsa ekler ve
+özgeçmiş başlıklarını gösterir; ancak bu başlıkların açıkça yeni sayfadan
+başlamasını, tek/çift sayfa kullanmasını veya Word section/page break ile
+ayrılmasını normatif olarak zorunlu kılmaz.
+
+Resmi literatür ve laboratuvar DOCX şablonlarında birçok geçiş önceki paragraftaki
+`sectPr` ile ve OpenXML varsayılanı `nextPage` olacak şekilde uygulanmıştır. Bu bir
+template convention olarak değerlidir, fakat tek başına akademik production
+requirement değildir. Ayrıca explicit OOXML boundary yoksa başlığın Word'de doğal
+sayfa taşmasıyla yeni sayfaya düşüp düşmediği layout motoru olmadan güvenilir
+ölçülemez.
+
+Bu nedenle bu rule setinde section page-start production ID'si yoktur. Mevcut
+ownership korunur: bölüm yokluğu `REQUIRED_SECTION`, sıra `SECTION_ORDER`,
+numaralandırma `HEADING_NUMBERING`, başlık biçimi `HEADING_LEVEL_FORMAT`, sayfa
+numarası geçişi ise `PAGE_NUMBER_SEQUENCE` tarafından değerlendirilir.

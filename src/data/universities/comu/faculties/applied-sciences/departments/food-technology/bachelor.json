@@ -60,6 +60,38 @@
       "version": "1.0.0"
     },
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
+      "title": "Akademik Ana Bölüm Başlığı Biçimi",
+      "description": "Güvenilir biçimde tanınan akademik ana bölüm başlıklarının yazı tipi, punto ve kalınlık biçimini doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 0,
+        "sections": [
+          { "section": "Giriş" },
+          { "section": "Genel Bilgiler ve Literatür Çalışması" },
+          { "section": "Materyal ve Metot" },
+          { "section": "Bulgular ve Tartışma" },
+          { "section": "Genel Bilgiler" },
+          { "section": "Sonuç" }
+        ],
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Akademik ana bölüm başlığı biçimi uygun değil.",
+      "solution": "Akademik ana bölüm başlıklarını Times New Roman, 12 punto ve kalın olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.page-number",
       "type": "PAGE_NUMBER",
       "scope": {

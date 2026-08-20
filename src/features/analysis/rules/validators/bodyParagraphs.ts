@@ -10,8 +10,13 @@ const BODY_EXCLUDED_HEADING_NAMES = new Set([
   "heading3",
 ]);
 
+interface BodyParagraphOptions {
+  excludeCaptions?: boolean;
+}
+
 export function getBodyParagraphs(
   document: Readonly<NormalizedDocument>,
+  options: BodyParagraphOptions = {},
 ): readonly Paragraph[] {
   const stylesById = new Map(
     document.styles.map((style) => [style.id, style]),
@@ -21,12 +26,16 @@ export function getBodyParagraphs(
       .filter((section) => section.isRuleDefinedHeading)
       .map((section) => section.paragraphId),
   );
+  const captionParagraphIds = options.excludeCaptions
+    ? new Set(document.captions.items.map((caption) => caption.paragraphId))
+    : new Set<string>();
 
   return document.paragraphs.filter(
     (paragraph) =>
       !paragraph.isEmpty &&
       !isHeadingParagraph(paragraph.styleId, stylesById) &&
-      !sectionHeadingParagraphIds.has(paragraph.id),
+      !sectionHeadingParagraphIds.has(paragraph.id) &&
+      !captionParagraphIds.has(paragraph.id),
   );
 }
 

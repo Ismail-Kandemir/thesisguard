@@ -34,6 +34,7 @@ export type RuleType =
   | "SECTION_WORD_COUNT"
   | "SECTION_KEYWORDS"
   | "HEADING_NUMBERING"
+  | "HEADING_LEVEL_FORMAT"
   | "ABBREVIATION_LIST_CONSISTENCY";
 
 export interface PageNumberRuleExpected {
@@ -134,6 +135,14 @@ export interface HeadingNumberingRuleExpected {
   sections: HeadingNumberingSectionExpectation[];
 }
 
+export interface HeadingLevelFormatRuleExpected {
+  level: number;
+  sections: SectionOrderItem[];
+  fontFamily?: string;
+  fontSize?: number;
+  bold?: boolean;
+}
+
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
 
 export type RuleScopeLevel =
@@ -179,6 +188,7 @@ export type RuleExpectedValue =
   | SectionWordCountRuleExpected
   | SectionKeywordsRuleExpected
   | HeadingNumberingRuleExpected
+  | HeadingLevelFormatRuleExpected
   | AbbreviationListConsistencyRuleExpected
   | {
       value: string | number | boolean;

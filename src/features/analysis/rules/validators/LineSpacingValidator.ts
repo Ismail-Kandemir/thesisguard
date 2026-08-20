@@ -59,7 +59,7 @@ function getActualLineSpacings(document: NormalizedDocument): number[] {
     document.documentDefaults,
   );
 
-  return getBodyParagraphs(document)
+  return getBodyParagraphs(document, { excludeCaptions: true })
     .map((paragraph) => {
       const run = paragraph.runs[0] ?? EMPTY_RUN;
 
