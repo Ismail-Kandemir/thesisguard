@@ -6,7 +6,9 @@ import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsN
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
+import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
 import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
+import { normalizeDocumentHeadings } from "./parsers/documentHeadingsNormalizer";
 import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
 import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRuleSets } from "./rules/RuleLoader";
@@ -20,7 +22,7 @@ import type {
 } from "./types";
 
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
-  const { documentXml, stylesXml, numberingXml, headerFooterXmlParts } =
+  const { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts } =
     await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
@@ -29,6 +31,7 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     ...normalizedDocument,
     styles: parsedStyles?.styles ?? [],
     documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
+    themeFonts: themeXml ? parseThemeFontsXml(themeXml) : null,
     numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
     pageNumbering: {
       ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
@@ -59,13 +62,17 @@ export async function analyzeDocx(
     normalizedDocument,
     rules,
   );
+  const documentWithHeadingOccurrences = normalizeDocumentHeadings(
+    documentWithMarkedSectionHeadings,
+    rules,
+  );
   const documentWithSectionHeadings: NormalizedDocument = {
-    ...documentWithMarkedSectionHeadings,
+    ...documentWithHeadingOccurrences,
     abbreviations: normalizeDocumentAbbreviations(
-      documentWithMarkedSectionHeadings,
+      documentWithHeadingOccurrences,
     ),
     objectReferences: normalizeDocumentObjectReferences(
-      documentWithMarkedSectionHeadings,
+      documentWithHeadingOccurrences,
     ),
   };
   const ruleEngine = new RuleEngine();
@@ -111,6 +118,7 @@ function createEffectiveFormattingDebugRows(document: NormalizedDocument) {
   const resolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
+    document.themeFonts,
   );
 
   return document.paragraphs.flatMap((paragraph) =>

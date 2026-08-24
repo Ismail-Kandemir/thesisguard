@@ -5,11 +5,13 @@ import type {
   ParagraphAlignment,
   StyleDefinition,
 } from "../types";
+import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
 interface StyleProperties {
   fontFamily: string | null;
+  fontFamilyReference: ReturnType<typeof parseRunFontFamilyReference>;
   fontSize: number | null;
   bold: boolean | null;
   italic: boolean | null;
@@ -17,6 +19,7 @@ interface StyleProperties {
   lineSpacing: number | null;
   alignment: ParagraphAlignment | null;
   tableAlignment: ObjectAlignment | null;
+  paragraphFormatting: ReturnType<typeof parseParagraphFormatting>;
 }
 
 interface ParsedStylesXml {
@@ -56,8 +59,14 @@ function parseDocumentDefaults(xmlDocument: Document): DocumentDefaults {
 
   return {
     fontFamily: parseFont(runProperties),
+    fontFamilyReference: parseRunFontFamilyReference(runProperties),
     fontSize: parseFontSize(runProperties),
+    bold: parseToggleProperty(runProperties, "b"),
+    italic: parseToggleProperty(runProperties, "i"),
+    underline: parseUnderline(runProperties),
     lineSpacing: parseSpacing(paragraphProperties),
+    alignment: parseAlignment(paragraphProperties),
+    paragraphFormatting: parseParagraphFormatting(paragraphProperties),
   };
 }
 
@@ -115,13 +124,41 @@ function parseStyleProperties(styleElement: Element): StyleProperties {
 
   return {
     fontFamily: parseFont(runProperties),
+    fontFamilyReference: parseRunFontFamilyReference(runProperties),
     fontSize: parseFontSize(runProperties),
     bold: parseToggleProperty(runProperties, "b"),
     italic: parseToggleProperty(runProperties, "i"),
     underline: parseUnderline(runProperties),
     lineSpacing: parseSpacing(paragraphProperties),
+    paragraphFormatting: parseParagraphFormatting(paragraphProperties),
     alignment: parseAlignment(paragraphProperties),
     tableAlignment: parseTableAlignment(tableProperties),
+  };
+}
+
+function parseParagraphFormatting(paragraphProperties: Element | null) {
+  const indentation = paragraphProperties ? getFirstDescendant(paragraphProperties, "ind") : null;
+  const spacing = paragraphProperties ? getFirstDescendant(paragraphProperties, "spacing") : null;
+  const numeric = (element: Element | null, name: string): number | null =>
+    element ? parseNumericAttribute(element, name) : null;
+
+  return {
+    indentation: {
+      leftTwips: numeric(indentation, "start") ?? numeric(indentation, "left"),
+      rightTwips: numeric(indentation, "end") ?? numeric(indentation, "right"),
+      firstLineTwips: numeric(indentation, "firstLine"),
+      hangingTwips: numeric(indentation, "hanging"),
+      leftChars: numeric(indentation, "startChars") ?? numeric(indentation, "leftChars"),
+      rightChars: numeric(indentation, "endChars") ?? numeric(indentation, "rightChars"),
+      firstLineChars: numeric(indentation, "firstLineChars"),
+      hangingChars: numeric(indentation, "hangingChars"),
+    },
+    spacing: {
+      beforeTwips: numeric(spacing, "before"),
+      afterTwips: numeric(spacing, "after"),
+      beforeLines: numeric(spacing, "beforeLines"),
+      afterLines: numeric(spacing, "afterLines"),
+    },
   };
 }
 
@@ -140,18 +177,7 @@ function parseStyleType(styleElement: Element): StyleDefinition["type"] {
 }
 
 function parseFont(runProperties: Element | null): string | null {
-  const fontsElement = runProperties ? getFirstDescendant(runProperties, "rFonts") : null;
-
-  if (!fontsElement) {
-    return null;
-  }
-
-  return (
-    getWordAttribute(fontsElement, "ascii") ??
-    getWordAttribute(fontsElement, "hAnsi") ??
-    getWordAttribute(fontsElement, "cs") ??
-    getWordAttribute(fontsElement, "eastAsia")
-  );
+  return getLegacyExplicitFont(parseRunFontFamilyReference(runProperties));
 }
 
 function parseFontSize(runProperties: Element | null): number | null {

@@ -12,30 +12,47 @@ const BODY_EXCLUDED_HEADING_NAMES = new Set([
 
 interface BodyParagraphOptions {
   excludeCaptions?: boolean;
+  excludeTableCells?: boolean;
+  excludeLists?: boolean;
+  excludeTableOfContents?: boolean;
+  excludeFigureCarriers?: boolean;
 }
 
 export function getBodyParagraphs(
   document: Readonly<NormalizedDocument>,
-  options: BodyParagraphOptions = {},
+  options: Readonly<BodyParagraphOptions> = {},
 ): readonly Paragraph[] {
   const stylesById = new Map(
     document.styles.map((style) => [style.id, style]),
   );
+
   const sectionHeadingParagraphIds = new Set(
     document.sections
       .filter((section) => section.isRuleDefinedHeading)
       .map((section) => section.paragraphId),
   );
-  const captionParagraphIds = options.excludeCaptions
-    ? new Set(document.captions.items.map((caption) => caption.paragraphId))
-    : new Set<string>();
+
+  const captionParagraphIds = new Set(
+    document.captions.items.map((caption) => caption.paragraphId),
+  );
+
+  const figureCarrierParagraphIds = new Set(
+    document.figures.items.map((figure) => figure.paragraphId),
+  );
 
   return document.paragraphs.filter(
     (paragraph) =>
       !paragraph.isEmpty &&
       !isHeadingParagraph(paragraph.styleId, stylesById) &&
       !sectionHeadingParagraphIds.has(paragraph.id) &&
-      !captionParagraphIds.has(paragraph.id),
+      !(options.excludeCaptions && captionParagraphIds.has(paragraph.id)) &&
+      !(options.excludeTableCells && paragraph.isInTableCell) &&
+      !(options.excludeLists && paragraph.numbering.source !== "none") &&
+      !(options.excludeTableOfContents && paragraph.isTableOfContentsEntry) &&
+      !(
+        options.excludeFigureCarriers &&
+        figureCarrierParagraphIds.has(paragraph.id)
+      ),
   );
 }
 

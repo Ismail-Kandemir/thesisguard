@@ -1,3 +1,45 @@
+# Occurrence-aware heading numbering
+
+`DocumentHeadingOccurrence.level` akademik heading role/scope seviyesini,
+`numberingLevel` ise paragraph'tan normalize edilen gerçek manual/Word numbering
+seviyesini taşır. Bilinen unnumbered section heading occurrence olarak korunur:
+`numberingSource="none"`, `numberingLevel=null`. Böylece validator unnumbered ile
+identity-unknown durumlarını karıştırmaz.
+
+`HeadingNumberingValidator` section, paragraph veya regex üzerinden heading keşfetmez.
+Yalnız `document.headings` içindeki canonical `sectionName`, `numberingSource`,
+`numberingLevel`, `visibleLabel` ve `numId` metadata'sını kullanır. Manual dotted
+depth ile Word `ilvl` aynı zero-based seviyeye normalize edilir.
+
+# Heading occurrence normalizasyonu
+
+`normalizeDocumentHeadings`, numbering ve rule-defined section işaretleme tamamlandıktan
+sonra `document.headings` kaynağını üretir. Bilinen akademik ana başlıklar
+`HEADING_NUMBERING` section beklentilerinden gelir. Dinamik alt başlıklar yalnız
+akademik ana gövde aralığında hem heading-style inheritance zinciri hem güvenilir
+manual/Word numbering taşıyorsa kabul edilir. Number prefix veya style tek başına
+academic heading identity oluşturmaz.
+
+TOC metadata, normalized caption `paragraphId`, table-cell ownership ve boş paragraph
+tek source-of-truth olarak exclusion sağlar. Manual `2.1. Başlık` ile Word `ilvl=1`
+aynı zero-based semantic level `1` olur. Normalizer paragraph, section, caption,
+numbering, block ve style koleksiyonlarını mutate etmez; paragraph/block ID ve
+indekslerini değiştirmez.
+
+Occurrence formatting consumer'ları mevcut `EffectiveFormattingResolver` üzerinden
+direct → style → basedOn → docDefaults zincirini kullanır. Paragraph alignment ve
+before/after spacing consumer'a hazırdır. Run toggle alanlarında missing ile explicit
+false ayrıdır; böylece style bold + direct `w:b w:val="0"` doğru biçimde false olur.
+
+# Paragraph indentation ve spacing normalizasyonu
+
+`documentXmlParser`, direct `w:ind` ve `w:spacing` değerlerini ham OOXML ölçüleriyle
+normalize eder. `start/end`, legacy `left/right` adlarından önceliklidir; `firstLine`,
+`hanging` ve karakter tabanlı karşılıklar ayrı tutulur. Tablo hücresi sahipliği
+`isInTableCell` ile taşınır. `EffectiveFormattingResolver` direct → style → basedOn
+→ docDefaults önceliğini uygular; direct sıfır inheritance'ı geçersiz kılar.
+Girinti ve before/after değerleri twip olarak saklanır; line spacing ayrı semantiktir.
+
 ## Table/Figure List Entry Infrastructure Decision
 
 Bu sprintte object-list entry normalizer eklenmedi. Resmi ÇOMÜ kaynakları liste
@@ -169,3 +211,44 @@ gelir. Nested table, anchored figure ve caption identity bulunmayan occurrence
 reference coverage'a girmez. Aynı kind/number birden çok güvenilir nesnede
 kullanılırsa validator false PASS vermek yerine identity ambiguity failure
 üretir.
+## Heading spacing audit boundary
+
+Paragraph formatting preserves `before`/`after` twips and
+`beforeLines`/`afterLines` hundredths-of-a-line as separate nullable fields.
+Direct explicit zero is distinct from absence and overrides the style chain;
+`StyleInheritanceResolver` is cycle-safe. These values remain separate from
+`lineSpacing`.
+
+This metadata does not by itself provide a rendered heading gap. Word uses the
+adjacent paragraphs' spacing and inter-line contributions, and empty paragraphs
+or page boundaries can change the visible layout. Automatic spacing attributes
+also override numeric before/after alternatives and are not currently modeled.
+Until a consumer needs a complete rendered-gap model, no additional auto/unknown
+types or dead-code validator are introduced. Heading identity remains exclusively
+`NormalizedDocument.headings` if a future safe validator is implemented.
+## Character-style typography resolution
+
+Runs retain their `w:rStyle` ID. Effective run formatting is resolved per
+property in this order: direct run formatting, character-style basedOn chain,
+paragraph-style basedOn chain, document defaults. Explicit false values remain
+overrides, and both inheritance chains are cycle-safe.
+
+Font-family and font-size validators evaluate only runs containing visible
+trimmed `w:t` text. Empty runs, field instructions without visible `w:t`, and
+drawing-only carriers cannot create typography failures.
+
+## Theme font resolution
+
+The package reader locates the theme part through the document relationship and
+uses `word/theme/theme1.xml` only as a conventional fallback. The theme parser
+normalizes major/minor Latin, East Asia, complex-script, and script-override
+font metadata. Runs, character styles, paragraph styles, and document defaults
+retain their `w:rFonts` slot references.
+
+Effective font resolution is property-local and layer-local: direct run,
+character-style chain, paragraph-style chain, then document defaults. Within a
+single `w:rFonts` element, the corresponding theme attribute overrides its
+explicit counterpart. ASCII characters use the ASCII slot; Turkish and other
+non-ASCII Latin text uses High ANSI. If visible text resolves to multiple font
+families, the validator keeps that ambiguity and does not produce a false pass.
+Unknown tokens or missing theme values resolve to unknown rather than guessing.

@@ -11,9 +11,14 @@ import { getBodyParagraphs } from "./bodyParagraphs";
 export class AlignmentValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedAlignment = getExpectedAlignment(rule.expected);
-    const actualAlignments = getBodyParagraphs(document, { excludeCaptions: true }).map(
-      (paragraph) => paragraph.alignment,
-    );
+
+    const actualAlignments = getBodyParagraphs(document, {
+      excludeCaptions: true,
+      excludeTableCells: true,
+      excludeTableOfContents: true,
+      excludeFigureCarriers: true,
+    }).map((paragraph) => paragraph.alignment);
+
     const passed =
       actualAlignments.length > 0 &&
       actualAlignments.every((alignment) => alignment === expectedAlignment);
@@ -37,14 +42,21 @@ function getExpectedAlignment(expected: RuleExpectedValue): ParagraphAlignment {
   const value = typeof expected === "object" ? expected.value : expected;
 
   if (!isParagraphAlignment(value)) {
-    throw new Error("Alignment kurali gecerli bir expected degeri icermelidir.");
+    throw new Error(
+      "Alignment kurali gecerli bir expected degeri icermelidir.",
+    );
   }
 
   return value;
 }
 
 function isParagraphAlignment(value: unknown): value is ParagraphAlignment {
-  return value === "left" || value === "right" || value === "center" || value === "justify";
+  return (
+    value === "left" ||
+    value === "right" ||
+    value === "center" ||
+    value === "justify"
+  );
 }
 
 function formatActualAlignments(

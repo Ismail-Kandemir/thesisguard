@@ -6,6 +6,7 @@ import type {
 } from "../../types";
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import { getBodyParagraphs } from "./bodyParagraphs";
+import { fontFamiliesEqual } from "../fontFamilyComparison";
 import type { RuleValidator } from "./RuleValidator";
 
 export class FontFamilyValidator implements RuleValidator {
@@ -13,7 +14,7 @@ export class FontFamilyValidator implements RuleValidator {
     const expectedFontFamily = getExpectedFontFamily(rule.expected);
     const actualFontFamilies = getActualFontFamilies(document);
     const passed = actualFontFamilies.every(
-      (fontFamily) => fontFamily === expectedFontFamily,
+      (fontFamily) => fontFamiliesEqual(fontFamily, expectedFontFamily),
     );
 
     return {
@@ -47,13 +48,18 @@ function getActualFontFamilies(document: NormalizedDocument): Array<string | nul
   const formattingResolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
+    document.themeFonts,
   );
 
   return getBodyParagraphs(document).flatMap((paragraph) =>
-    paragraph.runs.map(
+    paragraph.runs.filter(isVisibleRun).map(
       (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontFamily,
     ),
   );
+}
+
+function isVisibleRun(run: NormalizedDocument["paragraphs"][number]["runs"][number]): boolean {
+  return run.text.trim().length > 0;
 }
 
 function formatActualValues(values: Array<string | null>): string | null {

@@ -35,7 +35,20 @@ export type RuleType =
   | "SECTION_KEYWORDS"
   | "HEADING_NUMBERING"
   | "HEADING_LEVEL_FORMAT"
+  | "HEADING_ALIGNMENT"
+  | "PARAGRAPH_INDENTATION"
   | "ABBREVIATION_LIST_CONSISTENCY";
+
+export interface ParagraphIndentationRuleExpected {
+  firstLineCm: number;
+  toleranceTwips: number;
+  sections: string[];
+}
+
+export interface HeadingAlignmentRuleExpected {
+  levels: number[];
+  alignment: ParagraphAlignment;
+}
 
 export interface PageNumberRuleExpected {
   required: boolean;
@@ -189,6 +202,8 @@ export type RuleExpectedValue =
   | SectionKeywordsRuleExpected
   | HeadingNumberingRuleExpected
   | HeadingLevelFormatRuleExpected
+  | HeadingAlignmentRuleExpected
+  | ParagraphIndentationRuleExpected
   | AbbreviationListConsistencyRuleExpected
   | {
       value: string | number | boolean;
@@ -231,6 +246,7 @@ export interface DocxAnalysisXmlParts {
   documentXml: string;
   stylesXml: string | null;
   numberingXml: string | null;
+  themeXml: string | null;
   headerFooterXmlParts: HeaderFooterXmlPart[];
 }
 
@@ -244,11 +260,36 @@ export interface HeaderFooterXmlPart {
 
 export interface Run {
   text: string;
-  bold: boolean;
-  italic: boolean;
-  underline: boolean;
+  styleId: string | null;
+  fontFamilyReference?: RunFontFamilyReference | null;
+  bold: boolean | null;
+  italic: boolean | null;
+  underline: boolean | null;
   fontFamily: string | null;
   fontSize: number | null;
+}
+
+export type FontSlotReference =
+  | { kind: "explicit"; value: string }
+  | { kind: "theme"; value: string };
+
+export interface RunFontFamilyReference {
+  ascii: FontSlotReference | null;
+  highAnsi: FontSlotReference | null;
+  eastAsia: FontSlotReference | null;
+  complexScript: FontSlotReference | null;
+}
+
+export interface ThemeFontFamily {
+  latin: string | null;
+  eastAsia: string | null;
+  complexScript: string | null;
+  scriptOverrides: Readonly<Record<string, string>>;
+}
+
+export interface DocumentThemeFonts {
+  major: ThemeFontFamily;
+  minor: ThemeFontFamily;
 }
 
 export type ParagraphAlignment =
@@ -264,11 +305,13 @@ export interface StyleDefinition {
   basedOn: string | null;
   nextStyle: string | null;
   fontFamily: string | null;
+  fontFamilyReference?: RunFontFamilyReference | null;
   fontSize: number | null;
   bold: boolean | null;
   italic: boolean | null;
   underline: boolean | null;
   lineSpacing: number | null;
+  paragraphFormatting: ParagraphFormatting;
   alignment: ParagraphAlignment | null;
   tableAlignment: ObjectAlignment | null;
   numbering: NumberingReference | null;
@@ -301,14 +344,45 @@ export interface ParagraphNumbering {
 
 export interface DocumentDefaults {
   fontFamily: string | null;
+  fontFamilyReference?: RunFontFamilyReference | null;
   fontSize: number | null;
+  bold: boolean | null;
+  italic: boolean | null;
+  underline: boolean | null;
   lineSpacing: number | null;
+  alignment: ParagraphAlignment | null;
+  paragraphFormatting: ParagraphFormatting;
+}
+
+export interface ParagraphIndentation {
+  leftTwips: number | null;
+  rightTwips: number | null;
+  firstLineTwips: number | null;
+  hangingTwips: number | null;
+  leftChars: number | null;
+  rightChars: number | null;
+  firstLineChars: number | null;
+  hangingChars: number | null;
+}
+
+export interface ParagraphSpacing {
+  beforeTwips: number | null;
+  afterTwips: number | null;
+  beforeLines: number | null;
+  afterLines: number | null;
+}
+
+export interface ParagraphFormatting {
+  indentation: ParagraphIndentation;
+  spacing: ParagraphSpacing;
 }
 
 export interface EffectiveFormatting {
   fontFamily: string | null;
   fontSize: number | null;
   bold: boolean;
+  italic: boolean;
+  underline: boolean;
   lineSpacing: number | null;
 }
 
@@ -318,9 +392,11 @@ export interface Paragraph {
   runs: Run[];
   alignment: ParagraphAlignment | null;
   lineSpacing: number | null;
+  paragraphFormatting: ParagraphFormatting;
   styleId: string | null;
   numbering: ParagraphNumbering;
   isTableOfContentsEntry: boolean;
+  isInTableCell: boolean;
   isEmpty: boolean;
 }
 
@@ -386,10 +462,29 @@ export interface DocumentFigures {
 }
 
 export type CaptionKind = "table" | "figure";
-export type CaptionPosition = "before" | "after" | "none" | "ambiguous";
-export type FigureDrawingType = "inline" | "anchor" | "unknown";
-export type ObjectAlignment = "left" | "center" | "right" | "unknown";
-export type ObjectAlignmentSource = "direct" | "style" | "paragraph" | "unknown";
+
+export type CaptionPosition =
+  | "before"
+  | "after"
+  | "none"
+  | "ambiguous";
+
+export type FigureDrawingType =
+  | "inline"
+  | "anchor"
+  | "unknown";
+
+export type ObjectAlignment =
+  | "left"
+  | "center"
+  | "right"
+  | "unknown";
+
+export type ObjectAlignmentSource =
+  | "direct"
+  | "style"
+  | "paragraph"
+  | "unknown";
 
 export interface DocumentCaption {
   id: string;
@@ -426,8 +521,18 @@ export interface DocumentFigureOccurrence {
 }
 
 export type DocumentBlock =
-  | { id: string; blockIndex: number; type: "paragraph"; paragraphId: string }
-  | { id: string; blockIndex: number; type: "table"; tableId: string };
+  | {
+      id: string;
+      blockIndex: number;
+      type: "paragraph";
+      paragraphId: string;
+    }
+  | {
+      id: string;
+      blockIndex: number;
+      type: "table";
+      tableId: string;
+    };
 
 export interface DocumentCaptions {
   items: DocumentCaption[];
@@ -467,6 +572,30 @@ export interface DocumentSection {
   isObjectReferenceExcluded: boolean;
 }
 
+export type HeadingNumberingSource =
+  | "text"
+  | "word"
+  | "none";
+
+export interface DocumentHeadingOccurrence {
+  id: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  text: string;
+  normalizedText: string;
+  level: number;
+  numberingLevel: number | null;
+  numberingSource: HeadingNumberingSource;
+  numId: string | null;
+  visibleLabel: string | null;
+  styleId: string | null;
+  styleName: string | null;
+  sectionName: string | null;
+  isRuleDefinedSection: boolean;
+  isAcademicHeading: true;
+}
+
 export interface NormalizedDocument {
   paragraphs: Paragraph[];
   styles: StyleDefinition[];
@@ -482,9 +611,12 @@ export interface NormalizedDocument {
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
   sections: DocumentSection[];
+  headings: DocumentHeadingOccurrence[];
+  themeFonts?: DocumentThemeFonts | null;
 }
 
 export type { AnalysisReport } from "./AnalysisReport";
+
 export type {
   AcademicSelection,
   AcademicSelectionBase,

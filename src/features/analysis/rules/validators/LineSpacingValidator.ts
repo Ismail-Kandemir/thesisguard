@@ -10,8 +10,10 @@ import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
 
 const OOXML_UNITS_PER_LINE = 240;
+
 const EMPTY_RUN: Run = {
   text: "",
+  styleId: null,
   bold: false,
   italic: false,
   underline: false,
@@ -23,9 +25,12 @@ export class LineSpacingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedLineSpacing = getExpectedLineSpacing(rule.expected);
     const actualLineSpacings = getActualLineSpacings(document);
+
     const passed =
       actualLineSpacings.length > 0 &&
-      actualLineSpacings.every((lineSpacing) => lineSpacing === expectedLineSpacing);
+      actualLineSpacings.every(
+        (lineSpacing) => lineSpacing === expectedLineSpacing,
+      );
 
     return {
       ruleId: rule.id,
@@ -47,7 +52,9 @@ function getExpectedLineSpacing(expected: RuleExpectedValue): number {
   const parsedValue = typeof value === "number" ? value : Number(value);
 
   if (!Number.isFinite(parsedValue)) {
-    throw new Error("Line spacing kurali sayisal bir expected degeri icermelidir.");
+    throw new Error(
+      "Line spacing kurali sayisal bir expected degeri icermelidir.",
+    );
   }
 
   return parsedValue;
@@ -59,12 +66,20 @@ function getActualLineSpacings(document: NormalizedDocument): number[] {
     document.documentDefaults,
   );
 
-  return getBodyParagraphs(document, { excludeCaptions: true })
+  return getBodyParagraphs(document, {
+    excludeCaptions: true,
+    excludeTableCells: true,
+    excludeTableOfContents: true,
+    excludeFigureCarriers: true,
+  })
     .map((paragraph) => {
       const run = paragraph.runs[0] ?? EMPTY_RUN;
 
-      return formattingResolver.resolveRun(run, paragraph.styleId, paragraph.lineSpacing)
-        .lineSpacing;
+      return formattingResolver.resolveRun(
+        run,
+        paragraph.styleId,
+        paragraph.lineSpacing,
+      ).lineSpacing;
     })
     .filter((lineSpacing): lineSpacing is number => lineSpacing !== null)
     .map(convertOoxmlSpacingToLines);
@@ -74,7 +89,9 @@ function convertOoxmlSpacingToLines(lineSpacing: number): number {
   return lineSpacing / OOXML_UNITS_PER_LINE;
 }
 
-function formatActualLineSpacings(lineSpacings: number[]): string | null {
+function formatActualLineSpacings(
+  lineSpacings: number[],
+): string | null {
   if (lineSpacings.length === 0) {
     return null;
   }

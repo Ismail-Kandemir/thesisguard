@@ -44,13 +44,18 @@ function getActualFontSizes(document: NormalizedDocument): Array<number | null> 
   const formattingResolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
+    document.themeFonts,
   );
 
   return getBodyParagraphs(document).flatMap((paragraph) =>
-    paragraph.runs.map(
+    paragraph.runs.filter(isVisibleRun).map(
       (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontSize,
     ),
   );
+}
+
+function isVisibleRun(run: NormalizedDocument["paragraphs"][number]["runs"][number]): boolean {
+  return run.text.trim().length > 0;
 }
 
 function formatActualFontSizes(fontSizes: Array<number | null>): string | null {

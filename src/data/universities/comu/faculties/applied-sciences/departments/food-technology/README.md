@@ -1,4 +1,73 @@
+## Occurrence-aware heading numbering
+
+Ana section numbering validator'ı artık yalnız normalized heading occurrence'larını
+değerlendirir. Manual ve Word numbering storage farkı sonucu değiştirmez. Bilinen
+ama numarasız ana heading occurrence modelde kalır ve FAILED olur; missing veya
+duplicate section aynı eksikliği numbering rule'unda tekrar FAIL ettirmez.
+
+Kural yalnız configured named academic main section'ların numbering presence ve
+expected zero-based level'ını kontrol eder. Exact `1-2-3` sequence, skipped/duplicate
+number ve child-parent hierarchy template convention düzeyinde kaldığından production
+semantiğine eklenmemiştir.
+
+## Akademik heading occurrence ve hizalama
+
+Ana akademik section heading'leri rule-defined section + heading-numbering beklentisiyle,
+isimleri önceden bilinmeyen alt heading'ler ise akademik body sınırı içinde
+heading-style + güvenilir numbering birleşimiyle normalize edilir. Manual ve Word
+numbering aynı zero-based level semantiğini üretir. TOC, caption, front/back matter,
+table-cell ve normal numbered list dışarıda kalır.
+
+Kılavuzun body heading'leri sola yaslama hükmü ortak
+`comu.applied-sciences.food-technology.bachelor.heading-alignment` production
+kuralıyla level 0/1/2 için uygulanır. Direct center style left'i override ederek
+FAIL; direct left style center'ı override ederek PASS üretir. Alignment null ise
+Word default left varsayılmaz. Heading spacing bu sprintte production değildir.
+
+## Kalan kural auditi
+
+46-rule runtime baseline sonrasında kılavuzun page, typography, heading, front
+matter, body section, back matter, object, abstract, abbreviation ve references
+alanları yeniden tarandı. Yeni production rule eklenmedi.
+
+Heading 1/2/3 için TNR 12 ve bold davranışı mevcut generic heading kurallarıyla
+zaten kapsanır. Heading alignment kaynakta güçlü olsa da mevcut validator style
+tanımını ölçer; paragraph-direct override ve gerçek occurrence identity'sini
+ölçmediği için genişletilmedi. Şablonlardaki heading before/after değerleri de
+PDF'deki “1,5 satır / 1 satır” ifadesiyle deterministik pt eşlemesi vermez.
+
+Paragraph before/after, left/right/hanging indent, object çevresi spacing, özel
+Özet/Abstract paragraph formatı, bibliography hanging/alphabetic order, caption
+punctuation/sequence ve deeper heading formatı kaynak veya observability yetersizliği
+nedeniyle production dışında kaldı. Table-cell metadata korunur; first-line body
+kuralı table-cell'i dışlar, fakat PDF “metnin tamamı TNR 12” dediğinden global font
+kurallarına yeni table-cell exclusion eklenmedi.
+
+## Akademik ana gövde paragraf girintisi
+
+Kılavuz 4.2, paragraf başlarının `1,5 cm (1 Tab tuşu)` içeriden başlamasını açıkça
+zorunlu kılar. Bu STRONG hüküm `PARAGRAPH_INDENTATION` kuralıyla modellenir.
+1,5 cm yaklaşık 850,39 twip'tir; integer OOXML için 849–851 twip kabul edilir.
+İki resmî şablondaki 0/357/708 twip değerleri tutarsız template convention'dır.
+
+Kural yalnız Giriş–Sonuç akademik ana-gövde section içeriklerinde çalışır; heading,
+caption, TOC, list, table-cell, figure-carrier, Özet/Abstract, Teşekkür, Kaynaklar
+ve Özgeçmiş kapsam dışıdır. “Boşluk bırakılmadan” hükmü kesin before/after punto
+ölçüsü vermediğinden spacing production rule'u yoktur.
+
 # Gıda Teknolojisi
+
+## Runtime composition count
+
+The current deterministic selector/resolver/engine truth is 45 rules/results
+for `experimental` and 43 for `source-research`. Forty resolved rules are common.
+Experimental contributes five track-only IDs (three required sections, section
+order, and heading numbering); Source Research contributes three corresponding
+track-only IDs (one required section, section order, and heading numbering).
+All configured rules are enabled and mapped to validators. A
+`NOT_APPLICABLE` result is retained in the total. Unknown study-type IDs are
+rejected rather than falling back to another track. Previously reported 47/45
+counts were two too high for both tracks.
 
 Bu klasörde Uygulamalı Bilimler Fakültesi Gıda Teknolojisi bölümünün doğrulanmış
 kural setleri tutulur.
@@ -287,6 +356,7 @@ Bu nedenle `OBJECT_LIST_CONSISTENCY`, `table-list-consistency` ve
 object'in listede bulunması, listedeki her entry'nin gerçek object'e karşılık
 gelmesi, exact title eşitliği, sıra, duplicate entry yasağı, dot leader ve page
 accuracy bu rule setinde kontrol edilmez.
+<<<<<<< HEAD
 
 ## Tablo ve şekil kaynak gösterimi source audit
 
@@ -370,3 +440,44 @@ Bu nedenle bu rule setinde section page-start production ID'si yoktur. Mevcut
 ownership korunur: bölüm yokluğu `REQUIRED_SECTION`, sıra `SECTION_ORDER`,
 numaralandırma `HEADING_NUMBERING`, başlık biçimi `HEADING_LEVEL_FORMAT`, sayfa
 numarası geçişi ise `PAGE_NUMBER_SEQUENCE` tarafından değerlendirilir.
+=======
+## Heading spacing
+
+The official guide strongly requires a visible 1.5-line gap before headings and
+a 1-line gap after headings. It does not require a specific `w:before`,
+`w:after`, `w:beforeLines`, or `w:afterLines` encoding. Both official DOCX
+templates use mixed style/direct spacing and empty paragraph neighbors, with
+different Heading 1 versus Heading 2/3 style values.
+
+Consequently this rule set does not contain a `HEADING_SPACING` production rule.
+Word determines the rendered gap using both adjacent paragraphs and their line
+spacing, while page-start and empty-paragraph behavior cannot be reconstructed
+reliably from the heading property alone. Adding a property-only validator would
+turn template implementation details into an unsupported academic constraint.
+## Typography ownership
+
+The guide's Times New Roman 12 pt statement covers the complete thesis text.
+Existing inherited font-family/font-size rules therefore remain the single owner
+for visible body and caption text. Caption-specific rules separately own caption
+alignment and single-line spacing; no duplicate caption font rule is configured.
+
+Academic heading levels 0, 1, and 2 are already covered by the existing Heading
+1/2/3 rules for Times New Roman, 12 pt, and bold, and by the common heading
+alignment rule for left alignment. Missing Heading 2/3 occurrences yield N/A;
+that is not missing rule coverage. No all-caps, italic=false, underline=false, or
+character-spacing rule is added because those prohibitions are not explicit in
+the guide.
+
+## Theme fonts and section-aware typography
+
+The official guide does not establish section-specific font families. Front
+matter, body sections, appendices, captions, tables, and references remain under
+the existing thesis-wide Times New Roman 12 pt ownership; headings retain their
+existing bold requirement. No new academic rule is configured.
+
+Official template packages include `word/theme/theme1.xml` and theme font
+metadata, even though their document runs also contain many explicit font
+assignments. Theme-backed formatting is now resolved as OOXML representation
+before the existing rule is evaluated. It does not change the rule counts:
+Experimental 45 and Source Research 43.
+>>>>>>> 0b22081 (feat: add theme font resolution and strengthen typography validation)

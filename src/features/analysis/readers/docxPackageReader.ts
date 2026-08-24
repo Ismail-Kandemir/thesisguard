@@ -9,6 +9,9 @@ import type {
 const DOCUMENT_XML_PATH = "word/document.xml";
 const STYLES_XML_PATH = "word/styles.xml";
 const NUMBERING_XML_PATH = "word/numbering.xml";
+const DOCUMENT_RELATIONSHIPS_PATH = "word/_rels/document.xml.rels";
+const CONVENTIONAL_THEME_XML_PATH = "word/theme/theme1.xml";
+const RELATIONSHIPS_NAMESPACE = "http://schemas.openxmlformats.org/package/2006/relationships";
 const HEADER_XML_PATTERN = /^word\/header[\w-]*\.xml$/;
 const FOOTER_XML_PATTERN = /^word\/footer[\w-]*\.xml$/;
 
@@ -63,12 +66,50 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
     const numberingXml = zip.file(NUMBERING_XML_PATH)
       ? await readXmlPart(file, NUMBERING_XML_PATH, zip)
       : null;
+    const themeXml = await readThemeXmlPart(file, zip);
     const headerFooterXmlParts = await readHeaderFooterXmlParts(file, zip);
 
-    return { documentXml, stylesXml, numberingXml, headerFooterXmlParts };
+    return { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts };
   } catch (error) {
     throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
   }
+}
+
+async function readThemeXmlPart(file: File, zip: JSZip): Promise<string | null> {
+  const relationshipPath = zip.file(DOCUMENT_RELATIONSHIPS_PATH)
+    ? await findThemeRelationshipTarget(file, zip)
+    : null;
+  const themePath = relationshipPath ??
+    (zip.file(CONVENTIONAL_THEME_XML_PATH) ? CONVENTIONAL_THEME_XML_PATH : null);
+  return themePath && zip.file(themePath) ? readXmlPart(file, themePath, zip) : null;
+}
+
+async function findThemeRelationshipTarget(file: File, zip: JSZip): Promise<string | null> {
+  const xml = await readXmlPart(file, DOCUMENT_RELATIONSHIPS_PATH, zip);
+  const document = new DOMParser().parseFromString(xml, "application/xml");
+  const relationship = Array.from(
+    document.getElementsByTagNameNS(RELATIONSHIPS_NAMESPACE, "Relationship"),
+  ).find((entry) =>
+    entry.getAttribute("Type")?.endsWith("/theme") &&
+    entry.getAttribute("TargetMode")?.toLowerCase() !== "external",
+  );
+  const target = relationship?.getAttribute("Target")?.replaceAll("\\", "/") ?? null;
+  return target ? resolveWordPartTarget(target) : null;
+}
+
+function resolveWordPartTarget(target: string): string | null {
+  const segments = target.startsWith("/") ? [] : ["word"];
+  for (const segment of target.split("/")) {
+    if (!segment || segment === ".") continue;
+    if (segment === "..") {
+      if (segments.length === 0) return null;
+      segments.pop();
+    } else {
+      segments.push(segment);
+    }
+  }
+  const resolved = segments.join("/");
+  return resolved.startsWith("word/") ? resolved : null;
 }
 
 async function readHeaderFooterXmlParts(

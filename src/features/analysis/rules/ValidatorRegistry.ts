@@ -4,9 +4,11 @@ import { ConditionalRequiredSectionValidator } from "./validators/ConditionalReq
 import { HeadingValidator } from "./validators/HeadingValidator";
 import { HeadingLevelFormatValidator } from "./validators/HeadingLevelFormatValidator";
 import { HeadingNumberingValidator } from "./validators/HeadingNumberingValidator";
+import { HeadingAlignmentValidator } from "./validators/HeadingAlignmentValidator";
 import { MarginValidator } from "./validators/MarginValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { PageNumberSequenceValidator } from "./validators/PageNumberSequenceValidator";
+import { ParagraphIndentationValidator } from "./validators/ParagraphIndentationValidator";
 import { ObjectAlignmentValidator } from "./validators/ObjectAlignmentValidator";
 import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlacementValidator";
 import { ObjectCaptionFormatValidator } from "./validators/ObjectCaptionFormatValidator";
@@ -101,6 +103,10 @@ const FOOD_TECHNOLOGY_SUMMARY_TR_KEYWORDS_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.summary-tr-keywords";
 const FOOD_TECHNOLOGY_SUMMARY_EN_KEYWORDS_RULE_ID =
   "comu.applied-sciences.food-technology.bachelor.summary-en-keywords";
+const FOOD_TECHNOLOGY_PARAGRAPH_INDENTATION_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.paragraph-indentation";
+const FOOD_TECHNOLOGY_HEADING_ALIGNMENT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.heading-alignment";
 
 export class ValidatorRegistry {
   private readonly validators = new Map<string, RuleValidator>([
@@ -208,6 +214,8 @@ export class ValidatorRegistry {
       FOOD_TECHNOLOGY_SUMMARY_EN_KEYWORDS_RULE_ID,
       new SectionKeywordsValidator(),
     ],
+    [FOOD_TECHNOLOGY_PARAGRAPH_INDENTATION_RULE_ID, new ParagraphIndentationValidator()],
+    [FOOD_TECHNOLOGY_HEADING_ALIGNMENT_RULE_ID, new HeadingAlignmentValidator()],
   ]);
 
   register(ruleId: string, validator: RuleValidator): void {

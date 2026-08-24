@@ -1,182 +1,118 @@
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import { normalizeSectionName } from "../../parsers/documentSectionsParser";
 import type {
-  DocumentSection,
+  DocumentHeadingOccurrence,
   HeadingNumberingRuleExpected,
   HeadingNumberingSectionExpectation,
   NormalizedDocument,
-  Paragraph,
   RuleDefinition,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 
+const MAX_FAILURE_SAMPLES = 3;
+
+interface LocatedHeading {
+  expectation: HeadingNumberingSectionExpectation;
+  occurrence: DocumentHeadingOccurrence;
+}
+
 export class HeadingNumberingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertHeadingNumberingRule(rule);
     const expected = getExpected(rule.expected);
-    const duplicate = findDuplicate(expected.sections, document.sections);
-
-    if (duplicate) {
-      return createResult(
-        rule,
-        expected,
-        "FAILED",
-        "Güvenle doğrulanamadı",
-        `${duplicate.section} bölümü birden fazla bulunduğu için numaralandırma güvenle doğrulanamadı.`,
-      );
-    }
-
+    const occurrencesBySection = indexNamedOccurrences(document.headings);
     const located = expected.sections.flatMap((expectation) => {
-      const occurrence = findOccurrences(expectation, document.sections)[0];
-      const paragraph = occurrence
-        ? document.paragraphs.find((candidate) => candidate.id === occurrence.paragraphId)
-        : undefined;
-
-      return occurrence && paragraph ? [{ expectation, occurrence, paragraph }] : [];
+      const occurrences = occurrencesBySection.get(normalizeSectionName(expectation.section)) ?? [];
+      return occurrences.length === 1 ? [{ expectation, occurrence: occurrences[0] }] : [];
     });
 
     if (located.length === 0) {
-      return createResult(
-        rule,
-        expected,
-        "NOT_APPLICABLE",
-        "Uygulanmadı",
-        "Numaralandırması doğrulanacak bölüm bulunmadığı için kontrol uygulanmadı.",
-      );
+      return createResult(rule, expected, "NOT_APPLICABLE", "Uygulanmadı",
+        "Numaralandırması güvenilir biçimde değerlendirilebilecek benzersiz ana bölüm başlığı bulunmadı.");
     }
 
-    const unnumbered = located.find(({ paragraph }) => !isReliablyNumbered(paragraph));
-
-    if (unnumbered) {
-      return createResult(
-        rule,
-        expected,
-        "FAILED",
-        `${unnumbered.expectation.section}: Numaralandırılmamış`,
-        `${unnumbered.expectation.section} bölümü numaralandırılmalıdır.`,
-      );
+    const failures = located.flatMap((item) => getFailure(item));
+    if (failures.length === 0) {
+      return createResult(rule, expected, "PASSED",
+        `${located.length}/${expected.sections.length} bulunan bölüm uygun`,
+        "Bulunan ana bölüm başlıklarının numaralandırma seviyeleri kurala uygundur.");
     }
 
-    const wrongLevel = located.find(
-      ({ expectation, paragraph }) => paragraph.numbering.level !== expectation.level,
-    );
-
-    if (wrongLevel) {
-      const actualLevel = wrongLevel.paragraph.numbering.level;
-
-      return createResult(
-        rule,
-        expected,
-        "FAILED",
-        `${wrongLevel.expectation.section}: ${formatLevel(actualLevel)}`,
-        `${wrongLevel.expectation.section} bölümü ${formatExpectedLevel(wrongLevel.expectation.level)} numaralandırılmalıdır. Bulunan düzey: ${formatLevel(actualLevel)}.`,
-      );
-    }
-
-    return createResult(
-      rule,
-      expected,
-      "PASSED",
-      `${located.length}/${expected.sections.length} bulunan bölüm uygun`,
-      "Bulunan akademik ana bölümler beklenen düzeyde numaralandırılmış.",
-    );
+    const samples = failures.slice(0, MAX_FAILURE_SAMPLES).map((failure) => failure.message);
+    return createResult(rule, expected, "FAILED", samples.join("; "),
+      `${failures.length} başlığın numaralandırması uygun değil: ${samples.join("; ")}`);
   }
+}
+
+function indexNamedOccurrences(
+  headings: readonly DocumentHeadingOccurrence[],
+): ReadonlyMap<string, DocumentHeadingOccurrence[]> {
+  const index = new Map<string, DocumentHeadingOccurrence[]>();
+  for (const heading of headings) {
+    if (!heading.isRuleDefinedSection || heading.sectionName === null) continue;
+    const key = normalizeSectionName(heading.sectionName);
+    const occurrences = index.get(key) ?? [];
+    occurrences.push(heading);
+    index.set(key, occurrences);
+  }
+  return index;
+}
+
+function getFailure(item: LocatedHeading): Array<{ message: string }> {
+  const { expectation, occurrence } = item;
+  if (!isReliablyNumbered(occurrence)) {
+    return [{ message: `“${expectation.section}” başlığı bulundu ancak numaralandırılmamış.` }];
+  }
+  if (occurrence.numberingLevel !== expectation.level) {
+    return [{ message: `“${expectation.section}” başlığı ${formatLevel(occurrence.numberingLevel)} düzeyinde bulundu; ${formatExpectedLevel(expectation.level)} numaralandırılması bekleniyor.` }];
+  }
+  return [];
+}
+
+function isReliablyNumbered(heading: Readonly<DocumentHeadingOccurrence>): boolean {
+  if (heading.numberingSource === "text") {
+    return heading.visibleLabel !== null && heading.numberingLevel !== null;
+  }
+  if (heading.numberingSource === "word") {
+    return heading.numId !== null && heading.numberingLevel !== null;
+  }
+  return false;
 }
 
 function assertHeadingNumberingRule(
   rule: RuleDefinition,
 ): asserts rule is RuleDefinition & { type: "HEADING_NUMBERING" } {
   if (rule.type !== "HEADING_NUMBERING") {
-    throw new Error(
-      "HeadingNumberingValidator yalnızca HEADING_NUMBERING tipindeki kuralları çalıştırır.",
-    );
+    throw new Error("HeadingNumberingValidator yalnızca HEADING_NUMBERING tipindeki kuralları çalıştırır.");
   }
 }
 
 function getExpected(expected: RuleDefinition["expected"]): HeadingNumberingRuleExpected {
-  if (
-    typeof expected !== "object" ||
-    expected === null ||
-    !("sections" in expected) ||
-    !Array.isArray(expected.sections) ||
-    expected.sections.length === 0 ||
-    !expected.sections.every(isValidExpectation)
-  ) {
-    throw new Error(
-      "HEADING_NUMBERING kuralı en az bir geçerli section, optional aliases ve non-negative integer level tanımlamalıdır.",
-    );
+  if (typeof expected !== "object" || expected === null || !("sections" in expected) ||
+      !Array.isArray(expected.sections) || expected.sections.length === 0 ||
+      !expected.sections.every(isValidExpectation)) {
+    throw new Error("HEADING_NUMBERING kuralı en az bir geçerli section ve non-negative integer level tanımlamalıdır.");
   }
-
   if (hasOverlappingExpectedNames(expected.sections)) {
-    throw new Error(
-      "HEADING_NUMBERING kuralı aynı section veya alias adını birden fazla expectation içinde tanımlayamaz.",
-    );
+    throw new Error("HEADING_NUMBERING kuralı aynı section veya alias adını birden fazla expectation içinde tanımlayamaz.");
   }
-
-  return expected;
-}
-
-function hasOverlappingExpectedNames(
-  expectations: readonly HeadingNumberingSectionExpectation[],
-): boolean {
-  const names = expectations.flatMap((expectation) => [
-    expectation.section,
-    ...(expectation.aliases ?? []),
-  ]);
-  const normalizedNames = names.map(normalizeSectionName);
-
-  return new Set(normalizedNames).size !== normalizedNames.length;
+  return { sections: expected.sections.filter(isValidExpectation) };
 }
 
 function isValidExpectation(value: unknown): value is HeadingNumberingSectionExpectation {
-  if (typeof value !== "object" || value === null) {
-    return false;
-  }
-
+  if (typeof value !== "object" || value === null) return false;
   const candidate = value as { section?: unknown; aliases?: unknown; level?: unknown };
-
-  return (
-    typeof candidate.section === "string" &&
-    candidate.section.trim().length > 0 &&
-    (candidate.aliases === undefined ||
-      (Array.isArray(candidate.aliases) &&
-        candidate.aliases.every(
-          (alias) => typeof alias === "string" && alias.trim().length > 0,
-        ))) &&
-    typeof candidate.level === "number" &&
-    Number.isInteger(candidate.level) &&
-    candidate.level >= 0
-  );
+  return typeof candidate.section === "string" && candidate.section.trim().length > 0 &&
+    (candidate.aliases === undefined || (Array.isArray(candidate.aliases) &&
+      candidate.aliases.every((alias) => typeof alias === "string" && alias.trim().length > 0))) &&
+    typeof candidate.level === "number" && Number.isInteger(candidate.level) && candidate.level >= 0;
 }
 
-function findOccurrences(
-  expectation: HeadingNumberingSectionExpectation,
-  sections: readonly DocumentSection[],
-): DocumentSection[] {
-  const names = [expectation.section, ...(expectation.aliases ?? [])];
-
-  return sections.filter((section) => sectionMatchesAnyExpectedName(section, names));
-}
-
-function findDuplicate(
-  expectations: readonly HeadingNumberingSectionExpectation[],
-  sections: readonly DocumentSection[],
-): HeadingNumberingSectionExpectation | null {
-  return expectations.find((expectation) => findOccurrences(expectation, sections).length > 1) ?? null;
-}
-
-function isReliablyNumbered(paragraph: Readonly<Paragraph>): boolean {
-  if (paragraph.numbering.source === "text") {
-    return paragraph.numbering.visibleLabel !== null && paragraph.numbering.level !== null;
-  }
-
-  return (
-    paragraph.numbering.source === "word" &&
-    paragraph.numbering.numId !== null &&
-    paragraph.numbering.level !== null
-  );
+function hasOverlappingExpectedNames(expectations: readonly HeadingNumberingSectionExpectation[]): boolean {
+  const names = expectations.flatMap((expectation) => [expectation.section, ...(expectation.aliases ?? [])]);
+  const normalized = names.map(normalizeSectionName);
+  return new Set(normalized).size !== normalized.length;
 }
 
 function formatExpectedLevel(level: number): string {
@@ -184,26 +120,13 @@ function formatExpectedLevel(level: number): string {
 }
 
 function formatLevel(level: number | null): string {
-  return level === null ? "Belirlenemedi" : String(level + 1);
+  return level === null ? "belirlenemeyen" : String(level + 1);
 }
 
-function createResult(
-  rule: RuleDefinition,
-  expected: HeadingNumberingRuleExpected,
-  status: RuleResultStatus,
-  actual: string,
-  message: string,
-): RuleResult {
-  return {
-    ruleId: rule.id,
-    ruleName: rule.title,
-    status,
-    passed: status === "PASSED",
+function createResult(rule: RuleDefinition, expected: HeadingNumberingRuleExpected,
+  status: RuleResultStatus, actual: string, message: string): RuleResult {
+  return { ruleId: rule.id, ruleName: rule.title, status, passed: status === "PASSED",
     severity: rule.severity,
-    expected: expected.sections
-      .map((expectation) => `${expectation.section}: düzey ${expectation.level + 1}`)
-      .join(", "),
-    actual,
-    message,
-  };
+    expected: expected.sections.map((item) => `${item.section}: düzey ${item.level + 1}`).join(", "),
+    actual, message };
 }

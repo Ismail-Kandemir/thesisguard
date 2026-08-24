@@ -12,6 +12,40 @@
   ],
   "rules": [
     {
+      "id": "comu.applied-sciences.food-technology.bachelor.heading-alignment",
+      "type": "HEADING_ALIGNMENT",
+      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "title": "Akademik Gövde Başlık Hizalaması",
+      "description": "Ana ve alt akademik gövde başlıklarının sola yaslı olmasını doğrular.",
+      "category": "heading",
+      "expected": { "levels": [0, 1, 2], "alignment": "left" },
+      "severity": "error",
+      "score": 10,
+      "message": "Akademik gövde başlıkları sola yaslı olmalıdır.",
+      "solution": "Akademik gövde başlığının paragraf hizalamasını sola yaslı olarak ayarlayın.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor.paragraph-indentation",
+      "type": "PARAGRAPH_INDENTATION",
+      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "title": "Akademik Ana Gövde Paragraf İlk Satır Girintisi",
+      "description": "Giriş ile Sonuç arasındaki akademik ana gövde paragraflarının ilk satırının 1,5 cm içeriden başlamasını doğrular.",
+      "category": "spacing",
+      "expected": {
+        "firstLineCm": 1.5,
+        "toleranceTwips": 1,
+        "sections": ["Giriş", "Genel Bilgiler", "Genel Bilgiler ve Literatür Çalışması", "Materyal ve Metot", "Bulgular ve Tartışma", "Sonuç"]
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Akademik ana gövde paragraf ilk satır girintisi 1,5 cm olmalıdır.",
+      "solution": "Akademik ana gövde paragraflarının ilk satır girintisini 1,5 cm olarak ayarlayın.",
+      "enabled": true,
+      "version": "1.0.0"
+    },
+    {
       "id": "comu.applied-sciences.food-technology.bachelor.margin.top",
       "scope": {
         "level": "department",

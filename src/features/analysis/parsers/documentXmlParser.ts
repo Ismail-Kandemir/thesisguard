@@ -9,6 +9,7 @@ import type {
 import { parseTableOfContents } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
+import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -30,7 +31,12 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     documentDefaults: {
       fontFamily: null,
       fontSize: null,
+      bold: null,
+      italic: null,
+      underline: null,
       lineSpacing: null,
+      alignment: null,
+      paragraphFormatting: createEmptyParagraphFormatting(),
     },
     pageMargins: parsePageMargins(xmlDocument),
     pageNumbering: {
@@ -51,6 +57,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     },
     numberingDefinitions: [],
     sections: parseDocumentSections(paragraphs),
+    headings: [],
   };
 }
 
@@ -108,13 +115,76 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
         runs,
         alignment: parseAlignment(paragraphElement),
         lineSpacing: parseLineSpacing(paragraphElement),
+        paragraphFormatting: parseParagraphFormatting(paragraphElement),
         styleId: parseParagraphStyleId(paragraphElement),
         numbering: parseDirectNumbering(paragraphElement),
         isTableOfContentsEntry: isTableOfContentsEntry(paragraphElement),
+        isInTableCell: hasAncestor(paragraphElement, "tc"),
         isEmpty: runs.every((run) => run.text.length === 0),
       };
     },
   );
+}
+
+function parseParagraphFormatting(paragraphElement: Element) {
+  const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
+  const indentation = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "ind")
+    : null;
+  const spacing = paragraphProperties
+    ? getFirstDescendant(paragraphProperties, "spacing")
+    : null;
+
+  return {
+    indentation: {
+      leftTwips: parseAliasedNumericWordAttribute(indentation, "start", "left"),
+      rightTwips: parseAliasedNumericWordAttribute(indentation, "end", "right"),
+      firstLineTwips: parseNumericWordAttributeOrNull(indentation, "firstLine"),
+      hangingTwips: parseNumericWordAttributeOrNull(indentation, "hanging"),
+      leftChars: parseAliasedNumericWordAttribute(indentation, "startChars", "leftChars"),
+      rightChars: parseAliasedNumericWordAttribute(indentation, "endChars", "rightChars"),
+      firstLineChars: parseNumericWordAttributeOrNull(indentation, "firstLineChars"),
+      hangingChars: parseNumericWordAttributeOrNull(indentation, "hangingChars"),
+    },
+    spacing: {
+      beforeTwips: parseNumericWordAttributeOrNull(spacing, "before"),
+      afterTwips: parseNumericWordAttributeOrNull(spacing, "after"),
+      beforeLines: parseNumericWordAttributeOrNull(spacing, "beforeLines"),
+      afterLines: parseNumericWordAttributeOrNull(spacing, "afterLines"),
+    },
+  };
+}
+
+function createEmptyParagraphFormatting() {
+  return {
+    indentation: {
+      leftTwips: null, rightTwips: null, firstLineTwips: null, hangingTwips: null,
+      leftChars: null, rightChars: null, firstLineChars: null, hangingChars: null,
+    },
+    spacing: { beforeTwips: null, afterTwips: null, beforeLines: null, afterLines: null },
+  };
+}
+
+function parseNumericWordAttributeOrNull(element: Element | null, name: string): number | null {
+  return element ? parseNumericWordAttribute(element, name) : null;
+}
+
+function parseAliasedNumericWordAttribute(
+  element: Element | null,
+  preferred: string,
+  legacy: string,
+): number | null {
+  return parseNumericWordAttributeOrNull(element, preferred) ??
+    parseNumericWordAttributeOrNull(element, legacy);
+}
+
+function hasAncestor(element: Element, localName: string): boolean {
+  let ancestor = element.parentElement;
+  while (ancestor) {
+    if (ancestor.namespaceURI === WORD_NAMESPACE && ancestor.localName === localName) return true;
+    ancestor = ancestor.parentElement;
+  }
+  return false;
 }
 
 function parsePageNumberSections(xmlDocument: Document) {
@@ -221,18 +291,28 @@ function parseRun(runElement: Element): Run {
 
   return {
     text: parseRunText(runElement),
+    styleId: parseRunStyleId(runElement),
     ...style,
   };
 }
 
+function parseRunStyleId(runElement: Element): string | null {
+  const runProperties = getFirstDescendant(runElement, "rPr");
+  const runStyle = runProperties ? getFirstDescendant(runProperties, "rStyle") : null;
+
+  return runStyle ? getWordAttribute(runStyle, "val") : null;
+}
+
 function parseRunStyle(runElement: Element): Omit<Run, "text"> {
   const runProperties = getFirstDescendant(runElement, "rPr");
+  const fontFamilyReference = parseRunFontFamilyReference(runProperties);
 
   return {
     bold: parseToggleProperty(runProperties, "b"),
     italic: parseToggleProperty(runProperties, "i"),
     underline: parseUnderline(runProperties),
-    fontFamily: parseRunFontFamily(runProperties),
+    fontFamily: getLegacyExplicitFont(fontFamilyReference),
+    fontFamilyReference,
     fontSize: parseRunFontSize(runProperties),
   };
 }
@@ -243,15 +323,15 @@ function parseRunText(runElement: Element): string {
     .join("");
 }
 
-function parseToggleProperty(runProperties: Element | null, propertyName: string): boolean {
+function parseToggleProperty(runProperties: Element | null, propertyName: string): boolean | null {
   if (!runProperties) {
-    return false;
+    return null;
   }
 
   const property = getFirstDescendant(runProperties, propertyName);
 
   if (!property) {
-    return false;
+    return null;
   }
 
   const value = getWordAttribute(property, "val")?.toLowerCase();
@@ -259,35 +339,20 @@ function parseToggleProperty(runProperties: Element | null, propertyName: string
   return value !== "false" && value !== "0" && value !== "off";
 }
 
-function parseUnderline(runProperties: Element | null): boolean {
+function parseUnderline(runProperties: Element | null): boolean | null {
   if (!runProperties) {
-    return false;
+    return null;
   }
 
   const underline = getFirstDescendant(runProperties, "u");
 
   if (!underline) {
-    return false;
+    return null;
   }
 
   const value = getWordAttribute(underline, "val")?.toLowerCase();
 
   return value !== "none" && value !== "false" && value !== "0" && value !== "off";
-}
-
-function parseRunFontFamily(runProperties: Element | null): string | null {
-  const runFonts = runProperties ? getFirstDescendant(runProperties, "rFonts") : null;
-
-  if (!runFonts) {
-    return null;
-  }
-
-  return (
-    getWordAttribute(runFonts, "ascii") ??
-    getWordAttribute(runFonts, "hAnsi") ??
-    getWordAttribute(runFonts, "cs") ??
-    getWordAttribute(runFonts, "eastAsia")
-  );
 }
 
 function parseRunFontSize(runProperties: Element | null): number | null {
