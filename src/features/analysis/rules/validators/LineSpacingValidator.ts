@@ -48,7 +48,10 @@ export class LineSpacingValidator implements RuleValidator {
 }
 
 function getExpectedLineSpacing(expected: RuleExpectedValue): number {
-  const value = typeof expected === "object" ? expected.value : expected;
+  const value =
+    typeof expected === "object" && "value" in expected
+      ? expected.value
+      : expected;
   const parsedValue = typeof value === "number" ? value : Number(value);
 
   if (!Number.isFinite(parsedValue)) {
