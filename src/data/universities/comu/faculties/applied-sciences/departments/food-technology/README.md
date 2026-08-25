@@ -59,8 +59,8 @@ ve Özgeçmiş kapsam dışıdır. “Boşluk bırakılmadan” hükmü kesin be
 
 ## Runtime composition count
 
-The current deterministic selector/resolver/engine truth is 45 rules/results
-for `experimental` and 43 for `source-research`. Forty resolved rules are common.
+The current deterministic selector/resolver/engine truth is 46 rules/results
+for `experimental` and 44 for `source-research`. Forty-one resolved rules are common.
 Experimental contributes five track-only IDs (three required sections, section
 order, and heading numbering); Source Research contributes three corresponding
 track-only IDs (one required section, section order, and heading numbering).
@@ -356,7 +356,6 @@ Bu nedenle `OBJECT_LIST_CONSISTENCY`, `table-list-consistency` ve
 object'in listede bulunması, listedeki her entry'nin gerçek object'e karşılık
 gelmesi, exact title eşitliği, sıra, duplicate entry yasağı, dot leader ve page
 accuracy bu rule setinde kontrol edilmez.
-<<<<<<< HEAD
 
 ## Tablo ve şekil kaynak gösterimi source audit
 
@@ -440,7 +439,6 @@ Bu nedenle bu rule setinde section page-start production ID'si yoktur. Mevcut
 ownership korunur: bölüm yokluğu `REQUIRED_SECTION`, sıra `SECTION_ORDER`,
 numaralandırma `HEADING_NUMBERING`, başlık biçimi `HEADING_LEVEL_FORMAT`, sayfa
 numarası geçişi ise `PAGE_NUMBER_SEQUENCE` tarafından değerlendirilir.
-=======
 ## Heading spacing
 
 The official guide strongly requires a visible 1.5-line gap before headings and
@@ -479,5 +477,27 @@ Official template packages include `word/theme/theme1.xml` and theme font
 metadata, even though their document runs also contain many explicit font
 assignments. Theme-backed formatting is now resolved as OOXML representation
 before the existing rule is evaluated. It does not change the rule counts:
-Experimental 45 and Source Research 43.
->>>>>>> 0b22081 (feat: add theme font resolution and strengthen typography validation)
+Experimental 46 and Source Research 44.
+
+## Academic structure and references hardening audit
+
+The official guide, bibliography guide, and both official DOCX templates were
+re-audited together. `Kaynaklar` presence remains owned by `REQUIRED_SECTION`;
+relative placement remains owned by each track's `SECTION_ORDER`. The sources
+strongly support author-year citations, alphabetical bibliography ordering, and
+type-specific bibliography examples. No bibliography-format or citation-linking
+production rule was added because the normalized model does not yet expose
+reliable bibliography-entry and in-text-citation identities across all supported
+source types. Template examples were not promoted to additional requirements.
+
+`Ekler` remains optional: missing appendices do not fail. `Özgeçmiş` remains a
+required section-presence check; personal data and placeholder content are not
+validated. Heading 2/3 absence, a document without eligible academic body prose,
+and a document without detected abbreviations remain intentional
+`NOT_APPLICABLE` outcomes.
+
+Section identity now rejects TOC cache paragraphs, table-cell paragraphs, and
+normalized caption paragraphs before any section validator consumes them. The
+abbreviation fact uses the shared body scope and excludes captions, table cells,
+numbered lists, TOC entries, and figure-carrier paragraphs. These changes close
+false-pass and false-applicability paths without adding a production rule ID.

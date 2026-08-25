@@ -1,5 +1,5 @@
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
-import { normalizeSectionName } from "../../parsers/documentSectionsParser";
+import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import type {
   NormalizedDocument,
   ParagraphIndentationRuleExpected,
@@ -71,9 +71,12 @@ function getAcademicBodyParagraphs(
   document: NormalizedDocument,
   sectionNames: readonly string[],
 ) {
-  const selectedNames = new Set(sectionNames.map(normalizeSectionName));
   const selectedRanges = document.sections
-    .filter((section) => section.isRuleDefinedHeading && selectedNames.has(section.normalizedName))
+    .filter(
+      (section) =>
+        section.isRuleDefinedHeading &&
+        sectionMatchesAnyExpectedName(section, sectionNames),
+    )
     .map((section) => {
       const next = document.sections.find(
         (candidate) => candidate.isRuleDefinedHeading && candidate.paragraphIndex > section.paragraphIndex,

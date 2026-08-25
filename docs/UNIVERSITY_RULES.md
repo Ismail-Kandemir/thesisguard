@@ -1728,15 +1728,15 @@ mevcut rule'larda kalmalıdır.
 
 **\## Current Food Technology runtime composition**
 
-For the current repository, \`experimental\` resolves to 45 rules and
+For the current repository, \`experimental\` resolves to 46 rules and
 
-\`source-research\` resolves to 43. RuleEngine produces the same
+\`source-research\` resolves to 44. RuleEngine produces the same
 respective result
 
 counts; all rules are enabled and every ID has a validator mapping. The
 common
 
-resolved layer contains 40 rules. Experimental has five track-specific
+resolved layer contains 41 rules. Experimental has five track-specific
 IDs and
 
 Source Research has three, producing the exact net difference of two.
@@ -1859,10 +1859,10 @@ captions,
 tables, or references. Therefore no section-specific typography rule or
 new
 
-production rule ID is added; Experimental remains 45 rules and Source
+production rule ID is added; Experimental remains 46 rules and Source
 Research
 
-remains 43.
+remains 44.
 
 Theme references are an OOXML representation of a font choice, not a new
 

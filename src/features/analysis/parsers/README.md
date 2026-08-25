@@ -252,3 +252,14 @@ explicit counterpart. ASCII characters use the ASCII slot; Turkish and other
 non-ASCII Latin text uses High ANSI. If visible text resolves to multiple font
 families, the validator keeps that ambiguity and does not produce a false pass.
 Unknown tokens or missing theme values resolve to unknown rather than guessing.
+# Academic identity scope hardening
+
+Section candidates exclude TOC cache paragraphs and table-cell paragraphs.
+After caption normalization, caption paragraph IDs are also removed before
+rule-defined section marking. Required-section and section-order validators
+therefore cannot treat those structural texts as independent headings.
+
+Abbreviation document facts use the shared body-paragraph scope. Captions,
+table cells, numbered lists, TOC entries, and figure-carrier paragraphs are
+excluded before token detection, so uppercase tokens in those structures do not
+create false conditional applicability.

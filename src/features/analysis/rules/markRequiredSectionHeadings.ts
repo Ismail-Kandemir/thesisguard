@@ -10,6 +10,9 @@ export function markRequiredSectionHeadings(
   document: NormalizedDocument,
   rules: readonly RuleDefinition[],
 ): NormalizedDocument {
+  const captionParagraphIds = new Set(
+    document.captions.items.map((caption) => caption.paragraphId),
+  );
   const requiredSectionNames = rules
     .filter(isRuleDefinedSectionRule)
     .flatMap((rule) => [
@@ -22,17 +25,19 @@ export function markRequiredSectionHeadings(
 
   return {
     ...document,
-    sections: document.sections.map((section) => ({
-      ...section,
-      isRuleDefinedHeading: sectionMatchesAnyExpectedName(
-        section,
-        requiredSectionNames,
-      ),
-      isObjectReferenceExcluded: sectionMatchesAnyExpectedName(
-        section,
-        objectReferenceExcludedNames,
-      ),
-    })),
+    sections: document.sections
+      .filter((section) => !captionParagraphIds.has(section.paragraphId))
+      .map((section) => ({
+        ...section,
+        isRuleDefinedHeading: sectionMatchesAnyExpectedName(
+          section,
+          requiredSectionNames,
+        ),
+        isObjectReferenceExcluded: sectionMatchesAnyExpectedName(
+          section,
+          objectReferenceExcludedNames,
+        ),
+      })),
   };
 }
 

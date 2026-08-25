@@ -3235,10 +3235,10 @@ Selection Resolved Enabled Engine results Missing validator
 
 ---
 
-`experimental` 45 45 45 0
-`source-research` 43 43 43 0
+`experimental` 46 46 46 0
+`source-research` 44 44 44 0
 
-Both selections share 40 resolved rules. Experimental adds
+Both selections share 41 resolved rules. Experimental adds
 `experimental.general-information-literature`,
 `experimental.material-method`, `experimental.findings-discussion`,
 `experimental.section-order`, and `experimental.heading-numbering`.
@@ -3250,8 +3250,8 @@ only the score denominator excludes it. Earlier 47/45 figures were a
 reporting/counting error, not repository or runtime composition truth.
 \## Heading spacing source audit
 
-Production decision: no rule added; counts remain Experimental 45 and
-Source Research 43.
+Production decision: no rule added; counts remain Experimental 46 and
+Source Research 44.
 
 ---
 
@@ -3293,8 +3293,8 @@ HEADING_SPACING rule Not configured because a
 heading-only property check is
 unsafe
 
-Resolver/engine parity Experimental 45/45; Source Research
-43/43
+Resolver/engine parity Experimental 46/46; Source Research
+44/44
 
 ---
 
@@ -3338,7 +3338,24 @@ rules own TNR/12
 Italic/underline/case No new failure without
 source-backed prohibition
 
-Counts Experimental 45; Source Research 43
+Counts Experimental 46; Source Research 44
+
+## Academic structure hardening smoke
+
+| Scenario | Expected |
+| --- | --- |
+| Experimental selector/resolver/engine | 46 / 46 / 46 |
+| Source Research selector/resolver/engine | 44 / 44 / 44 |
+| Unknown study type | Explicit rejection |
+| Missing validator | 0 |
+| Duplicate resolved ID | 0 |
+| TOC cached `KAYNAKLAR` | Not a section occurrence |
+| Table-cell `KAYNAKLAR` | Not a section occurrence |
+| Caption `KAYNAKLAR` | Not a section occurrence |
+| Body `PCR` | Abbreviation evidence |
+| Numbered-list `FAO` | Not abbreviation applicability evidence |
+| Missing Heading 2/3 | Legitimate `NOT_APPLICABLE` |
+| Optional `Ekler` absent | No failure |
 
 ---
 
@@ -3390,3 +3407,11 @@ Counts / engine parity Experimental 45/45; Source Research
 43/43
 
 ---
+## Manual-numbered academic section indentation regression
+
+| Scenario | Expected |
+| --- | --- |
+| `1. GİRİŞ` is marked as a rule-defined section while its stored `normalizedName` is `1giris` | Section is selected through the shared section matcher |
+| Plain prose immediately after that heading has direct `firstLineTwips=850` | `PARAGRAPH_INDENTATION` returns `PASSED` |
+| A numbered-list paragraph in the same range has a wrong indentation | Excluded from indentation candidates |
+| A table-cell or TOC paragraph in the same range has a wrong indentation | Excluded from indentation candidates |

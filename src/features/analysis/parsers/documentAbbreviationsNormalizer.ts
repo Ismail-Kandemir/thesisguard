@@ -12,7 +12,13 @@ export function normalizeDocumentAbbreviations(
   document: Readonly<NormalizedDocument>,
 ): DocumentAbbreviations {
   const items = detectAbbreviations(
-    getBodyParagraphs(document).map((paragraph) => paragraph.text),
+    getBodyParagraphs(document, {
+      excludeCaptions: true,
+      excludeTableCells: true,
+      excludeLists: true,
+      excludeTableOfContents: true,
+      excludeFigureCarriers: true,
+    }).map((paragraph) => paragraph.text),
   );
 
   return {
