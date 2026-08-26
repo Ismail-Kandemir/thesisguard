@@ -1,5 +1,66 @@
 ## Occurrence-aware heading numbering
 
+## Experimental 46/46 golden DOCX regression
+
+The COMU / Applied Sciences / Food Technology / Bachelor / Experimental
+golden DOCX is the manually verified full-correct fixture for the complete
+runtime contract:
+
+- total rules: 46
+- passed: 46
+- failed: 0
+- not applicable: 0
+- score: 100
+
+Fixture path:
+
+`tests/fixtures/comu/food-technology/experimental/full-correct.docx`
+
+The verified source file name is
+`thesisguard-comu-food-tech-experimental-46-of-46-full-correct.docx`.
+Copy that binary to the fixture path as `full-correct.docx`. Do not place
+the binary under `src/`, and do not edit it as source code.
+
+Regression command:
+
+`npm run test:golden`
+
+The command runs the real DOCX package through the production-equivalent
+analysis pipeline: DOCX package reader, XML parsers, numbering/object/
+abbreviation/heading normalization, `RuleSetSelector`, `RuleResolver`,
+`RuleEngine`, and `ReportBuilder`. It asserts:
+
+- Experimental resolved rules and engine results are both 46.
+- Source Research resolves 44 rules.
+- Common Food Technology resolves 41 rules.
+- missing validator count is 0.
+- duplicate resolved IDs and duplicate result IDs are 0.
+- resolved rule IDs and result rule IDs match exactly.
+- all 46 results are `PASSED`.
+- score is 100.
+
+Critical coverage includes typography, line spacing, paragraph alignment,
+paragraph indentation, Heading1/2/3, heading alignment, experimental heading
+numbering, all table object/caption/reference/list rules, all figure
+object/caption/reference/list rules, and `Simgeler ve Kısaltmalar Listesi`.
+
+Fixture facts are also asserted where the production model exposes them:
+tables, figures, abbreviations, `DNA`, Heading2/Heading3 occurrences,
+`Tablolar Listesi`, `Şekiller Listesi`, and
+`Simgeler ve Kısaltmalar Listesi`.
+
+Golden fixture failing after a production change is evidence to investigate;
+the fixture must not be changed merely to make the test green. The fixture
+should be intentionally updated only when the academic rule set or production
+parser contract changes deliberately, and the new real DOCX runtime has been
+manually verified.
+
+The script also runs small deterministic negative regression smoke checks for
+wrong table alignment, wrong figure caption side, missing figure reference,
+missing abbreviation list with academic `DNA`, wrong Heading2 font, and wrong
+paragraph first-line indentation. These smoke checks do not replace the real
+DOCX package-level golden test.
+
 ---
 
 Senaryo Beklenen
