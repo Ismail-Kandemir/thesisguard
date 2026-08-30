@@ -9,16 +9,21 @@ import type {
   ObjectAlignmentRuleExpected,
   ObjectAlignmentSource,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 type AlignableOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
 
 interface ResolvedObjectAlignment {
   occurrence: AlignableOccurrence;
   label: string;
+  captionId: string | null;
+  captionNumber: string | null;
+  captionText: string | null;
   alignment: ObjectAlignment;
   source: ObjectAlignmentSource;
 }
@@ -71,6 +76,17 @@ export class ObjectAlignmentValidator implements RuleValidator {
       "FAILED",
       formatActual(items),
       createFailureMessage(expected.object, wrong, unknown),
+      [...wrong, ...unknown].slice(0, MAX_RULE_EVIDENCE_ITEMS).map((item) =>
+        createObjectEvidence(expected.object, item.occurrence, {
+          actual: alignmentName(item.alignment),
+          captionId: item.captionId ?? undefined,
+          captionNumber: item.captionNumber ?? undefined,
+          captionText: item.captionText ?? undefined,
+          expected: alignmentName(expected.alignment),
+          objectLabel: item.label,
+        }),
+      ),
+      wrong.length + unknown.length,
     );
   }
 }
@@ -94,10 +110,14 @@ function resolveTableAlignments(
     .filter((table) => !table.isNested)
     .map((table, index) => {
       const resolved = resolveTableAlignment(table, styleResolver);
+      const caption = table.captionId ? captionsById.get(table.captionId) : undefined;
 
       return {
         occurrence: table,
-        label: getObjectLabel("table", table.captionId, captionsById, index),
+        label: getObjectLabel("table", caption, index),
+        captionId: caption?.id ?? null,
+        captionNumber: caption?.number ?? null,
+        captionText: caption?.text ?? null,
         ...resolved,
       };
     });
@@ -149,10 +169,14 @@ function resolveFigureAlignments(
       drawingCountByParagraphId,
       formattingResolver,
     );
+    const caption = figure.captionId ? captionsById.get(figure.captionId) : undefined;
 
     return {
       occurrence: figure,
-      label: getObjectLabel("figure", figure.captionId, captionsById, index),
+      label: getObjectLabel("figure", caption, index),
+      captionId: caption?.id ?? null,
+      captionNumber: caption?.number ?? null,
+      captionText: caption?.text ?? null,
       ...resolved,
     };
   });
@@ -190,12 +214,9 @@ function resolveFigureAlignment(
 
 function getObjectLabel(
   object: CaptionKind,
-  captionId: string | null,
-  captionsById: ReadonlyMap<string, NormalizedDocument["captions"]["items"][number]>,
+  caption: NormalizedDocument["captions"]["items"][number] | undefined,
   index: number,
 ): string {
-  const caption = captionId ? captionsById.get(captionId) : undefined;
-
   if (caption && caption.kind === object) {
     return `${objectName(object)} ${caption.number}`;
   }
@@ -236,6 +257,8 @@ function createResult(
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -246,6 +269,8 @@ function createResult(
     expected: `${objectName(expected.object)} nesnesi: ${alignmentName(expected.alignment)}`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

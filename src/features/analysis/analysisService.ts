@@ -4,7 +4,6 @@ import { normalizeDocumentNumbering } from "./parsers/documentNumberingNormalize
 import { parseNumberingXml } from "./parsers/numberingXmlParser";
 import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
-import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
 import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
@@ -53,7 +52,6 @@ export async function analyzeDocx(
   selection?: Readonly<AcademicSelection>,
 ): Promise<AnalysisReport> {
   const normalizedDocument = await createNormalizedDocumentFromDocx(file);
-  logParserDebugData(normalizedDocument);
   const ruleSets = selection
     ? new RuleSetSelector().select(selection)
     : loadRuleSets();
@@ -80,62 +78,4 @@ export async function analyzeDocx(
   const results = ruleEngine.run(documentWithSectionHeadings, rules);
 
   return reportBuilder.build(results);
-}
-
-function logParserDebugData(document: NormalizedDocument): void {
-  console.table(createParagraphDebugRows(document));
-  console.table(createRunDebugRows(document));
-  console.table([document.documentDefaults]);
-  console.table(createEffectiveFormattingDebugRows(document));
-}
-
-function createParagraphDebugRows(document: NormalizedDocument) {
-  const stylesById = new Map(document.styles.map((style) => [style.id, style]));
-
-  return document.paragraphs.map((paragraph) => ({
-    paragraphId: paragraph.id,
-    styleId: paragraph.styleId,
-    alignment: paragraph.alignment,
-    lineSpacing: paragraph.styleId
-      ? stylesById.get(paragraph.styleId)?.lineSpacing ?? null
-      : null,
-  }));
-}
-
-function createRunDebugRows(document: NormalizedDocument) {
-  return document.paragraphs.flatMap((paragraph) =>
-    paragraph.runs.map((run, runIndex) => ({
-      paragraphId: paragraph.id,
-      runIndex,
-      text: run.text,
-      fontFamily: run.fontFamily,
-      fontSize: run.fontSize,
-    })),
-  );
-}
-
-function createEffectiveFormattingDebugRows(document: NormalizedDocument) {
-  const resolver = new EffectiveFormattingResolver(
-    document.styles,
-    document.documentDefaults,
-    document.themeFonts,
-  );
-
-  return document.paragraphs.flatMap((paragraph) =>
-    paragraph.runs.map((run, runIndex) => {
-      const effectiveFormatting = resolver.resolveRun(
-        run,
-        paragraph.styleId,
-        paragraph.lineSpacing,
-      );
-
-      return {
-        paragraphId: paragraph.id,
-        runIndex,
-        fontFamily: effectiveFormatting.fontFamily,
-        fontSize: effectiveFormatting.fontSize,
-        lineSpacing: effectiveFormatting.lineSpacing,
-      };
-    }),
-  );
 }

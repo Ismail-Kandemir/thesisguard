@@ -6,10 +6,12 @@ import type {
   NormalizedDocument,
   ObjectCaptionPlacementRuleExpected,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 type CaptionOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
 
@@ -49,6 +51,13 @@ export class ObjectCaptionPlacementValidator implements RuleValidator {
       "FAILED",
       formatActual(occurrences),
       createFailureMessage(expected.object, occurrences.length, wrong),
+      wrong.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((occurrence) =>
+        createObjectEvidence(expected.object, occurrence, {
+          actual: positionName(occurrence.captionPosition),
+          expected: positionName(expected.position),
+        }),
+      ),
+      wrong.length,
     );
   }
 }
@@ -92,6 +101,8 @@ function createResult(
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -102,6 +113,8 @@ function createResult(
     expected: `${objectName(expected.object)} başlığı: ${positionName(expected.position)}`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

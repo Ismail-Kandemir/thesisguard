@@ -7,10 +7,12 @@ import type {
   Paragraph,
   ParagraphAlignment,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createCaptionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const OOXML_UNITS_PER_LINE = 240;
 
@@ -49,6 +51,15 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
       status === "PASSED"
         ? `${objectName(expected.object)} başlıklarının biçimi uygun.`
         : createFailureMessage(expected.object, formatting.length, wrong),
+      status === "FAILED"
+        ? wrong.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((item) =>
+            createCaptionEvidence(item.caption, {
+              actual: formatActual([item]),
+              expected: `${alignmentName(expected.alignment)}, ${expected.lineSpacing} satır`,
+            }),
+          )
+        : undefined,
+      status === "FAILED" ? wrong.length : undefined,
     );
   }
 }
@@ -127,6 +138,8 @@ function createResult(
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -137,6 +150,8 @@ function createResult(
     expected: `${alignmentName(expected.alignment)}, ${expected.lineSpacing} satır`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

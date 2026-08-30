@@ -1,5 +1,6 @@
 import type {
   NormalizedDocument,
+  Paragraph,
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
@@ -7,14 +8,25 @@ import type {
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
+import { createRunEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+
+interface FontSizeObservation {
+  actual: number | null;
+  paragraph: Paragraph;
+  paragraphIndex: number;
+  run: Paragraph["runs"][number];
+  runIndex: number;
+}
 
 export class FontSizeValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedFontSize = getExpectedFontSize(rule.expected);
-    const actualFontSizes = getActualFontSizes(document);
+    const observations = getFontSizeObservations(document);
+    const actualFontSizes = observations.map((observation) => observation.actual);
     const passed = actualFontSizes.every((fontSize) => fontSize === expectedFontSize);
+    const failures = observations.filter((observation) => observation.actual !== expectedFontSize);
 
-    return {
+    const result: RuleResult = {
       ruleId: rule.id,
       ruleName: rule.title,
       status: passed ? "PASSED" : "FAILED",
@@ -26,6 +38,20 @@ export class FontSizeValidator implements RuleValidator {
         ? `${rule.title} kurali basarili.`
         : createFailureMessage(expectedFontSize, actualFontSizes),
     };
+
+    return passed
+      ? result
+      : {
+          ...result,
+          evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((failure) =>
+            createRunEvidence(failure.paragraph, failure.paragraphIndex, failure.run, failure.runIndex, {
+              actual: failure.actual,
+              expected: expectedFontSize,
+              unit: "punto",
+            }),
+          ),
+          evidenceTotal: failures.length,
+        };
   }
 }
 
@@ -40,17 +66,29 @@ function getExpectedFontSize(expected: RuleExpectedValue): number {
   return parsedValue;
 }
 
-function getActualFontSizes(document: NormalizedDocument): Array<number | null> {
+function getFontSizeObservations(document: NormalizedDocument): FontSizeObservation[] {
   const formattingResolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
     document.themeFonts,
   );
 
+  const paragraphIndexById = new Map(document.paragraphs.map((paragraph, index) => [paragraph.id, index]));
+
   return getBodyParagraphs(document).flatMap((paragraph) =>
-    paragraph.runs.filter(isVisibleRun).map(
-      (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontSize,
-    ),
+    paragraph.runs.flatMap((run, runIndex) => {
+      if (!isVisibleRun(run)) {
+        return [];
+      }
+
+      return [{
+        actual: formattingResolver.resolveRun(run, paragraph.styleId).fontSize,
+        paragraph,
+        paragraphIndex: paragraphIndexById.get(paragraph.id) ?? 0,
+        run,
+        runIndex,
+      }];
+    }),
   );
 }
 

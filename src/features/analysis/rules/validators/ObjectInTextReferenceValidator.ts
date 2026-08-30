@@ -1,17 +1,23 @@
 import type {
   CaptionKind,
   DocumentCaption,
+  DocumentFigureOccurrence,
+  DocumentTableOccurrence,
   NormalizedDocument,
   ObjectInTextReferenceRuleExpected,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 interface ObjectIdentity {
+  caption: DocumentCaption;
   kind: CaptionKind;
   number: string;
+  occurrence: DocumentTableOccurrence | DocumentFigureOccurrence;
 }
 
 export class ObjectInTextReferenceValidator implements RuleValidator {
@@ -39,6 +45,14 @@ export class ObjectInTextReferenceValidator implements RuleValidator {
         "FAILED",
         `Belirsiz nesne numaraları: ${formatIdentities(expected.object, duplicateNumbers)}`,
         `${objectName(expected.object)} numaraları birden fazla nesnede kullanıldığı için metin içi atıf kapsamı güvenilir biçimde belirlenemedi: ${formatIdentities(expected.object, duplicateNumbers)}.`,
+        identities
+          .filter((identity) => duplicateNumbers.includes(identity.number))
+          .slice(0, MAX_RULE_EVIDENCE_ITEMS)
+          .map((identity) => createReferenceObjectEvidence(expected.object, identity, {
+            actual: "Numara birden fazla nesnede kullanıldı",
+            expected: "Benzersiz nesne numarası",
+          })),
+        identities.filter((identity) => duplicateNumbers.includes(identity.number)).length,
       );
     }
 
@@ -56,6 +70,13 @@ export class ObjectInTextReferenceValidator implements RuleValidator {
         "FAILED",
         `Atıf bulunamayanlar: ${formatIdentities(expected.object, missing.map((item) => item.number))}`,
         `Bazı ${expected.object === "table" ? "tablolar" : "şekiller"} için metin içi atıf bulunamadı: ${formatIdentities(expected.object, missing.map((item) => item.number))}.`,
+        missing.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((identity) =>
+          createReferenceObjectEvidence(expected.object, identity, {
+            actual: "Atıf tespit edilmedi",
+            expected: "Metin içinde en az bir atıf",
+          }),
+        ),
+        missing.length,
       );
     }
 
@@ -86,13 +107,16 @@ function getReliableObjectIdentities(
       : undefined;
 
     return caption && caption.kind === object
-      ? [toIdentity(caption)]
+      ? [toIdentity(caption, occurrence)]
       : [];
   });
 }
 
-function toIdentity(caption: Readonly<DocumentCaption>): ObjectIdentity {
-  return { kind: caption.kind, number: caption.number };
+function toIdentity(
+  caption: DocumentCaption,
+  occurrence: DocumentTableOccurrence | DocumentFigureOccurrence,
+): ObjectIdentity {
+  return { caption, kind: caption.kind, number: caption.number, occurrence };
 }
 
 function findDuplicateNumbers(identities: readonly ObjectIdentity[]): string[] {
@@ -134,6 +158,8 @@ function createResult(
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -144,7 +170,27 @@ function createResult(
     expected: `Her ${objectName(expected.object).toLocaleLowerCase("tr-TR")} için en az bir metin içi atıf`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
+}
+
+function createReferenceObjectEvidence(
+  object: CaptionKind,
+  identity: Readonly<ObjectIdentity>,
+  values: Readonly<{
+    actual: string;
+    expected: string;
+  }>,
+): RuleEvidence {
+  return createObjectEvidence(object, identity.occurrence, {
+    actual: values.actual,
+    captionId: identity.caption.id,
+    captionNumber: identity.caption.number,
+    captionText: identity.caption.text,
+    expected: values.expected,
+    objectLabel: `${objectName(object)} ${identity.number}`,
+  });
 }
 
 function formatIdentities(object: CaptionKind, numbers: readonly string[]): string {

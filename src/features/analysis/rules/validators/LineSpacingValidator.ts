@@ -1,5 +1,6 @@
 import type {
   NormalizedDocument,
+  Paragraph,
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
@@ -8,6 +9,7 @@ import type {
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
+import { createParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const OOXML_UNITS_PER_LINE = 240;
 
@@ -21,18 +23,28 @@ const EMPTY_RUN: Run = {
   fontSize: null,
 };
 
+interface LineSpacingObservation {
+  actual: number;
+  paragraph: Paragraph;
+  paragraphIndex: number;
+}
+
 export class LineSpacingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedLineSpacing = getExpectedLineSpacing(rule.expected);
-    const actualLineSpacings = getActualLineSpacings(document);
+    const observations = getLineSpacingObservations(document);
+    const actualLineSpacings = observations.map((observation) => observation.actual);
 
     const passed =
       actualLineSpacings.length > 0 &&
       actualLineSpacings.every(
         (lineSpacing) => lineSpacing === expectedLineSpacing,
       );
+    const failures = observations.filter(
+      (observation) => observation.actual !== expectedLineSpacing,
+    );
 
-    return {
+    const result: RuleResult = {
       ruleId: rule.id,
       ruleName: rule.title,
       status: passed ? "PASSED" : "FAILED",
@@ -44,6 +56,20 @@ export class LineSpacingValidator implements RuleValidator {
         ? `${rule.title} kurali basarili.`
         : createFailureMessage(expectedLineSpacing, actualLineSpacings),
     };
+
+    return passed || failures.length === 0
+      ? result
+      : {
+          ...result,
+          evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((failure) =>
+            createParagraphEvidence(failure.paragraph, failure.paragraphIndex, {
+              actual: failure.actual,
+              expected: expectedLineSpacing,
+              unit: "satır",
+            }),
+          ),
+          evidenceTotal: failures.length,
+        };
   }
 }
 
@@ -63,7 +89,7 @@ function getExpectedLineSpacing(expected: RuleExpectedValue): number {
   return parsedValue;
 }
 
-function getActualLineSpacings(document: NormalizedDocument): number[] {
+function getLineSpacingObservations(document: NormalizedDocument): LineSpacingObservation[] {
   const formattingResolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
@@ -75,17 +101,24 @@ function getActualLineSpacings(document: NormalizedDocument): number[] {
     excludeTableOfContents: true,
     excludeFigureCarriers: true,
   })
-    .map((paragraph) => {
+    .flatMap((paragraph) => {
       const run = paragraph.runs[0] ?? EMPTY_RUN;
-
-      return formattingResolver.resolveRun(
+      const lineSpacing = formattingResolver.resolveRun(
         run,
         paragraph.styleId,
         paragraph.lineSpacing,
       ).lineSpacing;
-    })
-    .filter((lineSpacing): lineSpacing is number => lineSpacing !== null)
-    .map(convertOoxmlSpacingToLines);
+
+      if (lineSpacing === null) {
+        return [];
+      }
+
+      return [{
+        actual: convertOoxmlSpacingToLines(lineSpacing),
+        paragraph,
+        paragraphIndex: document.paragraphs.indexOf(paragraph),
+      }];
+    });
 }
 
 function convertOoxmlSpacingToLines(lineSpacing: number): number {

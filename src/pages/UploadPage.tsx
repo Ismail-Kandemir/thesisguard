@@ -24,6 +24,7 @@ export function UploadPage() {
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<SelectedUploadFile | null>(null)
   const [analysisReport, setAnalysisReport] = useState<AnalysisReport | null>(null)
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [universityId, setUniversityId] = useState('')
   const [organizationId, setOrganizationId] = useState('')
   const [unitId, setUnitId] = useState('')
@@ -54,12 +55,14 @@ export function UploadPage() {
     if (!isSupportedUploadFile(file)) {
       setSelectedFile(null)
       setAnalysisReport(null)
+      setIsAnalyzing(false)
       setErrorMessage('Yalnızca .docx uzantılı dosyalar yüklenebilir.')
       return
     }
 
     setErrorMessage('')
     setAnalysisReport(null)
+    setIsAnalyzing(false)
     setSelectedFile(createSelectedUploadFile(file))
   }
 
@@ -71,14 +74,15 @@ export function UploadPage() {
 
     try {
       setErrorMessage('')
+      setAnalysisReport(null)
+      setIsAnalyzing(true)
       const report = await analyzeDocx(selectedFile.file, academicSelection)
       setAnalysisReport(report)
     } catch (error) {
-      setErrorMessage(
-        error instanceof Error
-          ? error.message
-          : 'Analiz sırasında bilinmeyen bir hata oluştu.',
-      )
+      setAnalysisReport(null)
+      setErrorMessage(createUserFriendlyAnalysisErrorMessage(error))
+    } finally {
+      setIsAnalyzing(false)
     }
   }
 
@@ -89,6 +93,7 @@ export function UploadPage() {
         onNewAnalysis={() => {
           setAnalysisReport(null)
           setSelectedFile(null)
+          setIsAnalyzing(false)
           setErrorMessage('')
         }}
       />
@@ -216,15 +221,32 @@ export function UploadPage() {
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
         {selectedFile ? <FileInfo selectedFile={selectedFile} /> : null}
         <p className="upload-page__analysis-hint" aria-live="polite">
-          {disabledReason}
+          {isAnalyzing ? 'Belge analiz ediliyor. Lütfen bekleyin.' : disabledReason}
         </p>
+        {isAnalyzing ? (
+          <p className="upload-page__analysis-status" role="status">
+            Analiz sonuçları hazırlanıyor...
+          </p>
+        ) : null}
         <UploadActions
           disabled={!selectedFile || !academicSelection}
+          isAnalyzing={isAnalyzing}
           onAnalyze={handleAnalyzeClick}
         />
       </Card>
     </Container>
   )
+}
+
+function createUserFriendlyAnalysisErrorMessage(error: unknown): string {
+  const fallbackMessage =
+    'Analiz sırasında bir hata oluştu. Lütfen geçerli bir DOCX dosyası yükleyip tekrar deneyin.'
+
+  if (!(error instanceof Error)) {
+    return fallbackMessage
+  }
+
+  return error.message || fallbackMessage
 }
 
 interface SelectionFieldProps {

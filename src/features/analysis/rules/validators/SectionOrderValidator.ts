@@ -2,12 +2,14 @@ import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher"
 import type {
   DocumentSection,
   NormalizedDocument,
+  RuleEvidence,
   RuleDefinition,
   RuleResult,
   SectionOrderItem,
   SectionOrderRuleExpected,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createSectionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 interface LocatedSection {
   item: SectionOrderItem;
@@ -27,12 +29,21 @@ export class SectionOrderValidator implements RuleValidator {
     );
 
     if (duplicate) {
+      const duplicateOccurrences = findDuplicateOccurrences(duplicate, document.sections);
       return createResult(
         rule,
         expected,
         false,
         formatActual(locatedSections),
         `${duplicate.section} bölümü belgede birden fazla kez bulundu; bölüm sırası güvenle doğrulanamadı.`,
+        duplicateOccurrences.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((section) =>
+          createSectionEvidence(section, {
+            actual: section.displayName,
+            expected: duplicate.section,
+            sectionName: duplicate.section,
+          }),
+        ),
+        duplicateOccurrences.length,
       );
     }
 
@@ -46,6 +57,14 @@ export class SectionOrderValidator implements RuleValidator {
         false,
         formatActual(locatedSections),
         `${before.item.section} bölümü, ${after.item.section} bölümünden sonra bulundu.`,
+        [before, after].map((section) =>
+          createSectionEvidence(section.occurrence, {
+            actual: section.occurrence.displayName,
+            expected: section.item.section,
+            sectionName: section.item.section,
+          }),
+        ),
+        misplacedPair.length,
       );
     }
 
@@ -131,6 +150,14 @@ function findDuplicateExpectedSection(
   );
 }
 
+function findDuplicateOccurrences(
+  item: SectionOrderItem,
+  sections: readonly DocumentSection[],
+): DocumentSection[] {
+  const names = getNames(item);
+  return sections.filter((section) => sectionMatchesAnyExpectedName(section, names));
+}
+
 function findMisplacedPair(
   sections: readonly LocatedSection[],
 ): readonly [LocatedSection, LocatedSection] | null {
@@ -152,6 +179,8 @@ function createResult(
   passed: boolean,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -162,6 +191,8 @@ function createResult(
     expected: expected.sections.map((item) => item.section).join(" → "),
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

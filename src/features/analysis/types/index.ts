@@ -623,9 +623,16 @@ export type {
 } from "./AcademicSelection";
 
 export type {
+  CaptionRuleEvidence,
+  HeadingRuleEvidence,
+  ObjectRuleEvidence,
+  ParagraphRuleEvidence,
+  RunRuleEvidence,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
   RuleResultValue,
+  SectionRuleEvidence,
 } from "./RuleResult";
 
 export type {

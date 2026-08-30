@@ -1,5 +1,6 @@
 import type {
   NormalizedDocument,
+  Paragraph,
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
@@ -8,16 +9,29 @@ import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingRe
 import { getBodyParagraphs } from "./bodyParagraphs";
 import { fontFamiliesEqual } from "../fontFamilyComparison";
 import type { RuleValidator } from "./RuleValidator";
+import { createRunEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+
+interface FontFamilyObservation {
+  actual: string | null;
+  paragraph: Paragraph;
+  paragraphIndex: number;
+  run: Paragraph["runs"][number];
+  runIndex: number;
+}
 
 export class FontFamilyValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedFontFamily = getExpectedFontFamily(rule.expected);
-    const actualFontFamilies = getActualFontFamilies(document);
+    const observations = getFontFamilyObservations(document);
+    const actualFontFamilies = observations.map((observation) => observation.actual);
     const passed = actualFontFamilies.every(
       (fontFamily) => fontFamiliesEqual(fontFamily, expectedFontFamily),
     );
+    const failures = observations.filter(
+      (observation) => !fontFamiliesEqual(observation.actual, expectedFontFamily),
+    );
 
-    return {
+    const result: RuleResult = {
       ruleId: rule.id,
       ruleName: rule.title,
       status: passed ? "PASSED" : "FAILED",
@@ -29,6 +43,19 @@ export class FontFamilyValidator implements RuleValidator {
         ? `${rule.title} kurali basarili.`
         : createFailureMessage(expectedFontFamily, actualFontFamilies),
     };
+
+    return passed
+      ? result
+      : {
+          ...result,
+          evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((failure) =>
+            createRunEvidence(failure.paragraph, failure.paragraphIndex, failure.run, failure.runIndex, {
+              actual: failure.actual ?? "Belirtilmemis",
+              expected: expectedFontFamily,
+            }),
+          ),
+          evidenceTotal: failures.length,
+        };
   }
 }
 
@@ -44,17 +71,29 @@ function getExpectedFontFamily(expected: RuleExpectedValue): string {
   return String(expected);
 }
 
-function getActualFontFamilies(document: NormalizedDocument): Array<string | null> {
+function getFontFamilyObservations(document: NormalizedDocument): FontFamilyObservation[] {
   const formattingResolver = new EffectiveFormattingResolver(
     document.styles,
     document.documentDefaults,
     document.themeFonts,
   );
 
+  const paragraphIndexById = new Map(document.paragraphs.map((paragraph, index) => [paragraph.id, index]));
+
   return getBodyParagraphs(document).flatMap((paragraph) =>
-    paragraph.runs.filter(isVisibleRun).map(
-      (run) => formattingResolver.resolveRun(run, paragraph.styleId).fontFamily,
-    ),
+    paragraph.runs.flatMap((run, runIndex) => {
+      if (!isVisibleRun(run)) {
+        return [];
+      }
+
+      return [{
+        actual: formattingResolver.resolveRun(run, paragraph.styleId).fontFamily,
+        paragraph,
+        paragraphIndex: paragraphIndexById.get(paragraph.id) ?? 0,
+        run,
+        runIndex,
+      }];
+    }),
   );
 }
 

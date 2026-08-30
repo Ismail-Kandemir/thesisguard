@@ -65,6 +65,17 @@
   font-size: 14px;
 }
 
+.upload-page__analysis-status {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 6px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 14px;
+  font-weight: 600;
+}
+
 @media (max-width: 640px) {
   .upload-page__selections {
     grid-template-columns: 1fr;

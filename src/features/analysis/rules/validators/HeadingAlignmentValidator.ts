@@ -7,6 +7,7 @@ import type {
   RuleResult,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const MAX_SAMPLES = 3;
 
@@ -36,8 +37,17 @@ export class HeadingAlignmentValidator implements RuleValidator {
     const samples = failures.slice(0, MAX_SAMPLES).map(({ heading, actual }) =>
       `“${formatHeadingLabel(heading.visibleLabel, heading.text)}” (${formatAlignment(actual)})`,
     );
-    return result(rule, "FAILED", false, expected.alignment, samples.join("; "),
-      `${failures.length} akademik başlığın hizalaması uygun değil. ${samples.join("; ")}`);
+    return {
+      ...result(rule, "FAILED", false, expected.alignment, samples.join("; "),
+        `${failures.length} akademik başlığın hizalaması uygun değil. ${samples.join("; ")}`),
+      evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map(({ heading, actual }) =>
+        createHeadingEvidence(heading, {
+          actual: formatAlignment(actual),
+          expected: formatAlignment(expected.alignment),
+        }),
+      ),
+      evidenceTotal: failures.length,
+    };
   }
 }
 

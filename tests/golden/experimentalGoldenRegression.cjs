@@ -26,6 +26,33 @@ const FIXTURE_PATH = path.join(
   "experimental",
   "full-correct.docx",
 );
+const INDENTATION_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-indentation-fail.docx",
+);
+const TYPOGRAPHY_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-typography-fail.docx",
+);
+const PARAGRAPH_FORMAT_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-paragraph-format-fail.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -65,6 +92,10 @@ const CRITICAL_RULE_IDS = [
   "comu.applied-sciences.food-technology.bachelor.list-of-abbreviations",
 ];
 
+const INDENTATION_RULE_ID = "comu.applied-sciences.food-technology.bachelor.paragraph-indentation";
+const FONT_SIZE_RULE_ID = "comu.bachelor.typography.font-size";
+const LINE_SPACING_RULE_ID = "comu.bachelor.spacing.line-height";
+
 installMinimalXmlDomParser();
 
 async function main() {
@@ -89,6 +120,7 @@ async function main() {
   assertReport(report, rules, results);
   assertCriticalRules(report.results);
   assertFixtureFacts(document);
+  await assertDerivedNegativeFixtures();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -153,6 +185,10 @@ function resolveRuleSet(ruleSetId, allRuleSets, ruleSetsById, RuleResolver) {
 }
 
 async function runGoldenFixture() {
+  return runAnalysisFixture(FIXTURE_PATH);
+}
+
+async function runAnalysisFixture(filePath) {
   const { readDocxAnalysisXmlParts } = require("../../src/features/analysis/readers/docxPackageReader.ts");
   const { parseDocumentXml } = require("../../src/features/analysis/parsers/documentXmlParser.ts");
   const { parseStylesXml } = require("../../src/features/analysis/parsers/stylesXmlParser.ts");
@@ -181,7 +217,7 @@ async function runGoldenFixture() {
   const { RuleEngine } = require("../../src/features/analysis/engine/RuleEngine.ts");
   const { ReportBuilder } = require("../../src/features/analysis/report/ReportBuilder.ts");
 
-  const file = createNodeDocxReaderInput(FIXTURE_PATH);
+  const file = createNodeDocxReaderInput(filePath);
   const { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts } =
     await readDocxAnalysisXmlParts(file);
   const parsed = parseDocumentXml(documentXml);
@@ -218,6 +254,66 @@ async function runGoldenFixture() {
   const report = new ReportBuilder().build(results);
 
   return { document, report };
+}
+
+async function assertDerivedNegativeFixtures() {
+  assert(fs.existsSync(INDENTATION_NEGATIVE_FIXTURE_PATH), "indentation negative fixture missing");
+  assert(fs.existsSync(TYPOGRAPHY_NEGATIVE_FIXTURE_PATH), "typography negative fixture missing");
+  assert(fs.existsSync(PARAGRAPH_FORMAT_NEGATIVE_FIXTURE_PATH), "paragraph format negative fixture missing");
+
+  const indentation = await runAnalysisFixture(INDENTATION_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(indentation.report, INDENTATION_RULE_ID, "indentation negative fixture");
+  const indentationResult = getResultById(indentation.report.results, INDENTATION_RULE_ID);
+  assertEqual(indentationResult.evidence?.[0]?.kind, "paragraph", "indentation fixture evidence kind");
+  assertEqual(indentationResult.evidence?.[0]?.paragraphId, "paragraph-25", "indentation fixture evidence paragraph id");
+  assertEqual(indentationResult.evidence?.[0]?.paragraphIndex, 24, "indentation fixture evidence paragraph index");
+
+  const typography = await runAnalysisFixture(TYPOGRAPHY_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(typography.report, FONT_SIZE_RULE_ID, "typography negative fixture");
+  const fontSizeResult = getResultById(typography.report.results, FONT_SIZE_RULE_ID);
+  assertEqual(fontSizeResult.evidence?.[0]?.kind, "run", "typography fixture evidence kind");
+  assertEqual(fontSizeResult.evidence?.[0]?.paragraphId, "paragraph-25", "typography fixture evidence paragraph id");
+  assertEqual(fontSizeResult.evidence?.[0]?.paragraphIndex, 24, "typography fixture evidence paragraph index");
+  assertEqual(fontSizeResult.evidence?.[0]?.runIndex, 0, "typography fixture evidence run index");
+  assertEqual(
+    fontSizeResult.evidence?.[0]?.textExcerpt,
+    "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır.",
+    "typography fixture evidence excerpt",
+  );
+  assertEqual(fontSizeResult.evidence?.[0]?.expected, 12, "typography fixture evidence expected");
+  assertEqual(fontSizeResult.evidence?.[0]?.actual, 11, "typography fixture evidence actual");
+  assertEqual(fontSizeResult.evidenceTotal, 1, "typography fixture evidence total");
+
+  const paragraphFormat = await runAnalysisFixture(PARAGRAPH_FORMAT_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(paragraphFormat.report, LINE_SPACING_RULE_ID, "paragraph format negative fixture");
+  const lineSpacingResult = getResultById(paragraphFormat.report.results, LINE_SPACING_RULE_ID);
+  assertEqual(lineSpacingResult.evidence?.[0]?.kind, "paragraph", "paragraph format fixture evidence kind");
+  assertEqual(lineSpacingResult.evidence?.[0]?.paragraphId, "paragraph-25", "paragraph format fixture evidence paragraph id");
+  assertEqual(lineSpacingResult.evidence?.[0]?.paragraphIndex, 24, "paragraph format fixture evidence paragraph index");
+  assertEqual(
+    lineSpacingResult.evidence?.[0]?.textExcerpt,
+    "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır.",
+    "paragraph format fixture evidence excerpt",
+  );
+  assertEqual(lineSpacingResult.evidence?.[0]?.expected, 1.5, "paragraph format fixture evidence expected");
+  assertEqual(lineSpacingResult.evidence?.[0]?.actual, 1, "paragraph format fixture evidence actual");
+  assertEqual(lineSpacingResult.evidenceTotal, 1, "paragraph format fixture evidence total");
+}
+
+function assertSingleFailureReport(report, failedRuleId, label) {
+  assertEqual(report.totalRules, 46, `${label} total rule count`);
+  assertEqual(report.passedRules, 45, `${label} passed rule count`);
+  assertEqual(report.failedRules, 1, `${label} failed rule count`);
+  assertEqual(report.notApplicableRules, 0, `${label} not applicable rule count`);
+  assertEqual(report.score, 98, `${label} score`);
+  const failed = report.results.filter((result) => result.status === "FAILED");
+  assertEqual(failed[0]?.ruleId, failedRuleId, `${label} failed rule id`);
+}
+
+function getResultById(results, ruleId) {
+  const result = results.find((item) => item.ruleId === ruleId);
+  if (!result) throw new Error(`Rule result missing: ${ruleId}`);
+  return result;
 }
 
 async function runPackageReadSmoke() {
@@ -330,38 +426,196 @@ function runNegativeRegressionSmoke() {
   const {
     ConditionalRequiredSectionValidator,
   } = require("../../src/features/analysis/rules/validators/ConditionalRequiredSectionValidator.ts");
+  const {
+    FontFamilyValidator,
+  } = require("../../src/features/analysis/rules/validators/FontFamilyValidator.ts");
+  const {
+    FontSizeValidator,
+  } = require("../../src/features/analysis/rules/validators/FontSizeValidator.ts");
+  const {
+    HeadingAlignmentValidator,
+  } = require("../../src/features/analysis/rules/validators/HeadingAlignmentValidator.ts");
+  const {
+    HeadingNumberingValidator,
+  } = require("../../src/features/analysis/rules/validators/HeadingNumberingValidator.ts");
   const { HeadingValidator } = require("../../src/features/analysis/rules/validators/HeadingValidator.ts");
+  const {
+    AlignmentValidator,
+  } = require("../../src/features/analysis/rules/validators/AlignmentValidator.ts");
+  const {
+    LineSpacingValidator,
+  } = require("../../src/features/analysis/rules/validators/LineSpacingValidator.ts");
+  const {
+    ObjectCaptionFormatValidator,
+  } = require("../../src/features/analysis/rules/validators/ObjectCaptionFormatValidator.ts");
   const {
     ParagraphIndentationValidator,
   } = require("../../src/features/analysis/rules/validators/ParagraphIndentationValidator.ts");
+  const {
+    SectionOrderValidator,
+  } = require("../../src/features/analysis/rules/validators/SectionOrderValidator.ts");
 
-  assertEqual(
-    new ObjectAlignmentValidator().validate(createNegativeDocument({ tableAlignment: "left" }), {
+  const tableAlignmentResult = new ObjectAlignmentValidator().validate(
+    createNegativeDocument({ tableAlignment: "left" }),
+    {
       ...ruleBase("table alignment"),
       type: "OBJECT_ALIGNMENT",
       expected: { object: "table", alignment: "center" },
-    }).status,
-    "FAILED",
-    "negative table alignment",
+    },
   );
-  assertEqual(
-    new ObjectCaptionPlacementValidator().validate(createNegativeDocument({ figureCaptionPosition: "before" }), {
+  assertEqual(tableAlignmentResult.status, "FAILED", "negative table alignment");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.kind, "table", "table alignment evidence kind");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.objectId, "table-1", "table alignment evidence id");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.objectLabel, "Tablo 1", "table alignment evidence label");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.expected, "Ortalanmış", "table alignment evidence expected");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.actual, "Sola hizalı", "table alignment evidence actual");
+  assertEqual(tableAlignmentResult.evidenceTotal, 1, "table alignment evidence total");
+  const figureAlignmentResult = new ObjectAlignmentValidator().validate(
+    createNegativeDocument({ figureAlignment: "left" }),
+    {
+      ...ruleBase("figure alignment"),
+      type: "OBJECT_ALIGNMENT",
+      expected: { object: "figure", alignment: "center" },
+    },
+  );
+  assertEqual(figureAlignmentResult.status, "FAILED", "negative figure alignment");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.kind, "figure", "figure alignment evidence kind");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.objectId, "figure-1", "figure alignment evidence id");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.objectLabel, "Şekil 1", "figure alignment evidence label");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.paragraphId, "figure-carrier", "figure alignment paragraph id");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.paragraphIndex, 3, "figure alignment paragraph index");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.expected, "Ortalanmış", "figure alignment evidence expected");
+  assertEqual(figureAlignmentResult.evidence?.[0]?.actual, "Sola hizalı", "figure alignment evidence actual");
+  assertEqual(figureAlignmentResult.evidenceTotal, 1, "figure alignment evidence total");
+  const fontSizeResult = new FontSizeValidator().validate(createNegativeDocument({ bodyRunFontSize: 11 }), {
+    ...ruleBase("font size"),
+    type: "FONT_SIZE",
+    expected: 12,
+  });
+  assertEqual(fontSizeResult.status, "FAILED", "negative font size");
+  assertAtLeast(fontSizeResult.evidence?.length ?? 0, 1, "negative font size evidence count");
+  assertEqual(fontSizeResult.evidenceTotal, 1, "negative font size evidence total");
+  assertEqual(fontSizeResult.evidence?.[0]?.kind, "run", "negative font size evidence kind");
+  assertEqual(fontSizeResult.evidence?.[0]?.paragraphId, "body", "negative font size paragraph id");
+  assertEqual(fontSizeResult.evidence?.[0]?.paragraphIndex, 1, "negative font size paragraph index");
+  assertEqual(fontSizeResult.evidence?.[0]?.runIndex, 0, "negative font size run index");
+  assertEqual(fontSizeResult.evidence?.[0]?.expected, 12, "negative font size expected");
+  assertEqual(fontSizeResult.evidence?.[0]?.actual, 11, "negative font size actual");
+  assert(
+    (fontSizeResult.evidence?.[0]?.textExcerpt?.length ?? 0) > 0 &&
+      (fontSizeResult.evidence?.[0]?.textExcerpt?.length ?? 0) <= 160,
+    "negative font size evidence excerpt should be bounded",
+  );
+  const fontFamilyResult = new FontFamilyValidator().validate(createNegativeDocument({ bodyRunFontFamily: "Arial" }), {
+    ...ruleBase("font family"),
+    type: "FONT_FAMILY",
+    expected: "Times New Roman",
+  });
+  assertEqual(fontFamilyResult.status, "FAILED", "negative font family");
+  assertAtLeast(fontFamilyResult.evidence?.length ?? 0, 1, "negative font family evidence count");
+  assertEqual(fontFamilyResult.evidenceTotal, 1, "negative font family evidence total");
+  assertEqual(fontFamilyResult.evidence?.[0]?.kind, "run", "negative font family evidence kind");
+  assertEqual(fontFamilyResult.evidence?.[0]?.paragraphId, "body", "negative font family paragraph id");
+  assertEqual(fontFamilyResult.evidence?.[0]?.paragraphIndex, 1, "negative font family paragraph index");
+  assertEqual(fontFamilyResult.evidence?.[0]?.runIndex, 0, "negative font family run index");
+  assertEqual(fontFamilyResult.evidence?.[0]?.expected, "Times New Roman", "negative font family expected");
+  assertEqual(fontFamilyResult.evidence?.[0]?.actual, "Arial", "negative font family actual");
+  const lineSpacingResult = new LineSpacingValidator().validate(createNegativeDocument({ bodyLineSpacing: 240 }), {
+    ...ruleBase("line spacing"),
+    type: "LINE_SPACING",
+    expected: 1.5,
+  });
+  assertEqual(lineSpacingResult.status, "FAILED", "negative line spacing");
+  assertAtLeast(lineSpacingResult.evidence?.length ?? 0, 1, "negative line spacing evidence count");
+  assertEqual(lineSpacingResult.evidenceTotal, 1, "negative line spacing evidence total");
+  assertEqual(lineSpacingResult.evidence?.[0]?.kind, "paragraph", "negative line spacing evidence kind");
+  assertEqual(lineSpacingResult.evidence?.[0]?.paragraphId, "body", "negative line spacing paragraph id");
+  assertEqual(lineSpacingResult.evidence?.[0]?.paragraphIndex, 1, "negative line spacing paragraph index");
+  assertEqual(lineSpacingResult.evidence?.[0]?.expected, 1.5, "negative line spacing expected");
+  assertEqual(lineSpacingResult.evidence?.[0]?.actual, 1, "negative line spacing actual");
+  assert(
+    (lineSpacingResult.evidence?.[0]?.textExcerpt?.length ?? 0) > 0 &&
+      (lineSpacingResult.evidence?.[0]?.textExcerpt?.length ?? 0) <= 160,
+    "negative line spacing evidence excerpt should be bounded",
+  );
+  const alignmentResult = new AlignmentValidator().validate(createNegativeDocument({ bodyAlignment: "left" }), {
+    ...ruleBase("alignment"),
+    type: "ALIGNMENT",
+    expected: "justify",
+  });
+  assertEqual(alignmentResult.status, "FAILED", "negative alignment");
+  assertAtLeast(alignmentResult.evidence?.length ?? 0, 1, "negative alignment evidence count");
+  assertEqual(alignmentResult.evidenceTotal, 1, "negative alignment evidence total");
+  assertEqual(alignmentResult.evidence?.[0]?.kind, "paragraph", "negative alignment evidence kind");
+  assertEqual(alignmentResult.evidence?.[0]?.paragraphId, "body", "negative alignment paragraph id");
+  assertEqual(alignmentResult.evidence?.[0]?.paragraphIndex, 1, "negative alignment paragraph index");
+  assertEqual(alignmentResult.evidence?.[0]?.expected, "Iki yana yasli", "negative alignment expected");
+  assertEqual(alignmentResult.evidence?.[0]?.actual, "Sola hizali", "negative alignment actual");
+  const figureCaptionPlacementResult = new ObjectCaptionPlacementValidator().validate(
+    createNegativeDocument({ figureCaptionPosition: "before" }),
+    {
       ...ruleBase("figure caption placement"),
       type: "OBJECT_CAPTION_PLACEMENT",
       expected: { object: "figure", position: "after" },
-    }).status,
-    "FAILED",
-    "negative figure caption placement",
+    },
   );
-  assertEqual(
-    new ObjectInTextReferenceValidator().validate(createNegativeDocument({ figureReference: false }), {
+  assertEqual(figureCaptionPlacementResult.status, "FAILED", "negative figure caption placement");
+  assertEqual(figureCaptionPlacementResult.evidence?.[0]?.kind, "figure", "figure placement evidence kind");
+  assertEqual(figureCaptionPlacementResult.evidence?.[0]?.objectId, "figure-1", "figure placement evidence id");
+  const tableCaptionPlacementResult = new ObjectCaptionPlacementValidator().validate(
+    createNegativeDocument({ tableCaptionPosition: "after" }),
+    {
+      ...ruleBase("table caption placement"),
+      type: "OBJECT_CAPTION_PLACEMENT",
+      expected: { object: "table", position: "before" },
+    },
+  );
+  assertEqual(tableCaptionPlacementResult.status, "FAILED", "negative table caption placement");
+  assertEqual(tableCaptionPlacementResult.evidence?.[0]?.kind, "table", "table placement evidence kind");
+  assertEqual(tableCaptionPlacementResult.evidence?.[0]?.objectId, "table-1", "table placement evidence id");
+  const figureCaptionFormatResult = new ObjectCaptionFormatValidator().validate(createNegativeDocument(), {
+    ...ruleBase("figure caption format"),
+    type: "OBJECT_CAPTION_FORMAT",
+    expected: { object: "figure", alignment: "center", lineSpacing: 1 },
+  });
+  assertEqual(figureCaptionFormatResult.status, "FAILED", "negative figure caption format");
+  assertEqual(figureCaptionFormatResult.evidence?.[0]?.kind, "caption", "caption format evidence kind");
+  assertEqual(figureCaptionFormatResult.evidence?.[0]?.captionId, "figure-caption", "caption format evidence id");
+  const tableCaptionFormatResult = new ObjectCaptionFormatValidator().validate(createNegativeDocument(), {
+    ...ruleBase("table caption format"),
+    type: "OBJECT_CAPTION_FORMAT",
+    expected: { object: "table", alignment: "center", lineSpacing: 1 },
+  });
+  assertEqual(tableCaptionFormatResult.status, "FAILED", "negative table caption format");
+  assertEqual(tableCaptionFormatResult.evidence?.[0]?.kind, "caption", "table caption format evidence kind");
+  assertEqual(tableCaptionFormatResult.evidence?.[0]?.captionId, "table-caption", "table caption format evidence id");
+  const tableReferenceResult = new ObjectInTextReferenceValidator().validate(createNegativeDocument(), {
+    ...ruleBase("table reference"),
+    type: "OBJECT_IN_TEXT_REFERENCE",
+    expected: { object: "table" },
+  });
+  assertEqual(tableReferenceResult.status, "FAILED", "negative missing table reference");
+  assertEqual(tableReferenceResult.evidence?.[0]?.kind, "table", "table reference evidence kind");
+  assertEqual(tableReferenceResult.evidence?.[0]?.objectLabel, "Tablo 1", "table reference evidence label");
+  assertEqual(tableReferenceResult.evidence?.[0]?.expected, "Metin içinde en az bir atıf", "table reference evidence expected");
+  assertEqual(tableReferenceResult.evidence?.[0]?.actual, "Atıf tespit edilmedi", "table reference evidence actual");
+  assertEqual(tableReferenceResult.evidenceTotal, 1, "table reference evidence total");
+  const figureReferenceResult = new ObjectInTextReferenceValidator().validate(
+    createNegativeDocument({ figureReference: false }),
+    {
       ...ruleBase("figure reference"),
       type: "OBJECT_IN_TEXT_REFERENCE",
       expected: { object: "figure" },
-    }).status,
-    "FAILED",
-    "negative missing figure reference",
+    },
   );
+  assertEqual(figureReferenceResult.status, "FAILED", "negative missing figure reference");
+  assertEqual(figureReferenceResult.evidence?.[0]?.kind, "figure", "figure reference evidence kind");
+  assertEqual(figureReferenceResult.evidence?.[0]?.objectLabel, "Şekil 1", "figure reference evidence label");
+  assertEqual(figureReferenceResult.evidence?.[0]?.paragraphId, "figure-carrier", "figure reference paragraph id");
+  assertEqual(figureReferenceResult.evidence?.[0]?.paragraphIndex, 3, "figure reference paragraph index");
+  assertEqual(figureReferenceResult.evidence?.[0]?.expected, "Metin içinde en az bir atıf", "figure reference evidence expected");
+  assertEqual(figureReferenceResult.evidence?.[0]?.actual, "Atıf tespit edilmedi", "figure reference evidence actual");
+  assertEqual(figureReferenceResult.evidenceTotal, 1, "figure reference evidence total");
   assertEqual(
     new ConditionalRequiredSectionValidator().validate(
       createNegativeDocument({ abbreviationList: false }),
@@ -377,8 +631,7 @@ function runNegativeRegressionSmoke() {
     "FAILED",
     "negative missing abbreviation list",
   );
-  assertEqual(
-    new HeadingValidator().validate(createNegativeDocument({ heading2Font: "Arial" }), {
+  const headingResult = new HeadingValidator().validate(createNegativeDocument({ heading2Font: "Arial" }), {
       ...ruleBase("heading 2"),
       type: "HEADING",
       category: "heading",
@@ -388,12 +641,59 @@ function runNegativeRegressionSmoke() {
         fontSize: 12,
         bold: true,
       },
-    }).status,
-    "FAILED",
-    "negative wrong Heading2 font",
-  );
-  assertEqual(
-    new ParagraphIndentationValidator().validate(createNegativeDocument({ bodyIndentTwips: 0 }), {
+    });
+  assertEqual(headingResult.status, "FAILED", "negative wrong Heading2 font");
+  assertEqual(headingResult.evidence?.[0]?.kind, "heading", "heading format evidence kind");
+  assertEqual(headingResult.evidence?.[0]?.paragraphId, "heading2", "heading format evidence paragraph");
+  const headingAlignmentResult = new HeadingAlignmentValidator().validate(createNegativeDocument(), {
+    ...ruleBase("heading alignment"),
+    type: "HEADING_ALIGNMENT",
+    expected: { levels: [1], alignment: "center" },
+  });
+  assertEqual(headingAlignmentResult.status, "FAILED", "negative heading alignment");
+  assertEqual(headingAlignmentResult.evidence?.[0]?.kind, "heading", "heading alignment evidence kind");
+  const headingNumberingDocument = createNegativeDocument();
+  headingNumberingDocument.headings = headingNumberingDocument.headings.map((heading) => ({
+    ...heading,
+    isRuleDefinedSection: true,
+    sectionName: "Giriş",
+  }));
+  const headingNumberingResult = new HeadingNumberingValidator().validate(headingNumberingDocument, {
+    ...ruleBase("heading numbering"),
+    type: "HEADING_NUMBERING",
+    expected: { sections: [{ section: "Giriş", level: 0 }] },
+  });
+  assertEqual(headingNumberingResult.status, "FAILED", "negative heading numbering");
+  assertEqual(headingNumberingResult.evidence?.[0]?.kind, "heading", "heading numbering evidence kind");
+  const sectionOrderDocument = createNegativeDocument();
+  sectionOrderDocument.sections = [
+    {
+      normalizedName: "giris",
+      displayName: "Giriş",
+      paragraphId: "heading2",
+      paragraphIndex: 2,
+      isRuleDefinedHeading: true,
+      isObjectReferenceExcluded: false,
+    },
+    {
+      normalizedName: "sonuc",
+      displayName: "Sonuç",
+      paragraphId: "intro",
+      paragraphIndex: 0,
+      isRuleDefinedHeading: true,
+      isObjectReferenceExcluded: false,
+    },
+  ];
+  const sectionOrderResult = new SectionOrderValidator().validate(sectionOrderDocument, {
+    ...ruleBase("section order"),
+    type: "SECTION_ORDER",
+    expected: { sections: [{ section: "Giriş" }, { section: "Sonuç" }] },
+  });
+  assertEqual(sectionOrderResult.status, "FAILED", "negative section order");
+  assertEqual(sectionOrderResult.evidence?.[0]?.kind, "section", "section order evidence kind");
+  const indentationResult = new ParagraphIndentationValidator().validate(
+    createNegativeDocument({ bodyIndentTwips: 0 }),
+    {
       ...ruleBase("paragraph indentation"),
       category: "spacing",
       expected: {
@@ -401,9 +701,20 @@ function runNegativeRegressionSmoke() {
         toleranceTwips: 1,
         sections: ["Giriş"],
       },
-    }).status,
-    "FAILED",
-    "negative wrong paragraph indentation",
+    },
+  );
+  assertEqual(indentationResult.status, "FAILED", "negative wrong paragraph indentation");
+  assertAtLeast(indentationResult.evidence?.length ?? 0, 1, "negative indentation evidence count");
+  assertEqual(indentationResult.evidenceTotal, 1, "negative indentation evidence total");
+  assertEqual(indentationResult.evidence?.[0]?.kind, "paragraph", "negative indentation evidence kind");
+  assertEqual(indentationResult.evidence?.[0]?.paragraphId, "body", "negative indentation paragraph id");
+  assertEqual(indentationResult.evidence?.[0]?.paragraphIndex, 1, "negative indentation paragraph index");
+  assertEqual(indentationResult.evidence?.[0]?.expected, 1.5, "negative indentation evidence expected");
+  assertEqual(indentationResult.evidence?.[0]?.actual, 0, "negative indentation evidence actual");
+  assert(
+    (indentationResult.evidence?.[0]?.textExcerpt?.length ?? 0) > 0 &&
+      (indentationResult.evidence?.[0]?.textExcerpt?.length ?? 0) <= 160,
+    "negative indentation evidence excerpt should be bounded",
   );
 }
 
@@ -437,6 +748,10 @@ function createNegativeDocument(options = {}) {
     isEmpty: text.length === 0,
   });
   const bodyParagraph = paragraph("body", "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır.", {
+    alignment: options.bodyAlignment ?? "justify",
+    lineSpacing: options.bodyLineSpacing ?? 360,
+    runFontFamily: options.bodyRunFontFamily ?? null,
+    runFontSize: options.bodyRunFontSize ?? null,
     paragraphFormatting: {
       ...goodIndent,
       indentation: {
@@ -458,6 +773,7 @@ function createNegativeDocument(options = {}) {
       heading2Paragraph,
       paragraph("figure-carrier", "", { alignment: "center" }),
       paragraph("figure-caption", "Şekil 1. Örnek Şekil", { alignment: "left", lineSpacing: 240 }),
+      paragraph("table-caption-paragraph", "Tablo 1. Örnek Tablo", { alignment: "left", lineSpacing: 240 }),
     ],
     styles: [
       createStyle("Heading1", "Heading 1"),
@@ -489,7 +805,7 @@ function createNegativeDocument(options = {}) {
         alignment: options.tableAlignment ?? "center",
         alignmentSource: "direct",
         captionId: "table-caption",
-        captionPosition: "before",
+        captionPosition: options.tableCaptionPosition ?? "before",
       }],
     },
     figures: {
@@ -501,7 +817,7 @@ function createNegativeDocument(options = {}) {
         paragraphIndex: 3,
         blockIndex: 3,
         drawingType: "inline",
-        alignment: "center",
+        alignment: options.figureAlignment ?? "center",
         alignmentSource: "paragraph",
         captionId: "figure-caption",
         captionPosition: options.figureCaptionPosition ?? "after",

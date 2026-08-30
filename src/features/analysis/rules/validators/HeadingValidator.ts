@@ -2,6 +2,7 @@ import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingRe
 import type { HeadingLevel, NormalizedDocument, RuleDefinition, RuleExpectedValue, RuleResult } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { fontFamiliesEqual } from "../fontFamilyComparison";
+import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const LEVELS: HeadingLevel[] = ["Heading1", "Heading2", "Heading3"];
 const MAX_SAMPLES = 3;
@@ -44,8 +45,17 @@ export class HeadingValidator implements RuleValidator {
         `${formatLevel(expected.level)} akademik başlık biçimi kurala uygundur.`);
     }
     const samples = failures.slice(0, MAX_SAMPLES).map(({ heading, actual }) => `“${heading.text}”: ${actual}`);
-    return createResult(rule, "FAILED", false, expected, samples.join("; "),
-      `${failures.length} akademik başlığın biçimi uygun değil. ${samples.join("; ")}`);
+    return {
+      ...createResult(rule, "FAILED", false, expected, samples.join("; "),
+        `${failures.length} akademik başlığın biçimi uygun değil. ${samples.join("; ")}`),
+      evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map(({ heading, actual }) =>
+        createHeadingEvidence(heading, {
+          actual,
+          expected: formatExpected(expected),
+        }),
+      ),
+      evidenceTotal: failures.length,
+    };
   }
 }
 

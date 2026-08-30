@@ -9,11 +9,19 @@ import type {
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const MAX_FAILURE_SAMPLES = 3;
 
 interface LocatedHeading {
   expectation: HeadingNumberingSectionExpectation;
+  occurrence: DocumentHeadingOccurrence;
+}
+
+interface HeadingNumberingFailure {
+  actual: string;
+  expected: string;
+  message: string;
   occurrence: DocumentHeadingOccurrence;
 }
 
@@ -40,8 +48,17 @@ export class HeadingNumberingValidator implements RuleValidator {
     }
 
     const samples = failures.slice(0, MAX_FAILURE_SAMPLES).map((failure) => failure.message);
-    return createResult(rule, expected, "FAILED", samples.join("; "),
-      `${failures.length} başlığın numaralandırması uygun değil: ${samples.join("; ")}`);
+    return {
+      ...createResult(rule, expected, "FAILED", samples.join("; "),
+        `${failures.length} başlığın numaralandırması uygun değil: ${samples.join("; ")}`),
+      evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((failure) =>
+        createHeadingEvidence(failure.occurrence, {
+          actual: failure.actual,
+          expected: failure.expected,
+        }),
+      ),
+      evidenceTotal: failures.length,
+    };
   }
 }
 
@@ -59,13 +76,24 @@ function indexNamedOccurrences(
   return index;
 }
 
-function getFailure(item: LocatedHeading): Array<{ message: string }> {
+function getFailure(item: LocatedHeading): HeadingNumberingFailure[] {
   const { expectation, occurrence } = item;
+  const expected = formatExpectedLevel(expectation.level);
   if (!isReliablyNumbered(occurrence)) {
-    return [{ message: `“${expectation.section}” başlığı bulundu ancak numaralandırılmamış.` }];
+    return [{
+      actual: "Numaralandırılmamış",
+      expected,
+      message: `“${expectation.section}” başlığı bulundu ancak numaralandırılmamış.`,
+      occurrence,
+    }];
   }
   if (occurrence.numberingLevel !== expectation.level) {
-    return [{ message: `“${expectation.section}” başlığı ${formatLevel(occurrence.numberingLevel)} düzeyinde bulundu; ${formatExpectedLevel(expectation.level)} numaralandırılması bekleniyor.` }];
+    return [{
+      actual: formatLevel(occurrence.numberingLevel),
+      expected,
+      message: `“${expectation.section}” başlığı ${formatLevel(occurrence.numberingLevel)} düzeyinde bulundu; ${formatExpectedLevel(expectation.level)} numaralandırılması bekleniyor.`,
+      occurrence,
+    }];
   }
   return [];
 }

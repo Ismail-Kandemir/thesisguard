@@ -1,5 +1,6 @@
 import type {
   NormalizedDocument,
+  Paragraph,
   ParagraphAlignment,
   RuleDefinition,
   RuleExpectedValue,
@@ -7,23 +8,29 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { getBodyParagraphs } from "./bodyParagraphs";
+import { createParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+
+interface AlignmentObservation {
+  actual: ParagraphAlignment | null;
+  paragraph: Paragraph;
+  paragraphIndex: number;
+}
 
 export class AlignmentValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedAlignment = getExpectedAlignment(rule.expected);
 
-    const actualAlignments = getBodyParagraphs(document, {
-      excludeCaptions: true,
-      excludeTableCells: true,
-      excludeTableOfContents: true,
-      excludeFigureCarriers: true,
-    }).map((paragraph) => paragraph.alignment);
+    const observations = getAlignmentObservations(document);
+    const actualAlignments = observations.map((observation) => observation.actual);
 
     const passed =
       actualAlignments.length > 0 &&
       actualAlignments.every((alignment) => alignment === expectedAlignment);
+    const failures = observations.filter(
+      (observation) => observation.actual !== expectedAlignment,
+    );
 
-    return {
+    const result: RuleResult = {
       ruleId: rule.id,
       ruleName: rule.title,
       status: passed ? "PASSED" : "FAILED",
@@ -35,7 +42,33 @@ export class AlignmentValidator implements RuleValidator {
         ? `${rule.title} kurali basarili.`
         : createFailureMessage(expectedAlignment, actualAlignments),
     };
+
+    return passed
+      ? result
+      : {
+          ...result,
+          evidence: failures.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((failure) =>
+            createParagraphEvidence(failure.paragraph, failure.paragraphIndex, {
+              actual: formatAlignmentLabel(failure.actual),
+              expected: formatAlignmentLabel(expectedAlignment),
+            }),
+          ),
+          evidenceTotal: failures.length,
+        };
   }
+}
+
+function getAlignmentObservations(document: NormalizedDocument): AlignmentObservation[] {
+  return getBodyParagraphs(document, {
+    excludeCaptions: true,
+    excludeTableCells: true,
+    excludeTableOfContents: true,
+    excludeFigureCarriers: true,
+  }).map((paragraph) => ({
+    actual: paragraph.alignment,
+    paragraph,
+    paragraphIndex: document.paragraphs.indexOf(paragraph),
+  }));
 }
 
 function getExpectedAlignment(expected: RuleExpectedValue): ParagraphAlignment {
