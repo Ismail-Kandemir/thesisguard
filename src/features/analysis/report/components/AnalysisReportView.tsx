@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import type {
+  AnalysisAcademicContext,
   AnalysisReport,
   RuleEvidence,
   RuleResult,
@@ -41,6 +42,7 @@ export function AnalysisReportView({
       </header>
 
       <ReportSummary analysisReport={analysisReport} />
+      <AcademicContextSummary academicContext={analysisReport.academicContext} />
 
       <section className="analysis-report__details" aria-labelledby="result-heading">
         <div className="analysis-report__results-header">
@@ -69,6 +71,46 @@ function ReportSummary({ analysisReport }: { analysisReport: AnalysisReport }) {
       <SummaryItem label="Başarılı" value={analysisReport.passedRules} tone="passed" />
       <SummaryItem label="Başarısız" value={analysisReport.failedRules} tone="failed" />
       <SummaryItem label="Uygulanamaz" value={analysisReport.notApplicableRules} tone="neutral" />
+    </section>
+  )
+}
+
+function AcademicContextSummary({
+  academicContext,
+}: {
+  academicContext?: AnalysisAcademicContext
+}) {
+  if (!academicContext) {
+    return null
+  }
+
+  const rows = [
+    { label: 'Üniversite', value: academicContext.universityName },
+    {
+      label: academicContext.organizationType === 'institute' ? 'Enstitü' : 'Fakülte',
+      value: academicContext.organizationName,
+    },
+    {
+      label: academicContext.unitType === 'program' ? 'Program' : 'Bölüm',
+      value: academicContext.unitName,
+    },
+    { label: 'Derece', value: academicContext.thesisTypeName },
+    { label: 'Çalışma türü', value: academicContext.studyTypeName },
+    { label: 'Kural seti', value: academicContext.ruleSetId },
+    { label: 'Kural seti sürümü', value: academicContext.ruleSetVersion },
+  ].filter((row): row is { label: string; value: string } => Boolean(row.value))
+
+  return (
+    <section className="analysis-report__context" aria-label="Akademik kapsam">
+      <h2>Akademik kapsam</h2>
+      <dl>
+        {rows.map((row) => (
+          <div key={row.label}>
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   )
 }
@@ -289,7 +331,7 @@ function EvidenceItem({
         {getEvidenceText(evidence) ? (
           <div>
             <dt>Metin</dt>
-            <dd>“{getEvidenceText(evidence)}”</dd>
+            <dd>"{getEvidenceText(evidence)}"</dd>
           </div>
         ) : null}
         {getEvidenceSectionName(evidence) ? (

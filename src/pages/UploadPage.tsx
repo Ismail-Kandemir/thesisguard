@@ -12,8 +12,9 @@ import {
   FileInfo,
   UploadActions,
   UploadDropzone,
+  UploadFileValidationError,
   createSelectedUploadFile,
-  isSupportedUploadFile,
+  validateUploadFile,
 } from '../features/upload'
 import type { SelectedUploadFile } from '../features/upload'
 import { Card, Container } from '../shared'
@@ -52,22 +53,35 @@ export function UploadPage() {
   const disabledReason = getDisabledReason(selectedFile, academicSelection)
 
   function handleFileSelect(file: File) {
-    if (!isSupportedUploadFile(file)) {
+    const validation = validateUploadFile(file)
+
+    setAnalysisReport(null)
+    setIsAnalyzing(false)
+
+    if (!validation.valid) {
       setSelectedFile(null)
-      setAnalysisReport(null)
-      setIsAnalyzing(false)
-      setErrorMessage('Yalnızca .docx uzantılı dosyalar yüklenebilir.')
+      setErrorMessage(validation.message)
       return
     }
 
     setErrorMessage('')
-    setAnalysisReport(null)
-    setIsAnalyzing(false)
     setSelectedFile(createSelectedUploadFile(file))
   }
 
   async function handleAnalyzeClick() {
-    if (!selectedFile || !academicSelection) {
+    if (!selectedFile) {
+      setErrorMessage(validateUploadFile(null).message)
+      return
+    }
+
+    const validation = validateUploadFile(selectedFile.file)
+
+    if (!validation.valid) {
+      setErrorMessage(validation.message)
+      return
+    }
+
+    if (!academicSelection) {
       setErrorMessage(getDisabledReason(selectedFile, academicSelection))
       return
     }
@@ -220,6 +234,9 @@ export function UploadPage() {
 
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
         {selectedFile ? <FileInfo selectedFile={selectedFile} /> : null}
+        <p className="upload-page__privacy-note">
+          Dosyanız tarayıcınızda analiz edilir.
+        </p>
         <p className="upload-page__analysis-hint" aria-live="polite">
           {isAnalyzing ? 'Belge analiz ediliyor. Lütfen bekleyin.' : disabledReason}
         </p>
@@ -239,14 +256,19 @@ export function UploadPage() {
 }
 
 function createUserFriendlyAnalysisErrorMessage(error: unknown): string {
-  const fallbackMessage =
-    'Analiz sırasında bir hata oluştu. Lütfen geçerli bir DOCX dosyası yükleyip tekrar deneyin.'
-
-  if (!(error instanceof Error)) {
-    return fallbackMessage
+  if (error instanceof UploadFileValidationError) {
+    return error.message
   }
 
-  return error.message || fallbackMessage
+  if (!(error instanceof Error)) {
+    return 'Analiz başarısız oldu. Lütfen tekrar deneyin.'
+  }
+
+  if (error.message.startsWith('DOCX paketi okunamadi:')) {
+    return 'DOCX dosyası okunamadı. Dosya bozuk olabilir veya geçerli bir DOCX paketi olmayabilir.'
+  }
+
+  return 'Analiz başarısız oldu. Lütfen geçerli bir DOCX dosyasıyla tekrar deneyin.'
 }
 
 interface SelectionFieldProps {

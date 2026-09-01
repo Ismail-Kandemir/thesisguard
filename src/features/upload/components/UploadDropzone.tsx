@@ -68,7 +68,7 @@ export function UploadDropzone({ errorMessage, onFileSelect }: UploadDropzonePro
         <Button onClick={openFileDialog} variant="secondary">
           Dosya Seç
         </Button>
-        <p className="upload-dropzone__hint">Desteklenen format: .docx</p>
+        <p className="upload-dropzone__hint">Desteklenen format: .docx, en fazla 20 MB.</p>
         {errorMessage ? <p className="upload-dropzone__error">{errorMessage}</p> : null}
       </div>
     </div>

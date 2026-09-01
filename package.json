@@ -9,6 +9,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:golden": "node tests/golden/experimentalGoldenRegression.cjs",
+    "test:upload": "node tests/uploadValidation.cjs",
     "preview": "vite preview"
   },
   "dependencies": {

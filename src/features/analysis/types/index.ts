@@ -615,7 +615,7 @@ export interface NormalizedDocument {
   themeFonts?: DocumentThemeFonts | null;
 }
 
-export type { AnalysisReport } from "./AnalysisReport";
+export type { AnalysisAcademicContext, AnalysisReport } from "./AnalysisReport";
 
 export type {
   AcademicSelection,

@@ -1,5 +1,5 @@
 import type { SelectedUploadFile } from '../types'
-import { maxUploadSizeInBytes } from '../utils'
+import { MAX_DOCX_FILE_SIZE_BYTES } from '../utils'
 import './FileInfo.css'
 
 type FileInfoProps = {
@@ -7,7 +7,7 @@ type FileInfoProps = {
 }
 
 export function FileInfo({ selectedFile }: FileInfoProps) {
-  const isFileTooLarge = selectedFile.file.size > maxUploadSizeInBytes
+  const isFileTooLarge = selectedFile.file.size > MAX_DOCX_FILE_SIZE_BYTES
 
   return (
     <section className="file-info" aria-label="Seçilen dosya bilgileri">
@@ -27,7 +27,7 @@ export function FileInfo({ selectedFile }: FileInfoProps) {
         </div>
       </dl>
       {isFileTooLarge ? (
-        <p className="file-info__warning">Dosya boyutu 20 MB sınırından büyük.</p>
+        <p className="file-info__warning">Dosya boyutu 20 MB'tan büyük olamaz.</p>
       ) : null}
     </section>
   )

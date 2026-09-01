@@ -66,6 +66,45 @@
   font-size: 24px;
 }
 
+.analysis-report__context {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  background: #f9fafb;
+}
+
+.analysis-report__context h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 18px;
+}
+
+.analysis-report__context dl {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.analysis-report__context div {
+  min-width: 0;
+}
+
+.analysis-report__context dt {
+  margin-bottom: 3px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.analysis-report__context dd {
+  margin: 0;
+  color: #111827;
+  overflow-wrap: anywhere;
+}
+
 .analysis-report__details,
 .analysis-report__result-list {
   display: grid;
@@ -334,6 +373,7 @@
   }
 
   .analysis-report__summary,
+  .analysis-report__context dl,
   .analysis-report__values,
   .analysis-report__evidence-item dl {
     grid-template-columns: 1fr;

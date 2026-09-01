@@ -1,7 +1,10 @@
-import type { AnalysisReport, RuleResult } from "../types";
+import type { AnalysisAcademicContext, AnalysisReport, RuleResult } from "../types";
 
 export class ReportBuilder {
-  build(results: RuleResult[]): AnalysisReport {
+  build(
+    results: RuleResult[],
+    academicContext?: AnalysisAcademicContext,
+  ): AnalysisReport {
     const totalRules = results.length;
     const passedRules = countRules(results, "PASSED");
     const failedRules = countRules(results, "FAILED");
@@ -15,6 +18,7 @@ export class ReportBuilder {
       failedRules,
       notApplicableRules,
       score: calculateScore(passedRules, evaluatedRules),
+      ...(academicContext ? { academicContext } : {}),
       results,
     };
   }
