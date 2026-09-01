@@ -336,6 +336,10 @@ function createEvidenceKey(evidence: RuleEvidence, index: number): string {
     return `${evidence.kind}-${evidence.sectionName}-${evidence.paragraphId ?? 'missing'}-${index}`
   }
 
+  if (evidence.kind === 'document-format') {
+    return `${evidence.kind}-${evidence.property}-${index}`
+  }
+
   if (evidence.kind === 'caption') {
     return `${evidence.kind}-${evidence.captionId}-${index}`
   }
@@ -362,16 +366,20 @@ function getEvidenceTitle(evidence: RuleEvidence, index: number): string {
     return `${prefix}: Bölüm`
   }
 
+  if (evidence.kind === 'document-format') {
+    return `${prefix}: ${evidence.property}`
+  }
+
   if (evidence.kind === 'caption') {
     return `${prefix}: ${evidence.captionKind === 'table' ? 'Tablo başlığı' : 'Şekil başlığı'}`
   }
 
   if (evidence.kind === 'table') {
-    return `${prefix}: ${evidence.objectLabel ?? 'Tablo'}`
+    return `${prefix}: ${evidence.objectLabel ?? 'Tablo nesnesi'}`
   }
 
   if (evidence.kind === 'figure') {
-    return `${prefix}: ${evidence.objectLabel ?? 'Şekil'}`
+    return `${prefix}: ${evidence.objectLabel ?? 'Şekil nesnesi'}`
   }
 
   return prefix
@@ -406,10 +414,25 @@ function getEvidenceSectionName(evidence: RuleEvidence): string | undefined {
 }
 
 function getEvidenceUnit(evidence: RuleEvidence): string | undefined {
-  return evidence.kind === 'paragraph' || evidence.kind === 'run' ? evidence.unit : undefined
+  if (
+    evidence.kind === 'paragraph' ||
+    evidence.kind === 'run' ||
+    evidence.kind === 'section' ||
+    evidence.kind === 'document-format'
+  ) {
+    return evidence.unit
+  }
+
+  return undefined
 }
 
 function formatEvidenceLocation(evidence: RuleEvidence): string {
+  if (evidence.kind === 'document-format') {
+    return evidence.sectionIndex === undefined
+      ? 'Belge biçimi'
+      : `Belge bölümü: ${evidence.sectionIndex + 1}`
+  }
+
   if (evidence.kind === 'table') {
     return evidence.objectLabel ?? 'Tablo nesnesi'
   }

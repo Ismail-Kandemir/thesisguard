@@ -46,6 +46,16 @@ export interface SectionRuleEvidence {
   paragraphIndex?: number;
   expected?: RuleResultValue;
   actual?: RuleResultValue;
+  unit?: string;
+}
+
+export interface DocumentFormatRuleEvidence {
+  kind: "document-format";
+  property: string;
+  sectionIndex?: number;
+  expected?: RuleResultValue;
+  actual?: RuleResultValue;
+  unit?: string;
 }
 
 export interface CaptionRuleEvidence {
@@ -81,6 +91,7 @@ export type RuleEvidence =
   | RunRuleEvidence
   | HeadingRuleEvidence
   | SectionRuleEvidence
+  | DocumentFormatRuleEvidence
   | CaptionRuleEvidence
   | ObjectRuleEvidence;
 

@@ -1,5 +1,6 @@
 import type {
   CaptionRuleEvidence,
+  DocumentFormatRuleEvidence,
   DocumentCaption,
   DocumentFigureOccurrence,
   DocumentHeadingOccurrence,
@@ -93,12 +94,41 @@ export function createHeadingEvidence(
   };
 }
 
+export function createHeadingParagraphEvidence(
+  paragraph: Readonly<Paragraph>,
+  paragraphIndex: number,
+  values: Readonly<{
+    actual?: RuleResultValue;
+    blockIndex?: number | null;
+    expected?: RuleResultValue;
+    headingLevel?: number;
+    sectionName?: string;
+  }> = {},
+): HeadingRuleEvidence {
+  const textExcerpt = createBoundedTextExcerpt(paragraph.text);
+
+  return {
+    kind: "heading",
+    paragraphId: paragraph.id,
+    paragraphIndex,
+    ...(values.blockIndex !== undefined && values.blockIndex !== null
+      ? { blockIndex: values.blockIndex }
+      : {}),
+    ...(textExcerpt ? { textExcerpt } : {}),
+    ...(values.headingLevel !== undefined ? { headingLevel: values.headingLevel } : {}),
+    ...(values.sectionName ? { sectionName: values.sectionName } : {}),
+    ...("expected" in values ? { expected: values.expected } : {}),
+    ...("actual" in values ? { actual: values.actual } : {}),
+  };
+}
+
 export function createSectionEvidence(
   section: Readonly<DocumentSection>,
   values: Readonly<{
     actual?: RuleResultValue;
     expected?: RuleResultValue;
     sectionName?: string;
+    unit?: string;
   }> = {},
 ): SectionRuleEvidence {
   return {
@@ -108,6 +138,43 @@ export function createSectionEvidence(
     paragraphIndex: section.paragraphIndex,
     ...("expected" in values ? { expected: values.expected } : {}),
     ...("actual" in values ? { actual: values.actual } : {}),
+    ...(values.unit ? { unit: values.unit } : {}),
+  };
+}
+
+export function createMissingSectionEvidence(
+  sectionName: string,
+  values: Readonly<{
+    actual?: RuleResultValue;
+    expected?: RuleResultValue;
+    unit?: string;
+  }> = {},
+): SectionRuleEvidence {
+  return {
+    kind: "section",
+    sectionName,
+    ...("expected" in values ? { expected: values.expected } : {}),
+    ...("actual" in values ? { actual: values.actual } : {}),
+    ...(values.unit ? { unit: values.unit } : {}),
+  };
+}
+
+export function createDocumentFormatEvidence(
+  property: string,
+  values: Readonly<{
+    actual?: RuleResultValue;
+    expected?: RuleResultValue;
+    sectionIndex?: number;
+    unit?: string;
+  }> = {},
+): DocumentFormatRuleEvidence {
+  return {
+    kind: "document-format",
+    property,
+    ...(values.sectionIndex !== undefined ? { sectionIndex: values.sectionIndex } : {}),
+    ...("expected" in values ? { expected: values.expected } : {}),
+    ...("actual" in values ? { actual: values.actual } : {}),
+    ...(values.unit ? { unit: values.unit } : {}),
   };
 }
 

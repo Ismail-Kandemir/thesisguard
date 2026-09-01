@@ -6,20 +6,27 @@ import type {
   NormalizedDocument,
   Paragraph,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
   SectionOrderItem,
 } from "../../types";
+import { createHeadingParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 interface LocatedHeading {
   item: SectionOrderItem;
   paragraph: Paragraph;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  sectionName: string;
 }
 
 interface FormattingIssue {
   headingText: string;
+  locatedHeading: LocatedHeading;
   problems: string[];
+  actual: string;
 }
 
 export class HeadingLevelFormatValidator implements RuleValidator {
@@ -42,8 +49,8 @@ export class HeadingLevelFormatValidator implements RuleValidator {
       document.styles,
       document.documentDefaults,
     );
-    const issues = locatedHeadings.flatMap(({ paragraph }) =>
-      validateParagraphFormatting(paragraph, expected, resolver),
+    const issues = locatedHeadings.flatMap((locatedHeading) =>
+      validateParagraphFormatting(locatedHeading, expected, resolver),
     );
 
     if (issues.length > 0) {
@@ -55,6 +62,20 @@ export class HeadingLevelFormatValidator implements RuleValidator {
         issues
           .map((issue) => `${issue.headingText}: ${issue.problems.join(" ")}`)
           .join(" "),
+        issues.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((issue) =>
+          createHeadingParagraphEvidence(
+            issue.locatedHeading.paragraph,
+            issue.locatedHeading.paragraphIndex,
+            {
+              actual: issue.actual,
+              blockIndex: issue.locatedHeading.blockIndex,
+              expected: formatExpected(expected),
+              headingLevel: expected.level + 1,
+              sectionName: issue.locatedHeading.sectionName,
+            },
+          ),
+        ),
+        issues.length,
       );
     }
 
@@ -135,6 +156,12 @@ function locateHeadings(
   document: NormalizedDocument,
   expected: HeadingLevelFormatRuleExpected,
 ): LocatedHeading[] {
+  const blockIndexByParagraphId = new Map(
+    document.blocks
+      .filter((block) => block.type === "paragraph")
+      .map((block) => [block.paragraphId, block.blockIndex]),
+  );
+
   return expected.sections.flatMap((item) => {
     const names = [item.section, ...(item.aliases ?? [])];
     const matches = document.sections.filter((section) =>
@@ -146,9 +173,10 @@ function locateHeadings(
     }
 
     const section = matches[0];
-    const paragraph = document.paragraphs.find(
+    const paragraphIndex = document.paragraphs.findIndex(
       (candidate) => candidate.id === section.paragraphId,
     );
+    const paragraph = paragraphIndex >= 0 ? document.paragraphs[paragraphIndex] : undefined;
 
     if (
       !paragraph ||
@@ -158,7 +186,13 @@ function locateHeadings(
       return [];
     }
 
-    return [{ item, paragraph }];
+    return [{
+      item,
+      paragraph,
+      paragraphIndex,
+      blockIndex: blockIndexByParagraphId.get(paragraph.id) ?? null,
+      sectionName: section.displayName,
+    }];
   });
 }
 
@@ -175,24 +209,33 @@ function isReliablyNumbered(paragraph: Readonly<Paragraph>): boolean {
 }
 
 function validateParagraphFormatting(
-  paragraph: Paragraph,
+  locatedHeading: LocatedHeading,
   expected: HeadingLevelFormatRuleExpected,
   resolver: EffectiveFormattingResolver,
 ): FormattingIssue[] {
+  const { paragraph } = locatedHeading;
   const visibleRuns = paragraph.runs.filter((run) => run.text.trim().length > 0);
-  const problems = visibleRuns.flatMap((run) => {
-    const formatting = resolver.resolveRun(
+  const resolvedFormats = visibleRuns.map((run) =>
+    resolver.resolveRun(
       run,
       paragraph.styleId,
       paragraph.lineSpacing,
-    );
-
-    return compareFormatting(formatting, expected);
-  });
+    ),
+  );
+  const problems = resolvedFormats.flatMap((formatting) =>
+    compareFormatting(formatting, expected),
+  );
+  const actualFormats = resolvedFormats.map(formatActualFormatting);
   const uniqueProblems = Array.from(new Set(problems));
+  const uniqueActualFormats = Array.from(new Set(actualFormats));
 
   return uniqueProblems.length > 0
-    ? [{ headingText: paragraph.text.trim(), problems: uniqueProblems }]
+    ? [{
+        headingText: paragraph.text.trim(),
+        locatedHeading,
+        problems: uniqueProblems,
+        actual: uniqueActualFormats.join("; "),
+      }]
     : [];
 }
 
@@ -225,12 +268,24 @@ function compareFormatting(
   return problems;
 }
 
+function formatActualFormatting(actual: EffectiveFormatting): string {
+  const parts = [
+    actual.fontFamily ?? "Yazı tipi belirlenemedi",
+    actual.fontSize === null ? "Punto belirlenemedi" : `${actual.fontSize} punto`,
+    actual.bold ? "kalın" : "normal",
+  ];
+
+  return parts.join(", ");
+}
+
 function createResult(
   rule: RuleDefinition,
   expected: HeadingLevelFormatRuleExpected,
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -241,6 +296,8 @@ function createResult(
     expected: formatExpected(expected),
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

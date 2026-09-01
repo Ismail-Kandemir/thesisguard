@@ -5,8 +5,10 @@ import type {
   PageNumberRuleExpected,
   ParagraphAlignment,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
 } from "../../types";
+import { createDocumentFormatEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 type PageNumberAlignment = Exclude<ParagraphAlignment, "justify">;
@@ -26,6 +28,15 @@ export class PageNumberValidator implements RuleValidator {
         expected.required
           ? "Sayfa numarası tespit edilemedi."
           : `${rule.title} kuralı başarılı.`,
+        expected.required
+          ? [
+              createDocumentFormatEvidence("Sayfa numarası alanı", {
+                actual: "Tespit edilmedi",
+                expected: "PAGE alanı bulunmalı",
+              }),
+            ]
+          : undefined,
+        expected.required ? 1 : undefined,
       );
     }
 
@@ -40,6 +51,13 @@ export class PageNumberValidator implements RuleValidator {
         false,
         formatActualFields(fields),
         `Sayfa numarası uygun konumda değil. Beklenen: ${formatLocation(expected.location)}, Bulunan: ${formatLocations(fields)}.`,
+        [
+          createDocumentFormatEvidence("Sayfa numarası konumu", {
+            actual: formatLocations(fields),
+            expected: formatLocation(expected.location),
+          }),
+        ],
+        1,
       );
     }
 
@@ -63,6 +81,15 @@ export class PageNumberValidator implements RuleValidator {
           false,
           formatActualFields(fieldsAtExpectedLocation),
           message,
+          [
+            createDocumentFormatEvidence("Sayfa numarası hizalaması", {
+              actual: detectedAlignments.length === 0
+                ? "Tespit edilemedi"
+                : formatAlignments(detectedAlignments),
+              expected: formatAlignment(expected.alignment),
+            }),
+          ],
+          1,
         );
       }
     }
@@ -113,6 +140,8 @@ function createResult(
   passed: boolean,
   actual: string | null,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -123,6 +152,8 @@ function createResult(
     expected: formatExpected(expected),
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

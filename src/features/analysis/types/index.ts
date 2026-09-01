@@ -624,6 +624,7 @@ export type {
 
 export type {
   CaptionRuleEvidence,
+  DocumentFormatRuleEvidence,
   HeadingRuleEvidence,
   ObjectRuleEvidence,
   ParagraphRuleEvidence,

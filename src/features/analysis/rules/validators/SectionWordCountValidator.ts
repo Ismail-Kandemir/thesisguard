@@ -5,10 +5,12 @@ import type {
   DocumentSection,
   NormalizedDocument,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
   SectionWordCountRuleExpected,
 } from "../../types";
+import { createSectionEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class SectionWordCountValidator implements RuleValidator {
@@ -34,6 +36,14 @@ export class SectionWordCountValidator implements RuleValidator {
         "FAILED",
         "Güvenle hesaplanamadı",
         `${expected.section} bölümü birden fazla kez bulunduğu için kelime sayısı güvenle hesaplanamadı.`,
+        occurrences.map((occurrence) =>
+          createSectionEvidence(occurrence, {
+            actual: "Birden fazla bölüm bulundu",
+            expected: "Tek bölüm",
+            sectionName: occurrence.displayName,
+          }),
+        ),
+        occurrences.length,
       );
     }
 
@@ -49,6 +59,17 @@ export class SectionWordCountValidator implements RuleValidator {
       passed ? "PASSED" : "FAILED",
       `${wordCount} kelime`,
       createMessage(expected, wordCount, passed),
+      passed
+        ? undefined
+        : [
+            createSectionEvidence(occurrences[0], {
+              actual: wordCount,
+              expected: formatExpected(expected),
+              sectionName: occurrences[0].displayName,
+              unit: "kelime",
+            }),
+          ],
+      passed ? undefined : 1,
     );
   }
 }
@@ -119,6 +140,8 @@ function createResult(
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -129,6 +152,8 @@ function createResult(
     expected: formatExpected(expected),
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 

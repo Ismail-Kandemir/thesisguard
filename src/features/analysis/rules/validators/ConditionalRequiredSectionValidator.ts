@@ -12,6 +12,7 @@ import type {
   RuleResult,
   RuleResultStatus,
 } from "../../types";
+import { createMissingSectionEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 const FACT_LABELS: Record<ConditionalRequiredSectionFact, string> = {
@@ -149,6 +150,17 @@ function createResult(
     expected: `${formatCondition(expected.requiredWhen)} ${expected.section} bölümü bulunmalı`,
     actual,
     message,
+    ...(status === "FAILED"
+      ? {
+          evidence: [
+            createMissingSectionEvidence(expected.section, {
+              actual: "Tespit edilmedi",
+              expected: "Bölüm bulunmalı",
+            }),
+          ],
+          evidenceTotal: 1,
+        }
+      : {}),
   };
 }
 

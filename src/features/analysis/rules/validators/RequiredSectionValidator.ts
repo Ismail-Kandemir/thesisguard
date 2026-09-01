@@ -5,6 +5,7 @@ import type {
   RuleResult,
 } from "../../types";
 import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
+import { createMissingSectionEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class RequiredSectionValidator implements RuleValidator {
@@ -32,6 +33,17 @@ export class RequiredSectionValidator implements RuleValidator {
           ? `${expected.section} bölümü bulundu.`
           : `${expected.section} bölümü zorunlu değil.`
         : `${expected.section} bölümü tespit edilemedi.`,
+      ...(passed
+        ? {}
+        : {
+            evidence: [
+              createMissingSectionEvidence(expected.section, {
+                actual: "Tespit edilmedi",
+                expected: "Bölüm bulunmalı",
+              }),
+            ],
+            evidenceTotal: 1,
+          }),
     };
   }
 }

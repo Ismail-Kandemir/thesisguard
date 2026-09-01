@@ -4,11 +4,18 @@ import { parseSectionKeywordLines } from "../sectionKeywordsParser";
 import type {
   DocumentSection,
   NormalizedDocument,
+  Paragraph,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
   SectionKeywordsRuleExpected,
 } from "../../types";
+import {
+  createParagraphEvidence,
+  createSectionEvidence,
+  MAX_RULE_EVIDENCE_ITEMS,
+} from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class SectionKeywordsValidator implements RuleValidator {
@@ -34,10 +41,19 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         "Güvenle doğrulanamadı",
         `${expected.section} bölümü birden fazla kez bulunduğu için anahtar kelimeler güvenle doğrulanamadı.`,
+        occurrences.map((occurrence) =>
+          createSectionEvidence(occurrence, {
+            actual: "Birden fazla bölüm bulundu",
+            expected: "Tek bölüm",
+            sectionName: occurrence.displayName,
+          }),
+        ),
+        occurrences.length,
       );
     }
 
-    const paragraphs = getSectionContentParagraphs(document, occurrences[0]);
+    const section = occurrences[0];
+    const paragraphs = getSectionContentParagraphs(document, section);
     const lines = parseSectionKeywordLines(
       paragraphs,
       expected.labels,
@@ -52,6 +68,14 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         "Bulunamadı",
         `${primaryLabel} satırı bulunamadı.`,
+        [
+          createSectionEvidence(section, {
+            actual: "Tespit edilmedi",
+            expected: `${expected.min}-${expected.max} anahtar kelime`,
+            sectionName: section.displayName,
+          }),
+        ],
+        1,
       );
     }
 
@@ -62,6 +86,15 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         `${lines.length} satır`,
         `Birden fazla ${primaryLabel} satırı bulundu.`,
+        lines
+          .slice(0, MAX_RULE_EVIDENCE_ITEMS)
+          .map((line) =>
+            createKeywordLineEvidence(document, paragraphs, line.paragraphIndex, {
+              actual: "Fazladan anahtar kelime satırı",
+              expected: "Tek anahtar kelime satırı",
+            }),
+          ),
+        lines.length,
       );
     }
 
@@ -75,6 +108,14 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         `${count} anahtar kelime`,
         `En az ${expected.min} anahtar kelime gerekli. Bulunan: ${count}.`,
+        [
+          createKeywordLineEvidence(document, paragraphs, line.paragraphIndex, {
+            actual: count,
+            expected: expected.min,
+            unit: "anahtar kelime",
+          }),
+        ],
+        1,
       );
     }
 
@@ -85,6 +126,14 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         `${count} anahtar kelime`,
         `En fazla ${expected.max} anahtar kelime kullanılabilir. Bulunan: ${count}.`,
+        [
+          createKeywordLineEvidence(document, paragraphs, line.paragraphIndex, {
+            actual: count,
+            expected: expected.max,
+            unit: "anahtar kelime",
+          }),
+        ],
+        1,
       );
     }
 
@@ -99,6 +148,13 @@ export class SectionKeywordsValidator implements RuleValidator {
         "FAILED",
         `${count} anahtar kelime; konum uygun değil`,
         `${primaryLabel} satırı bölümün sonunda değil.`,
+        [
+          createKeywordLineEvidence(document, paragraphs, line.paragraphIndex, {
+            actual: "Bölüm sonunda değil",
+            expected: "Bölüm sonunda",
+          }),
+        ],
+        1,
       );
     }
 
@@ -172,12 +228,42 @@ function findSectionOccurrences(
   return sections.filter((section) => sectionMatchesExpectedName(section, sectionName));
 }
 
+function createKeywordLineEvidence(
+  document: Readonly<NormalizedDocument>,
+  paragraphs: readonly Paragraph[],
+  sectionParagraphIndex: number,
+  values: Readonly<{
+    actual?: string | number;
+    expected?: string | number;
+    unit?: string;
+  }>,
+): RuleEvidence {
+  const paragraph = paragraphs[sectionParagraphIndex];
+  const paragraphIndex = paragraph
+    ? document.paragraphs.findIndex((candidate) => candidate.id === paragraph.id)
+    : -1;
+
+  if (!paragraph || paragraphIndex < 0) {
+    return {
+      kind: "section",
+      sectionName: "Anahtar kelime satırı",
+      ...("expected" in values ? { expected: values.expected } : {}),
+      ...("actual" in values ? { actual: values.actual } : {}),
+      ...(values.unit ? { unit: values.unit } : {}),
+    };
+  }
+
+  return createParagraphEvidence(paragraph, paragraphIndex, values);
+}
+
 function createResult(
   rule: RuleDefinition,
   expected: SectionKeywordsRuleExpected,
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -188,5 +274,7 @@ function createResult(
     expected: `${expected.min}–${expected.max} anahtar kelime; bölüm sonunda`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }

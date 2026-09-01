@@ -53,6 +53,42 @@ const PARAGRAPH_FORMAT_NEGATIVE_FIXTURE_PATH = path.join(
   "experimental",
   "experimental-paragraph-format-fail.docx",
 );
+const OBJECT_ALIGNMENT_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-object-alignment-fail.docx",
+);
+const MARGIN_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-margin-fail.docx",
+);
+const PAGE_NUMBER_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-page-number-fail.docx",
+);
+const PAGE_SEQUENCE_NEGATIVE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "experimental-page-sequence-fail.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -95,6 +131,10 @@ const CRITICAL_RULE_IDS = [
 const INDENTATION_RULE_ID = "comu.applied-sciences.food-technology.bachelor.paragraph-indentation";
 const FONT_SIZE_RULE_ID = "comu.bachelor.typography.font-size";
 const LINE_SPACING_RULE_ID = "comu.bachelor.spacing.line-height";
+const RIGHT_MARGIN_RULE_ID = "comu.bachelor.margin.right";
+const PAGE_NUMBER_RULE_ID = "comu.applied-sciences.food-technology.bachelor.page-number";
+const PAGE_SEQUENCE_RULE_ID = "comu.applied-sciences.food-technology.bachelor.page-number-sequence";
+const TABLE_OBJECT_ALIGNMENT_RULE_ID = "comu.applied-sciences.food-technology.bachelor.table-object-alignment";
 
 installMinimalXmlDomParser();
 
@@ -260,6 +300,10 @@ async function assertDerivedNegativeFixtures() {
   assert(fs.existsSync(INDENTATION_NEGATIVE_FIXTURE_PATH), "indentation negative fixture missing");
   assert(fs.existsSync(TYPOGRAPHY_NEGATIVE_FIXTURE_PATH), "typography negative fixture missing");
   assert(fs.existsSync(PARAGRAPH_FORMAT_NEGATIVE_FIXTURE_PATH), "paragraph format negative fixture missing");
+  assert(fs.existsSync(OBJECT_ALIGNMENT_NEGATIVE_FIXTURE_PATH), "object alignment negative fixture missing");
+  assert(fs.existsSync(MARGIN_NEGATIVE_FIXTURE_PATH), "margin negative fixture missing");
+  assert(fs.existsSync(PAGE_NUMBER_NEGATIVE_FIXTURE_PATH), "page number negative fixture missing");
+  assert(fs.existsSync(PAGE_SEQUENCE_NEGATIVE_FIXTURE_PATH), "page sequence negative fixture missing");
 
   const indentation = await runAnalysisFixture(INDENTATION_NEGATIVE_FIXTURE_PATH);
   assertSingleFailureReport(indentation.report, INDENTATION_RULE_ID, "indentation negative fixture");
@@ -298,6 +342,50 @@ async function assertDerivedNegativeFixtures() {
   assertEqual(lineSpacingResult.evidence?.[0]?.expected, 1.5, "paragraph format fixture evidence expected");
   assertEqual(lineSpacingResult.evidence?.[0]?.actual, 1, "paragraph format fixture evidence actual");
   assertEqual(lineSpacingResult.evidenceTotal, 1, "paragraph format fixture evidence total");
+
+  const objectAlignment = await runAnalysisFixture(OBJECT_ALIGNMENT_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(objectAlignment.report, TABLE_OBJECT_ALIGNMENT_RULE_ID, "object alignment negative fixture");
+  const tableAlignmentResult = getResultById(objectAlignment.report.results, TABLE_OBJECT_ALIGNMENT_RULE_ID);
+  assertEqual(tableAlignmentResult.evidence?.[0]?.kind, "table", "object alignment fixture evidence kind");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.objectId, "table-1", "object alignment fixture evidence id");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.objectLabel, "Tablo 1", "object alignment fixture evidence label");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.captionNumber, "1", "object alignment fixture evidence caption number");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.captionText, "Tablo 1. Örnek Tablo", "object alignment fixture evidence caption");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.expected, "Ortalanmış", "object alignment fixture evidence expected");
+  assertEqual(tableAlignmentResult.evidence?.[0]?.actual, "Sola hizalı", "object alignment fixture evidence actual");
+  assertEqual(tableAlignmentResult.evidenceTotal, 1, "object alignment fixture evidence total");
+
+  const margin = await runAnalysisFixture(MARGIN_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(margin.report, RIGHT_MARGIN_RULE_ID, "margin negative fixture");
+  const marginResult = getResultById(margin.report.results, RIGHT_MARGIN_RULE_ID);
+  assertEqual(marginResult.evidence?.[0]?.kind, "document-format", "margin fixture evidence kind");
+  assertEqual(marginResult.evidence?.[0]?.property, "Sag kenar boşluğu", "margin fixture evidence property");
+  assertEqual(marginResult.evidence?.[0]?.expected, 2.5, "margin fixture evidence expected");
+  assertEqual(marginResult.evidence?.[0]?.actual, 2, "margin fixture evidence actual");
+  assertEqual(marginResult.evidence?.[0]?.unit, "cm", "margin fixture evidence unit");
+  assertEqual(marginResult.evidence?.[0]?.paragraphId, undefined, "margin fixture evidence should not fabricate paragraph id");
+  assertEqual(marginResult.evidenceTotal, 1, "margin fixture evidence total");
+
+  const pageNumber = await runAnalysisFixture(PAGE_NUMBER_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(pageNumber.report, PAGE_NUMBER_RULE_ID, "page number negative fixture");
+  const pageNumberResult = getResultById(pageNumber.report.results, PAGE_NUMBER_RULE_ID);
+  assertEqual(pageNumberResult.evidence?.[0]?.kind, "document-format", "page number fixture evidence kind");
+  assertEqual(pageNumberResult.evidence?.[0]?.property, "Sayfa numarası hizalaması", "page number fixture evidence property");
+  assertEqual(pageNumberResult.evidence?.[0]?.expected, "Orta", "page number fixture evidence expected");
+  assertEqual(pageNumberResult.evidence?.[0]?.actual, "Sağ", "page number fixture evidence actual");
+  assertEqual(pageNumberResult.evidence?.[0]?.paragraphId, undefined, "page number fixture should not fabricate paragraph id");
+  assertEqual(pageNumberResult.evidenceTotal, 1, "page number fixture evidence total");
+
+  const pageSequence = await runAnalysisFixture(PAGE_SEQUENCE_NEGATIVE_FIXTURE_PATH);
+  assertSingleFailureReport(pageSequence.report, PAGE_SEQUENCE_RULE_ID, "page sequence negative fixture");
+  const pageSequenceResult = getResultById(pageSequence.report.results, PAGE_SEQUENCE_RULE_ID);
+  assertEqual(pageSequenceResult.evidence?.[0]?.kind, "document-format", "page sequence fixture evidence kind");
+  assertEqual(pageSequenceResult.evidence?.[0]?.property, "Sayfa numarası başlangıcı", "page sequence fixture evidence property");
+  assertEqual(pageSequenceResult.evidence?.[0]?.sectionIndex, 1, "page sequence fixture evidence section index");
+  assertEqual(pageSequenceResult.evidence?.[0]?.expected, 1, "page sequence fixture evidence expected");
+  assertEqual(pageSequenceResult.evidence?.[0]?.actual, 5, "page sequence fixture evidence actual");
+  assertEqual(pageSequenceResult.evidence?.[0]?.paragraphId, undefined, "page sequence fixture should not fabricate paragraph id");
+  assertEqual(pageSequenceResult.evidenceTotal, 1, "page sequence fixture evidence total");
 }
 
 function assertSingleFailureReport(report, failedRuleId, label) {
@@ -436,6 +524,9 @@ function runNegativeRegressionSmoke() {
     HeadingAlignmentValidator,
   } = require("../../src/features/analysis/rules/validators/HeadingAlignmentValidator.ts");
   const {
+    HeadingLevelFormatValidator,
+  } = require("../../src/features/analysis/rules/validators/HeadingLevelFormatValidator.ts");
+  const {
     HeadingNumberingValidator,
   } = require("../../src/features/analysis/rules/validators/HeadingNumberingValidator.ts");
   const { HeadingValidator } = require("../../src/features/analysis/rules/validators/HeadingValidator.ts");
@@ -446,14 +537,32 @@ function runNegativeRegressionSmoke() {
     LineSpacingValidator,
   } = require("../../src/features/analysis/rules/validators/LineSpacingValidator.ts");
   const {
+    MarginValidator,
+  } = require("../../src/features/analysis/rules/validators/MarginValidator.ts");
+  const {
     ObjectCaptionFormatValidator,
   } = require("../../src/features/analysis/rules/validators/ObjectCaptionFormatValidator.ts");
   const {
     ParagraphIndentationValidator,
   } = require("../../src/features/analysis/rules/validators/ParagraphIndentationValidator.ts");
   const {
+    PageNumberValidator,
+  } = require("../../src/features/analysis/rules/validators/PageNumberValidator.ts");
+  const {
+    PageNumberSequenceValidator,
+  } = require("../../src/features/analysis/rules/validators/PageNumberSequenceValidator.ts");
+  const {
+    RequiredSectionValidator,
+  } = require("../../src/features/analysis/rules/validators/RequiredSectionValidator.ts");
+  const {
+    SectionKeywordsValidator,
+  } = require("../../src/features/analysis/rules/validators/SectionKeywordsValidator.ts");
+  const {
     SectionOrderValidator,
   } = require("../../src/features/analysis/rules/validators/SectionOrderValidator.ts");
+  const {
+    SectionWordCountValidator,
+  } = require("../../src/features/analysis/rules/validators/SectionWordCountValidator.ts");
 
   const tableAlignmentResult = new ObjectAlignmentValidator().validate(
     createNegativeDocument({ tableAlignment: "left" }),
@@ -551,6 +660,203 @@ function runNegativeRegressionSmoke() {
   assertEqual(alignmentResult.evidence?.[0]?.paragraphIndex, 1, "negative alignment paragraph index");
   assertEqual(alignmentResult.evidence?.[0]?.expected, "Iki yana yasli", "negative alignment expected");
   assertEqual(alignmentResult.evidence?.[0]?.actual, "Sola hizali", "negative alignment actual");
+  const marginResult = new MarginValidator("left").validate(createNegativeDocument(), {
+    ...ruleBase("left margin"),
+    type: "MARGIN",
+    expected: 4,
+  });
+  assertEqual(marginResult.status, "FAILED", "negative margin");
+  assertEqual(marginResult.evidence?.[0]?.kind, "document-format", "negative margin evidence kind");
+  assertEqual(marginResult.evidence?.[0]?.property, "Sol kenar boşluğu", "negative margin evidence property");
+  assertEqual(marginResult.evidence?.[0]?.expected, 4, "negative margin evidence expected");
+  assertEqual(marginResult.evidence?.[0]?.actual, null, "negative margin evidence actual");
+  assertEqual(marginResult.evidence?.[0]?.unit, "cm", "negative margin evidence unit");
+  assertEqual(marginResult.evidence?.[0]?.paragraphId, undefined, "negative margin evidence should not fabricate paragraph id");
+  assertEqual(marginResult.evidenceTotal, 1, "negative margin evidence total");
+  const wordCountResult = new SectionWordCountValidator().validate(createNegativeDocument(), {
+    ...ruleBase("section word count"),
+    type: "SECTION_WORD_COUNT",
+    expected: { section: "Giriş", max: 1 },
+  });
+  assertEqual(wordCountResult.status, "FAILED", "negative section word count");
+  assertEqual(wordCountResult.evidence?.[0]?.kind, "section", "section word count evidence kind");
+  assertEqual(wordCountResult.evidence?.[0]?.sectionName, "1. GİRİŞ", "section word count evidence section");
+  assertEqual(wordCountResult.evidence?.[0]?.paragraphId, "intro", "section word count evidence paragraph id");
+  assertEqual(wordCountResult.evidence?.[0]?.paragraphIndex, 0, "section word count evidence paragraph index");
+  assertEqual(wordCountResult.evidence?.[0]?.expected, "En fazla 1 kelime", "section word count evidence expected");
+  assertEqual(wordCountResult.evidence?.[0]?.actual, 17, "section word count evidence actual");
+  assertEqual(wordCountResult.evidence?.[0]?.unit, "kelime", "section word count evidence unit");
+  assertEqual(wordCountResult.evidenceTotal, 1, "section word count evidence total");
+  const keywordsResult = new SectionKeywordsValidator().validate(createNegativeDocument(), {
+    ...ruleBase("section keywords"),
+    type: "SECTION_KEYWORDS",
+    expected: {
+      section: "Giriş",
+      labels: ["Anahtar Kelimeler"],
+      min: 3,
+      max: 5,
+      separators: [","],
+      placement: "section-end",
+    },
+  });
+  assertEqual(keywordsResult.status, "FAILED", "negative section keywords");
+  assertEqual(keywordsResult.evidence?.[0]?.kind, "section", "section keywords evidence kind");
+  assertEqual(keywordsResult.evidence?.[0]?.sectionName, "1. GİRİŞ", "section keywords evidence section");
+  assertEqual(keywordsResult.evidence?.[0]?.paragraphId, "intro", "section keywords evidence paragraph id");
+  assertEqual(keywordsResult.evidence?.[0]?.paragraphIndex, 0, "section keywords evidence paragraph index");
+  assertEqual(keywordsResult.evidence?.[0]?.expected, "3-5 anahtar kelime", "section keywords evidence expected");
+  assertEqual(keywordsResult.evidence?.[0]?.actual, "Tespit edilmedi", "section keywords evidence actual");
+  assertEqual(keywordsResult.evidenceTotal, 1, "section keywords evidence total");
+  const requiredSectionResult = new RequiredSectionValidator().validate(createNegativeDocument(), {
+    ...ruleBase("required section"),
+    type: "REQUIRED_SECTION",
+    expected: { section: "ÖZET", required: true },
+  });
+  assertEqual(requiredSectionResult.status, "FAILED", "negative required section");
+  assertEqual(requiredSectionResult.evidence?.[0]?.kind, "section", "required section evidence kind");
+  assertEqual(requiredSectionResult.evidence?.[0]?.sectionName, "ÖZET", "required section evidence section");
+  assertEqual(requiredSectionResult.evidence?.[0]?.paragraphId, undefined, "required section should not fabricate paragraph id");
+  assertEqual(requiredSectionResult.evidence?.[0]?.paragraphIndex, undefined, "required section should not fabricate paragraph index");
+  assertEqual(requiredSectionResult.evidence?.[0]?.expected, "Bölüm bulunmalı", "required section evidence expected");
+  assertEqual(requiredSectionResult.evidence?.[0]?.actual, "Tespit edilmedi", "required section evidence actual");
+  assertEqual(requiredSectionResult.evidenceTotal, 1, "required section evidence total");
+  const missingPageNumberResult = new PageNumberValidator().validate(createNegativeDocument(), {
+    ...ruleBase("page number missing"),
+    type: "PAGE_NUMBER",
+    expected: { required: true, location: "footer", alignment: "center" },
+  });
+  assertEqual(missingPageNumberResult.status, "FAILED", "negative missing page number");
+  assertEqual(missingPageNumberResult.evidence?.[0]?.kind, "document-format", "missing page number evidence kind");
+  assertEqual(missingPageNumberResult.evidence?.[0]?.property, "Sayfa numarası alanı", "missing page number evidence property");
+  assertEqual(missingPageNumberResult.evidence?.[0]?.expected, "PAGE alanı bulunmalı", "missing page number evidence expected");
+  assertEqual(missingPageNumberResult.evidence?.[0]?.actual, "Tespit edilmedi", "missing page number evidence actual");
+  assertEqual(missingPageNumberResult.evidence?.[0]?.paragraphId, undefined, "missing page number should not fabricate paragraph id");
+  assertEqual(missingPageNumberResult.evidenceTotal, 1, "missing page number evidence total");
+  const wrongPageNumberDocument = createNegativeDocument();
+  wrongPageNumberDocument.pageNumbering = {
+    ...wrongPageNumberDocument.pageNumbering,
+    hasPageNumbers: true,
+    fields: [{
+      sourcePath: "word/footer1.xml",
+      location: "footer",
+      alignment: "right",
+      fieldType: "PAGE",
+      structure: "fldSimple",
+    }],
+  };
+  const wrongPageNumberResult = new PageNumberValidator().validate(wrongPageNumberDocument, {
+    ...ruleBase("page number alignment"),
+    type: "PAGE_NUMBER",
+    expected: { required: true, location: "footer", alignment: "center" },
+  });
+  assertEqual(wrongPageNumberResult.status, "FAILED", "negative wrong page number alignment");
+  assertEqual(wrongPageNumberResult.evidence?.[0]?.kind, "document-format", "wrong page number evidence kind");
+  assertEqual(wrongPageNumberResult.evidence?.[0]?.property, "Sayfa numarası hizalaması", "wrong page number evidence property");
+  assertEqual(wrongPageNumberResult.evidence?.[0]?.expected, "Orta", "wrong page number evidence expected");
+  assertEqual(wrongPageNumberResult.evidence?.[0]?.actual, "Sağ", "wrong page number evidence actual");
+  assertEqual(wrongPageNumberResult.evidence?.[0]?.paragraphId, undefined, "wrong page number should not fabricate paragraph id");
+  assertEqual(wrongPageNumberResult.evidenceTotal, 1, "wrong page number evidence total");
+  const sequenceFormatDocument = createNegativeDocument();
+  sequenceFormatDocument.sections.push({
+    normalizedName: "fermenteurunler",
+    displayName: "FERMENTE ÜRÜNLER",
+    paragraphId: "heading2",
+    paragraphIndex: 2,
+    isRuleDefinedHeading: true,
+    isObjectReferenceExcluded: false,
+  });
+  sequenceFormatDocument.pageNumbering.sections = [
+    { endParagraphIndex: 1, format: "decimal", start: null },
+    { endParagraphIndex: 5, format: "decimal", start: 1 },
+  ];
+  const sequenceFormatResult = new PageNumberSequenceValidator().validate(sequenceFormatDocument, {
+    ...ruleBase("page sequence format"),
+    type: "PAGE_NUMBER_SEQUENCE",
+    expected: {
+      transitionSection: "FERMENTE ÜRÜNLER",
+      beforeFormat: "lowerRoman",
+      fromFormat: "decimal",
+      restartAt: 1,
+    },
+  });
+  assertEqual(sequenceFormatResult.status, "FAILED", "negative page sequence format");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.kind, "document-format", "page sequence format evidence kind");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.property, "Sayfa numarası biçimi", "page sequence format evidence property");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.sectionIndex, 0, "page sequence format evidence section index");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.expected, "Küçük Romen", "page sequence format evidence expected");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.actual, "Arap rakamı", "page sequence format evidence actual");
+  assertEqual(sequenceFormatResult.evidence?.[0]?.paragraphId, undefined, "page sequence format should not fabricate paragraph id");
+  assertEqual(sequenceFormatResult.evidenceTotal, 1, "page sequence format evidence total");
+  const sequenceRestartDocument = createNegativeDocument();
+  sequenceRestartDocument.sections.push({
+    normalizedName: "fermenteurunler",
+    displayName: "FERMENTE ÜRÜNLER",
+    paragraphId: "heading2",
+    paragraphIndex: 2,
+    isRuleDefinedHeading: true,
+    isObjectReferenceExcluded: false,
+  });
+  sequenceRestartDocument.pageNumbering.sections = [
+    { endParagraphIndex: 1, format: "lowerRoman", start: null },
+    { endParagraphIndex: 5, format: "decimal", start: 5 },
+  ];
+  const sequenceRestartResult = new PageNumberSequenceValidator().validate(sequenceRestartDocument, {
+    ...ruleBase("page sequence restart"),
+    type: "PAGE_NUMBER_SEQUENCE",
+    expected: {
+      transitionSection: "FERMENTE ÜRÜNLER",
+      beforeFormat: "lowerRoman",
+      fromFormat: "decimal",
+      restartAt: 1,
+    },
+  });
+  assertEqual(sequenceRestartResult.status, "FAILED", "negative page sequence restart");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.kind, "document-format", "page sequence restart evidence kind");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.property, "Sayfa numarası başlangıcı", "page sequence restart evidence property");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.sectionIndex, 1, "page sequence restart evidence section index");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.expected, 1, "page sequence restart evidence expected");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.actual, 5, "page sequence restart evidence actual");
+  assertEqual(sequenceRestartResult.evidence?.[0]?.paragraphId, undefined, "page sequence restart should not fabricate paragraph id");
+  assertEqual(sequenceRestartResult.evidenceTotal, 1, "page sequence restart evidence total");
+  const sequenceMissingConfigResult = new PageNumberSequenceValidator().validate(createNegativeDocument(), {
+    ...ruleBase("page sequence missing config"),
+    type: "PAGE_NUMBER_SEQUENCE",
+    expected: {
+      transitionSection: "Giriş",
+      beforeFormat: "lowerRoman",
+      fromFormat: "decimal",
+      restartAt: 1,
+    },
+  });
+  assertEqual(sequenceMissingConfigResult.status, "FAILED", "negative page sequence missing config");
+  assertEqual(sequenceMissingConfigResult.evidence?.[0]?.kind, "document-format", "page sequence missing evidence kind");
+  assertEqual(sequenceMissingConfigResult.evidence?.[0]?.property, "Sayfa numarası bölüm yapılandırması", "page sequence missing evidence property");
+  assertEqual(sequenceMissingConfigResult.evidence?.[0]?.expected, "DOCX bölüm sayfa numarası yapılandırması", "page sequence missing evidence expected");
+  assertEqual(sequenceMissingConfigResult.evidence?.[0]?.actual, "Tespit edilmedi", "page sequence missing evidence actual");
+  assertEqual(sequenceMissingConfigResult.evidence?.[0]?.paragraphId, undefined, "page sequence missing should not fabricate paragraph id");
+  assertEqual(sequenceMissingConfigResult.evidenceTotal, 1, "page sequence missing evidence total");
+  const sequenceDuplicateDocument = createNegativeDocument();
+  sequenceDuplicateDocument.sections.push({
+    normalizedName: "giris",
+    displayName: "GİRİŞ",
+    paragraphId: "heading2",
+    paragraphIndex: 2,
+    isRuleDefinedHeading: true,
+    isObjectReferenceExcluded: false,
+  });
+  const sequenceDuplicateResult = new PageNumberSequenceValidator().validate(sequenceDuplicateDocument, {
+    ...ruleBase("page sequence duplicate transition"),
+    type: "PAGE_NUMBER_SEQUENCE",
+    expected: {
+      transitionSection: "Giriş",
+      beforeFormat: "lowerRoman",
+      fromFormat: "decimal",
+      restartAt: 1,
+    },
+  });
+  assertEqual(sequenceDuplicateResult.status, "FAILED", "negative page sequence duplicate transition");
+  assertEqual(sequenceDuplicateResult.evidence?.[0]?.kind, "section", "page sequence duplicate evidence kind");
+  assertEqual(sequenceDuplicateResult.evidenceTotal, 2, "page sequence duplicate evidence total");
   const figureCaptionPlacementResult = new ObjectCaptionPlacementValidator().validate(
     createNegativeDocument({ figureCaptionPosition: "before" }),
     {
@@ -597,6 +903,8 @@ function runNegativeRegressionSmoke() {
   assertEqual(tableReferenceResult.status, "FAILED", "negative missing table reference");
   assertEqual(tableReferenceResult.evidence?.[0]?.kind, "table", "table reference evidence kind");
   assertEqual(tableReferenceResult.evidence?.[0]?.objectLabel, "Tablo 1", "table reference evidence label");
+  assertEqual(tableReferenceResult.evidence?.[0]?.paragraphId, undefined, "table reference evidence should not fabricate paragraph id");
+  assertEqual(tableReferenceResult.evidence?.[0]?.paragraphIndex, undefined, "table reference evidence should not fabricate paragraph index");
   assertEqual(tableReferenceResult.evidence?.[0]?.expected, "Metin içinde en az bir atıf", "table reference evidence expected");
   assertEqual(tableReferenceResult.evidence?.[0]?.actual, "Atıf tespit edilmedi", "table reference evidence actual");
   assertEqual(tableReferenceResult.evidenceTotal, 1, "table reference evidence total");
@@ -616,21 +924,25 @@ function runNegativeRegressionSmoke() {
   assertEqual(figureReferenceResult.evidence?.[0]?.expected, "Metin içinde en az bir atıf", "figure reference evidence expected");
   assertEqual(figureReferenceResult.evidence?.[0]?.actual, "Atıf tespit edilmedi", "figure reference evidence actual");
   assertEqual(figureReferenceResult.evidenceTotal, 1, "figure reference evidence total");
-  assertEqual(
-    new ConditionalRequiredSectionValidator().validate(
-      createNegativeDocument({ abbreviationList: false }),
-      {
-        ...ruleBase("abbreviation list"),
-        type: "CONDITIONAL_REQUIRED_SECTION",
-        expected: {
-          section: "Simgeler ve Kısaltmalar Listesi",
-          requiredWhen: { fact: "hasAbbreviations", equals: true },
-        },
+  const conditionalListResult = new ConditionalRequiredSectionValidator().validate(
+    createNegativeDocument({ abbreviationList: false }),
+    {
+      ...ruleBase("abbreviation list"),
+      type: "CONDITIONAL_REQUIRED_SECTION",
+      expected: {
+        section: "Simgeler ve Kısaltmalar Listesi",
+        requiredWhen: { fact: "hasAbbreviations", equals: true },
       },
-    ).status,
-    "FAILED",
-    "negative missing abbreviation list",
+    },
   );
+  assertEqual(conditionalListResult.status, "FAILED", "negative missing abbreviation list");
+  assertEqual(conditionalListResult.evidence?.[0]?.kind, "section", "conditional list evidence kind");
+  assertEqual(conditionalListResult.evidence?.[0]?.sectionName, "Simgeler ve Kısaltmalar Listesi", "conditional list evidence section");
+  assertEqual(conditionalListResult.evidence?.[0]?.paragraphId, undefined, "conditional list should not fabricate paragraph id");
+  assertEqual(conditionalListResult.evidence?.[0]?.paragraphIndex, undefined, "conditional list should not fabricate paragraph index");
+  assertEqual(conditionalListResult.evidence?.[0]?.expected, "Bölüm bulunmalı", "conditional list evidence expected");
+  assertEqual(conditionalListResult.evidence?.[0]?.actual, "Tespit edilmedi", "conditional list evidence actual");
+  assertEqual(conditionalListResult.evidenceTotal, 1, "conditional list evidence total");
   const headingResult = new HeadingValidator().validate(createNegativeDocument({ heading2Font: "Arial" }), {
       ...ruleBase("heading 2"),
       type: "HEADING",
@@ -645,6 +957,48 @@ function runNegativeRegressionSmoke() {
   assertEqual(headingResult.status, "FAILED", "negative wrong Heading2 font");
   assertEqual(headingResult.evidence?.[0]?.kind, "heading", "heading format evidence kind");
   assertEqual(headingResult.evidence?.[0]?.paragraphId, "heading2", "heading format evidence paragraph");
+  const headingLevelFormatDocument = createNegativeDocument({ heading2Font: "Arial" });
+  headingLevelFormatDocument.paragraphs[2] = {
+    ...headingLevelFormatDocument.paragraphs[2],
+    numbering: { source: "text", numId: null, level: 1, visibleLabel: "2.1." },
+    runs: headingLevelFormatDocument.paragraphs[2].runs.map((run) => ({
+      ...run,
+      bold: false,
+      fontFamily: "Arial",
+      fontSize: 11,
+    })),
+  };
+  headingLevelFormatDocument.sections.push({
+    normalizedName: "fermenteurunler",
+    displayName: "FERMENTE ÜRÜNLER",
+    paragraphId: "heading2",
+    paragraphIndex: 2,
+    isRuleDefinedHeading: true,
+    isObjectReferenceExcluded: false,
+  });
+  const headingLevelFormatResult = new HeadingLevelFormatValidator().validate(
+    headingLevelFormatDocument,
+    {
+      ...ruleBase("heading level format"),
+      type: "HEADING_LEVEL_FORMAT",
+      expected: {
+        level: 1,
+        sections: [{ section: "FERMENTE ÜRÜNLER" }],
+        fontFamily: "Times New Roman",
+        fontSize: 12,
+        bold: true,
+      },
+    },
+  );
+  assertEqual(headingLevelFormatResult.status, "FAILED", "negative heading level format");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.kind, "heading", "heading level format evidence kind");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.paragraphId, "heading2", "heading level format evidence paragraph id");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.paragraphIndex, 2, "heading level format evidence paragraph index");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.headingLevel, 2, "heading level format evidence heading level");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.textExcerpt, "2.1. FERMENTE ÜRÜNLER", "heading level format evidence excerpt");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.expected, "düzey 2, Times New Roman, 12 punto, kalın", "heading level format evidence expected");
+  assertEqual(headingLevelFormatResult.evidence?.[0]?.actual, "Arial, 11 punto, normal", "heading level format evidence actual");
+  assertEqual(headingLevelFormatResult.evidenceTotal, 1, "heading level format evidence total");
   const headingAlignmentResult = new HeadingAlignmentValidator().validate(createNegativeDocument(), {
     ...ruleBase("heading alignment"),
     type: "HEADING_ALIGNMENT",

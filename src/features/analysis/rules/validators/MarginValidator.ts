@@ -2,9 +2,11 @@ import type {
   NormalizedDocument,
   PageMargins,
   RuleDefinition,
+  RuleEvidence,
   RuleExpectedValue,
   RuleResult,
 } from "../../types";
+import { createDocumentFormatEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 type MarginSide = keyof PageMargins;
@@ -28,8 +30,26 @@ export class MarginValidator implements RuleValidator {
       message: passed
         ? `${rule.title} kurali basarili.`
         : createFailureMessage(this.side, expectedMargin, actualMargin),
+      ...(passed
+        ? {}
+        : {
+            evidence: [createMarginEvidence(this.side, expectedMargin, actualMargin)],
+            evidenceTotal: 1,
+          }),
     };
   }
+}
+
+function createMarginEvidence(
+  side: MarginSide,
+  expectedMargin: number,
+  actualMargin: number | null,
+): RuleEvidence {
+  return createDocumentFormatEvidence(`${formatMarginSide(side)} kenar boşluğu`, {
+    actual: actualMargin,
+    expected: expectedMargin,
+    unit: "cm",
+  });
 }
 
 function getExpectedMargin(expected: RuleExpectedValue): number {

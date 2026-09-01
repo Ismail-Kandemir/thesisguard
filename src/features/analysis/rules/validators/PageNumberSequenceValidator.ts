@@ -6,9 +6,15 @@ import type {
   PageNumberSection,
   PageNumberSequenceRuleExpected,
   RuleDefinition,
+  RuleEvidence,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
+import {
+  createDocumentFormatEvidence,
+  createSectionEvidence,
+  MAX_RULE_EVIDENCE_ITEMS,
+} from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class PageNumberSequenceValidator implements RuleValidator {
@@ -37,6 +43,14 @@ export class PageNumberSequenceValidator implements RuleValidator {
         "FAILED",
         "Geçiş bölümü birden fazla kez bulundu",
         `${expected.transitionSection} bölümü birden fazla kez bulunduğu için sayfa numarası geçişi güvenle belirlenemedi.`,
+        occurrences.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((section) =>
+          createSectionEvidence(section, {
+            actual: "Birden fazla geçiş bölümü bulundu",
+            expected: "Tek geçiş bölümü",
+            sectionName: section.displayName,
+          }),
+        ),
+        occurrences.length,
       );
     }
 
@@ -49,6 +63,13 @@ export class PageNumberSequenceValidator implements RuleValidator {
         "FAILED",
         "Bölüm sayfa numarası bilgisi tespit edilemedi",
         "DOCX bölüm özelliklerinde sayfa numarası biçimi tespit edilemedi.",
+        [
+          createDocumentFormatEvidence("Sayfa numarası bölüm yapılandırması", {
+            actual: "Tespit edilmedi",
+            expected: "DOCX bölüm sayfa numarası yapılandırması",
+          }),
+        ],
+        1,
       );
     }
 
@@ -61,6 +82,13 @@ export class PageNumberSequenceValidator implements RuleValidator {
         "FAILED",
         formatActual(sections),
         `${expected.transitionSection} bölümünün sayfa numarası bölümü belirlenemedi.`,
+        [
+          createDocumentFormatEvidence("Geçiş bölümü sayfa numarası yapılandırması", {
+            actual: "Tespit edilemedi",
+            expected: `${expected.transitionSection} bölümünü içeren belge bölümü`,
+          }),
+        ],
+        1,
       );
     }
 
@@ -74,6 +102,16 @@ export class PageNumberSequenceValidator implements RuleValidator {
     const restartMatches =
       expected.restartAt === undefined || transition.start === expected.restartAt;
     const passed = beforeMatches && fromMatches && restartMatches;
+    const evidence = passed
+      ? []
+      : createSequenceEvidence(
+          expected,
+          sections,
+          transitionIndex,
+          beforeMatches,
+          fromMatches,
+          restartMatches,
+        );
 
     return createResult(
       rule,
@@ -83,6 +121,8 @@ export class PageNumberSequenceValidator implements RuleValidator {
       passed
         ? `${rule.title} kuralı başarılı.`
         : createFailureMessage(expected, beforeMatches, fromMatches, restartMatches),
+      passed ? undefined : evidence.slice(0, MAX_RULE_EVIDENCE_ITEMS),
+      passed ? undefined : evidence.length,
     );
   }
 }
@@ -157,12 +197,80 @@ function isSupportedFormat(value: unknown): value is PageNumberFormat {
   return value === "decimal" || value === "lowerRoman";
 }
 
+function createSequenceEvidence(
+  expected: PageNumberSequenceRuleExpected,
+  sections: readonly EffectivePageNumberSection[],
+  transitionIndex: number,
+  beforeMatches: boolean,
+  fromMatches: boolean,
+  restartMatches: boolean,
+): RuleEvidence[] {
+  const evidence: RuleEvidence[] = [];
+
+  if (!beforeMatches) {
+    const before = sections.slice(0, transitionIndex);
+
+    if (before.length === 0) {
+      evidence.push(
+        createDocumentFormatEvidence(`${expected.transitionSection} öncesi sayfa numarası biçimi`, {
+          actual: "Tespit edilmedi",
+          expected: formatName(expected.beforeFormat),
+        }),
+      );
+    } else {
+      evidence.push(
+        ...before.flatMap((section, index) =>
+          section.effectiveFormat === expected.beforeFormat
+            ? []
+            : [
+                createDocumentFormatEvidence("Sayfa numarası biçimi", {
+                  actual: formatNullableFormat(section.effectiveFormat),
+                  expected: formatName(expected.beforeFormat),
+                  sectionIndex: index,
+                }),
+              ],
+        ),
+      );
+    }
+  }
+
+  if (!fromMatches) {
+    evidence.push(
+      ...sections.slice(transitionIndex).flatMap((section, offset) =>
+        section.effectiveFormat === expected.fromFormat
+          ? []
+          : [
+              createDocumentFormatEvidence("Sayfa numarası biçimi", {
+                actual: formatNullableFormat(section.effectiveFormat),
+                expected: formatName(expected.fromFormat),
+                sectionIndex: transitionIndex + offset,
+              }),
+            ],
+      ),
+    );
+  }
+
+  if (!restartMatches && expected.restartAt !== undefined) {
+    evidence.push(
+      createDocumentFormatEvidence("Sayfa numarası başlangıcı", {
+        actual: sections[transitionIndex].start ?? "Tespit edilmedi",
+        expected: expected.restartAt,
+        sectionIndex: transitionIndex,
+      }),
+    );
+  }
+
+  return evidence;
+}
+
 function createResult(
   rule: RuleDefinition,
   expected: PageNumberSequenceRuleExpected,
   status: RuleResultStatus,
   actual: string,
   message: string,
+  evidence?: RuleEvidence[],
+  evidenceTotal?: number,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -173,6 +281,8 @@ function createResult(
     expected: `${formatName(expected.beforeFormat)} → ${expected.transitionSection}: ${formatName(expected.fromFormat)}${expected.restartAt === undefined ? "" : `, başlangıç ${expected.restartAt}`}`,
     actual,
     message,
+    ...(evidence && evidence.length > 0 ? { evidence } : {}),
+    ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
 }
 
@@ -194,6 +304,10 @@ function formatName(format: string): string {
     default:
       return format;
   }
+}
+
+function formatNullableFormat(format: string | null): string {
+  return format === null ? "Tespit edilemedi" : formatName(format);
 }
 
 function createFailureMessage(
