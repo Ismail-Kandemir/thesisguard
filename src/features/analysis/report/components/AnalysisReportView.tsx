@@ -5,6 +5,7 @@ import type {
   RuleCategory,
   RuleEvidence,
   RuleResult,
+  RuleSeverity,
   RuleResultStatus,
   RuleResultValue,
 } from '../../types'
@@ -40,6 +41,12 @@ interface RuleResultGroupSummary {
   notApplicable: number
 }
 
+interface SeverityPresentation {
+  className: RuleSeverity
+  description: string
+  label: string
+}
+
 const categoryLabels: Record<RuleCategory, string> = {
   typography: 'Yazı Tipi ve Boyutu',
   spacing: 'Paragraf ve Satır Aralığı',
@@ -49,6 +56,28 @@ const categoryLabels: Record<RuleCategory, string> = {
   format: 'Belge Biçimi',
   heading: 'Başlıklar',
 }
+
+const severityPresentations: Record<RuleSeverity, SeverityPresentation> = {
+  error: {
+    className: 'error',
+    label: 'Kritik',
+    description:
+      'Tez biçim kurallarına doğrudan aykırı olan ve düzeltilmesi gereken kontrol.',
+  },
+  warning: {
+    className: 'warning',
+    label: 'Uyarı',
+    description:
+      'İncelenmesi önerilen, ancak kritik hata düzeyinde olmayan kontrol.',
+  },
+  info: {
+    className: 'info',
+    label: 'Bilgi',
+    description: 'Bilgilendirme amaçlı kontrol.',
+  },
+}
+
+const severityDisplayOrder: readonly RuleSeverity[] = ['error', 'warning', 'info']
 
 export function AnalysisReportView({
   analysisReport,
@@ -69,6 +98,8 @@ export function AnalysisReportView({
       </header>
 
       <ReportSummary analysisReport={analysisReport} />
+      <ScoreTrustNote />
+      <SeverityLegend results={analysisReport.results} />
       <AcademicContextSummary academicContext={analysisReport.academicContext} />
 
       <section className="analysis-report__details" aria-labelledby="result-heading">
@@ -98,6 +129,47 @@ function ReportSummary({ analysisReport }: { analysisReport: AnalysisReport }) {
       <SummaryItem label="Başarılı" value={analysisReport.passedRules} tone="passed" />
       <SummaryItem label="Başarısız" value={analysisReport.failedRules} tone="failed" />
       <SummaryItem label="Uygulanamaz" value={analysisReport.notApplicableRules} tone="neutral" />
+    </section>
+  )
+}
+
+function ScoreTrustNote() {
+  return (
+    <section className="analysis-report__trust-note" aria-labelledby="score-trust-heading">
+      <h2 id="score-trust-heading">Uyumluluk puanı hakkında</h2>
+      <p>
+        Uyumluluk puanı, otomatik olarak değerlendirilebilen kontrollerin
+        sonucudur. Tezin akademik içerik kalitesini veya tüm kılavuz
+        gerekliliklerini garanti etmez.
+      </p>
+    </section>
+  )
+}
+
+function SeverityLegend({ results }: { results: readonly RuleResult[] }) {
+  const severities = getUsedSeverityPresentations(results)
+
+  if (severities.length === 0) {
+    return null
+  }
+
+  return (
+    <section className="analysis-report__severity-legend" aria-labelledby="severity-heading">
+      <div>
+        <h2 id="severity-heading">Önem düzeyi</h2>
+        <p>Önem düzeyi, kuralın ağırlığını belirtir; kontrol sonucundan bağımsızdır.</p>
+      </div>
+
+      <dl>
+        {severities.map((severity) => (
+          <div key={severity.className}>
+            <dt>
+              <SeverityBadge presentation={severity} />
+            </dt>
+            <dd>{severity.description}</dd>
+          </div>
+        ))}
+      </dl>
     </section>
   )
 }
@@ -154,6 +226,22 @@ function SummaryItem({ label, tone = 'neutral', value }: SummaryItemProps) {
       <span>{label}</span>
       <strong>{value}</strong>
     </Card>
+  )
+}
+
+function SeverityBadge({
+  presentation,
+}: {
+  presentation: SeverityPresentation
+}) {
+  return (
+    <span
+      aria-label={`${presentation.label}: ${presentation.description}`}
+      className={`analysis-report__severity-badge analysis-report__severity-badge--${presentation.className}`}
+      title={presentation.description}
+    >
+      {presentation.label}
+    </span>
   )
 }
 
@@ -221,6 +309,7 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
 
 function RuleResultItem({ result }: { result: RuleResult }) {
   const presentation = getResultPresentation(result.status)
+  const severityPresentation = getSeverityPresentation(result.severity)
   const correctionGuidance =
     result.status === 'FAILED'
       ? result.solution?.trim() || getCorrectionGuidance(result)
@@ -248,10 +337,13 @@ function RuleResultItem({ result }: { result: RuleResult }) {
     >
       <div className="analysis-report__result-title">
         <h3>{result.ruleName || 'Kural sonucu'}</h3>
-        <span className="analysis-report__status">
-          <span aria-hidden="true">{presentation.symbol}</span>
-          {presentation.label}
-        </span>
+        <div className="analysis-report__result-meta">
+          <SeverityBadge presentation={severityPresentation} />
+          <span className="analysis-report__status">
+            <span aria-hidden="true">{presentation.symbol}</span>
+            {presentation.label}
+          </span>
+        </div>
       </div>
 
       {hasDetails ? (
@@ -667,6 +759,20 @@ function getResultPresentation(status: RuleResultStatus): {
   }
 
   return { className: 'not-applicable', symbol: '-', label: 'Uygulanamaz' }
+}
+
+function getSeverityPresentation(severity: RuleSeverity): SeverityPresentation {
+  return severityPresentations[severity]
+}
+
+function getUsedSeverityPresentations(
+  results: readonly RuleResult[],
+): SeverityPresentation[] {
+  const usedSeverities = new Set(results.map((result) => result.severity))
+
+  return severityDisplayOrder
+    .filter((severity) => usedSeverities.has(severity))
+    .map(getSeverityPresentation)
 }
 
 function getCorrectionGuidance(result: RuleResult): string | null {
