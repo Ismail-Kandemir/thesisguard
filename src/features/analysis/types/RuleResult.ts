@@ -1,6 +1,7 @@
-import type { RuleSeverity } from "./index";
+import type { RuleCategory, RuleSeverity } from "./index";
 
 export type RuleResultValue = string | number | boolean | null;
+
 export type RuleResultStatus = "PASSED" | "FAILED" | "NOT_APPLICABLE";
 
 export interface ParagraphRuleEvidence {
@@ -99,12 +100,28 @@ export interface RuleResult {
   ruleId: string;
   ruleName: string;
   status: RuleResultStatus;
+
   /** @deprecated Prefer status. Kept for backward compatibility. */
   passed: boolean;
+
   severity: RuleSeverity;
+
+  /**
+   * Akademik kuralın ait olduğu kategori.
+   * RuleDefinition.category kaynağından taşınır.
+   */
+  category?: RuleCategory;
+
+  /**
+   * Akademik kural için tanımlanmış düzeltme önerisi.
+   * RuleDefinition.solution kaynağından taşınır.
+   */
+  solution?: string;
+
   expected: RuleResultValue;
   actual: RuleResultValue;
   message: string;
+
   evidence?: RuleEvidence[];
   evidenceTotal?: number;
 }

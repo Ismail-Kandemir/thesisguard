@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type {
   AnalysisAcademicContext,
   AnalysisReport,
+  RuleCategory,
   RuleEvidence,
   RuleResult,
   RuleResultStatus,
@@ -21,6 +22,32 @@ interface FilterOption {
   id: ResultFilter
   label: string
   count: number
+}
+
+type RuleResultGroupKey = RuleCategory | 'uncategorized'
+
+interface RuleResultGroup {
+  key: RuleResultGroupKey
+  label: string
+  results: RuleResult[]
+  summary: RuleResultGroupSummary
+}
+
+interface RuleResultGroupSummary {
+  total: number
+  passed: number
+  failed: number
+  notApplicable: number
+}
+
+const categoryLabels: Record<RuleCategory, string> = {
+  typography: 'Yazı Tipi ve Boyutu',
+  spacing: 'Paragraf ve Satır Aralığı',
+  margin: 'Sayfa Kenar Boşlukları',
+  structure: 'Yapı ve Bölümler',
+  citation: 'Atıflar ve Referanslar',
+  format: 'Belge Biçimi',
+  heading: 'Başlıklar',
 }
 
 export function AnalysisReportView({
@@ -174,8 +201,19 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
 
   return (
     <div className="analysis-report__result-list">
-      {results.map((result) => (
-        <RuleResultItem key={result.ruleId} result={result} />
+      {groupRuleResultsByCategory(results).map((group) => (
+        <section className="analysis-report__category-group" key={group.key}>
+          <div className="analysis-report__category-header">
+            <h3>{group.label}</h3>
+            <p>{formatGroupSummary(group.summary)}</p>
+          </div>
+
+          <div className="analysis-report__category-results">
+            {group.results.map((result) => (
+              <RuleResultItem key={result.ruleId} result={result} />
+            ))}
+          </div>
+        </section>
       ))}
     </div>
   )
@@ -183,7 +221,10 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
 
 function RuleResultItem({ result }: { result: RuleResult }) {
   const presentation = getResultPresentation(result.status)
-  const correctionGuidance = getCorrectionGuidance(result)
+  const correctionGuidance =
+    result.status === 'FAILED'
+      ? result.solution?.trim() || getCorrectionGuidance(result)
+      : null
   const evidence = result.evidence ?? []
   const hasMessage = result.message.trim().length > 0
   const hasExpected = hasResultValue(result.expected)
@@ -521,6 +562,75 @@ function getVisibleResults(
         (first, second) => getStatusOrder(first.status) - getStatusOrder(second.status),
       )
     : [...filteredResults]
+}
+
+function groupRuleResultsByCategory(
+  results: readonly RuleResult[],
+): RuleResultGroup[] {
+  const groups = new Map<RuleResultGroupKey, RuleResultGroup>()
+
+  for (const result of results) {
+    const key = result.category ?? 'uncategorized'
+    const group = groups.get(key) ?? createRuleResultGroup(key)
+
+    group.results.push(result)
+    incrementGroupSummary(group.summary, result.status)
+    groups.set(key, group)
+  }
+
+  return Array.from(groups.values())
+}
+
+function createRuleResultGroup(key: RuleResultGroupKey): RuleResultGroup {
+  return {
+    key,
+    label: getCategoryLabel(key),
+    results: [],
+    summary: {
+      total: 0,
+      passed: 0,
+      failed: 0,
+      notApplicable: 0,
+    },
+  }
+}
+
+function incrementGroupSummary(
+  summary: RuleResultGroupSummary,
+  status: RuleResultStatus,
+): void {
+  summary.total += 1
+
+  if (status === 'PASSED') {
+    summary.passed += 1
+    return
+  }
+
+  if (status === 'FAILED') {
+    summary.failed += 1
+    return
+  }
+
+  summary.notApplicable += 1
+}
+
+function getCategoryLabel(category: RuleResultGroupKey): string {
+  if (category === 'uncategorized') {
+    return 'Diğer Kontroller'
+  }
+
+  return categoryLabels[category]
+}
+
+function formatGroupSummary(summary: RuleResultGroupSummary): string {
+  return [
+    `${summary.total} kontrol`,
+    summary.passed > 0 ? `${summary.passed} başarılı` : null,
+    summary.failed > 0 ? `${summary.failed} başarısız` : null,
+    summary.notApplicable > 0 ? `${summary.notApplicable} uygulanamaz` : null,
+  ]
+    .filter((part): part is string => part !== null)
+    .join(' · ')
 }
 
 function getEmptyFilterMessage(filter: ResultFilter): string {

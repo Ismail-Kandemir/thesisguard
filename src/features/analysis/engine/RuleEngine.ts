@@ -1,4 +1,8 @@
-import type { NormalizedDocument, RuleDefinition, RuleResult } from "../types";
+import type {
+  NormalizedDocument,
+  RuleDefinition,
+  RuleResult,
+} from "../types";
 import { ValidatorRegistry } from "../rules/ValidatorRegistry";
 import { FontFamilyValidator } from "../rules/validators/FontFamilyValidator";
 import { FontSizeValidator } from "../rules/validators/FontSizeValidator";
@@ -25,7 +29,9 @@ export class RuleEngine {
           return createMissingValidatorResult(rule);
         }
 
-        return validator.validate(document, rule);
+        const result = validator.validate(document, rule);
+
+        return enrichRuleResult(result, rule);
       });
   }
 }
@@ -40,6 +46,17 @@ function createDefaultValidatorRegistry(): ValidatorRegistry {
   return registry;
 }
 
+function enrichRuleResult(
+  result: RuleResult,
+  rule: RuleDefinition,
+): RuleResult {
+  return {
+    ...result,
+    category: rule.category,
+    solution: rule.solution,
+  };
+}
+
 function createMissingValidatorResult(rule: RuleDefinition): RuleResult {
   return {
     ruleId: rule.id,
@@ -47,13 +64,17 @@ function createMissingValidatorResult(rule: RuleDefinition): RuleResult {
     status: "FAILED",
     passed: false,
     severity: rule.severity,
+    category: rule.category,
+    solution: rule.solution,
     expected: getExpectedValue(rule.expected),
     actual: null,
-    message: "Bu kural icin kayitli validator bulunamadi.",
+    message: "Bu kural için kayıtlı validator bulunamadı.",
   };
 }
 
-function getExpectedValue(expected: RuleDefinition["expected"]): string | number | boolean {
+function getExpectedValue(
+  expected: RuleDefinition["expected"],
+): string | number | boolean {
   return typeof expected === "object"
     ? "value" in expected
       ? expected.value
