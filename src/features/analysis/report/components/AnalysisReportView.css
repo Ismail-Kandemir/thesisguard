@@ -18,6 +18,8 @@
 .analysis-report__results-header p,
 .analysis-report__trust-note h2,
 .analysis-report__trust-note p,
+.analysis-report__rule-source h2,
+.analysis-report__rule-source p,
 .analysis-report__severity-legend h2,
 .analysis-report__severity-legend p,
 .analysis-report__result-title h3,
@@ -36,6 +38,7 @@
 .analysis-report__header p,
 .analysis-report__results-header p,
 .analysis-report__trust-note p,
+.analysis-report__rule-source p,
 .analysis-report__severity-legend p,
 .analysis-report__message {
   color: #4b5563;
@@ -74,6 +77,7 @@
 }
 
 .analysis-report__trust-note,
+.analysis-report__rule-source,
 .analysis-report__severity-legend {
   display: grid;
   gap: 12px;
@@ -84,12 +88,14 @@
 }
 
 .analysis-report__trust-note h2,
+.analysis-report__rule-source h2,
 .analysis-report__severity-legend h2 {
   color: #111827;
   font-size: 17px;
 }
 
 .analysis-report__trust-note p,
+.analysis-report__rule-source p,
 .analysis-report__severity-legend p,
 .analysis-report__severity-legend dd {
   font-size: 14px;
@@ -99,6 +105,22 @@
   display: grid;
   gap: 10px;
   margin: 0;
+}
+
+.analysis-report__rule-source dl {
+  margin: 0;
+}
+
+.analysis-report__rule-source dt {
+  margin-bottom: 3px;
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.analysis-report__rule-source dd {
+  margin: 0;
+  color: #111827;
 }
 
 .analysis-report__severity-legend dl > div {

@@ -5,6 +5,7 @@
     "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
     "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
     "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
+    "guide": { "title": "Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu" },
     "version": "1.0.0"
   },
   "extends": [

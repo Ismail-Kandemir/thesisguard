@@ -167,6 +167,7 @@ async function main() {
 
 function assertRuleComposition() {
   const { RuleEngine } = require("../../src/features/analysis/engine/RuleEngine.ts");
+  const { ReportBuilder } = require("../../src/features/analysis/report/ReportBuilder.ts");
   const { RuleResolver } = require("../../src/features/analysis/rules/RuleResolver.ts");
   const {
     loadFoodTechnologyBachelorRuleSets,
@@ -174,6 +175,9 @@ function assertRuleComposition() {
 
   const ruleSets = loadFoodTechnologyBachelorRuleSets();
   const ruleSetsById = new Map(ruleSets.map((ruleSet) => [ruleSet.id, ruleSet]));
+  const departmentRuleSet = ruleSetsById.get(
+    "comu.applied-sciences.food-technology.bachelor",
+  );
   const experimentalRules = resolveRuleSet(
     "comu.applied-sciences.food-technology.bachelor.experimental",
     ruleSets,
@@ -205,6 +209,26 @@ function assertRuleComposition() {
   assertEqual(results.length, experimentalRules.length, "Engine result count does not match resolved rules");
   assertEqual(missingValidatorCount, 0, "Missing validator count changed");
   assertUnique(experimentalRules.map((rule) => rule.id), "duplicate resolved rule ID");
+  assertEqual(
+    departmentRuleSet?.metadata.guide?.title,
+    "Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu",
+    "Official guide title metadata changed",
+  );
+
+  const reportWithSource = new ReportBuilder().build([], undefined, {
+    guideTitle: departmentRuleSet.metadata.guide.title,
+  });
+  const reportWithoutSource = new ReportBuilder().build([]);
+  assertEqual(
+    reportWithSource.ruleSource?.guideTitle,
+    departmentRuleSet.metadata.guide.title,
+    "Known guide metadata was not carried to the report",
+  );
+  assertEqual(
+    reportWithoutSource.ruleSource,
+    undefined,
+    "Missing guide metadata produced a report source",
+  );
 
   return { rules: experimentalRules, results };
 }

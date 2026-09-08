@@ -101,6 +101,7 @@ export function AnalysisReportView({
       <ScoreTrustNote />
       <SeverityLegend results={analysisReport.results} />
       <AcademicContextSummary academicContext={analysisReport.academicContext} />
+      <RuleSourceSummary analysisReport={analysisReport} />
 
       <section className="analysis-report__details" aria-labelledby="result-heading">
         <div className="analysis-report__results-header">
@@ -118,6 +119,34 @@ export function AnalysisReportView({
         <RuleResultList activeFilter={activeFilter} results={visibleResults} />
       </section>
     </div>
+  )
+}
+
+function RuleSourceSummary({ analysisReport }: { analysisReport: AnalysisReport }) {
+  const guideTitle = analysisReport.ruleSource?.guideTitle
+
+  return (
+    <section className="analysis-report__rule-source" aria-labelledby="rule-source-heading">
+      <h2 id="rule-source-heading">Kural kaynağı</h2>
+      {guideTitle ? (
+        <dl>
+          <div>
+            <dt>Resmî kılavuz</dt>
+            <dd>{guideTitle}</dd>
+          </div>
+        </dl>
+      ) : (
+        <p>Resmî kılavuz kaynak bilgisi bu kural setinde yapılandırılmamıştır.</p>
+      )}
+      <p>
+        Kural seti sürümü ThesisGuard sürümüdür; kılavuz sürümü değildir. Kılavuz
+        sürümü ve tarih bilgileri yapılandırılmamıştır.
+      </p>
+      <p>
+        Analiz, ThesisGuard’da yapılandırılmış ve DOCX üzerinden otomatik olarak
+        doğrulanabilen kuralları kapsar.
+      </p>
+    </section>
   )
 }
 

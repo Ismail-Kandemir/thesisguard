@@ -42,10 +42,15 @@ export interface StudyType {
   slug: string;
 }
 
+export interface GuideMetadata {
+  title: string;
+}
+
 interface RuleSetMetadataBase {
   university: University;
   thesisType: ThesisType;
   studyType?: StudyType;
+  guide?: GuideMetadata;
   version: string;
 }
 

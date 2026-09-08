@@ -19,6 +19,7 @@ import type {
   AnalysisAcademicContext,
   AcademicSelection,
   AnalysisReport,
+  AnalysisRuleSource,
   NormalizedDocument,
   UniversityRuleSet,
 } from "./types";
@@ -84,7 +85,24 @@ export async function analyzeDocx(
   const reportBuilder = new ReportBuilder();
   const results = ruleEngine.run(documentWithSectionHeadings, rules);
 
-  return reportBuilder.build(results, createAcademicContext(ruleSets));
+  return reportBuilder.build(
+    results,
+    createAcademicContext(ruleSets),
+    createRuleSource(ruleSets),
+  );
+}
+
+function createRuleSource(
+  ruleSets: readonly UniversityRuleSet[],
+): AnalysisRuleSource | undefined {
+  const ruleSetWithGuide = [...ruleSets]
+    .sort(compareRuleSetSpecificity)
+    .reverse()
+    .find((ruleSet) => ruleSet.metadata.guide);
+
+  return ruleSetWithGuide?.metadata.guide
+    ? { guideTitle: ruleSetWithGuide.metadata.guide.title }
+    : undefined;
 }
 
 function createAcademicContext(

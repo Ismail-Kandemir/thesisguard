@@ -12,6 +12,10 @@ export interface AnalysisAcademicContext {
   ruleSetVersion: string;
 }
 
+export interface AnalysisRuleSource {
+  guideTitle: string;
+}
+
 export interface AnalysisReport {
   totalRules: number;
   evaluatedRules: number;
@@ -20,5 +24,6 @@ export interface AnalysisReport {
   notApplicableRules: number;
   score: number;
   academicContext?: AnalysisAcademicContext;
+  ruleSource?: AnalysisRuleSource;
   results: RuleResult[];
 }

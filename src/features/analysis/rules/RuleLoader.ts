@@ -80,6 +80,9 @@ function cloneRuleSet(ruleSet: UniversityRuleSet): UniversityRuleSet {
       studyType: ruleSet.metadata.studyType
         ? { ...ruleSet.metadata.studyType }
         : undefined,
+      guide: ruleSet.metadata.guide
+        ? { ...ruleSet.metadata.guide }
+        : undefined,
       faculty: ruleSet.metadata.faculty
         ? { ...ruleSet.metadata.faculty }
         : undefined,
