@@ -23,7 +23,7 @@ yapmaz. `word-native` origin yalnız Microsoft Word tarafından kaydedilmiş DOC
 kullanılır. Word-native fixture metadata'sında mümkün olduğunda Word sürümü,
 platform ve creation method belirtilmelidir.
 
-Mevcut on bir fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
+Mevcut on iki fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
 negative fixture'lar bunun kontrollü OOXML mutation türevleridir.
 
 ## Manifest alanları
@@ -118,6 +118,12 @@ docDefaults minorHAnsi token resolved through the document theme.
 Derived synthetic OOXML regression fixture whose academic headings omit literal
 number prefixes and receive multilevel visible labels from numPr, numbering.xml,
 and production counter-state normalization.
+
+`split-runs-synthetic.docx`
+
+Derived synthetic OOXML regression fixture that fragments semantic tokens across
+formatting-equivalent runs while preserving exact visible paragraph text. It
+covers heading, caption, reference, keywords, and body/abbreviation reconstruction.
 
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

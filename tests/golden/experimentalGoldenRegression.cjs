@@ -89,6 +89,15 @@ const PAGE_SEQUENCE_NEGATIVE_FIXTURE_PATH = path.join(
   "experimental",
   "experimental-page-sequence-fail.docx",
 );
+const SPLIT_RUNS_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "split-runs-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -161,6 +170,7 @@ async function main() {
   assertCriticalRules(report.results);
   assertFixtureFacts(document);
   await assertDerivedNegativeFixtures();
+  await assertSplitRunsFixture();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -1718,4 +1728,35 @@ if (require.main === module) {
     console.error(error.message);
     process.exitCode = 1;
   });
+}
+
+async function assertSplitRunsFixture() {
+  assert(fs.existsSync(SPLIT_RUNS_FIXTURE_PATH), "split-runs fixture missing");
+  const { document, report } = await runAnalysisFixture(SPLIT_RUNS_FIXTURE_PATH);
+  assertEqual(report.passedRules, 46, "split-runs fixture passed rule count");
+  assertEqual(report.failedRules, 0, "split-runs fixture failed rule count");
+  const expectedParagraphs = new Map([
+    [8, "Anahtar Kelimeler: ürün, kalite, analiz"],
+    [22, "2. GENEL BİLGİLER VE LİTERATÜR ÇALIŞMASI"],
+    [24, "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır."],
+    [28, "Tablo 1. Örnek Tablo"],
+    [34, "Çalışmada kullanılan örnek düzen Şekil 1'de gösterilmiştir."],
+  ]);
+  for (const [paragraphIndex, expectedText] of expectedParagraphs) {
+    const paragraph = document.paragraphs[paragraphIndex];
+    assertEqual(paragraph.runs.length, 4, `split-runs paragraph ${paragraphIndex} run count`);
+    assertEqual(paragraph.runs.map((run) => run.text).join(""), expectedText,
+      `split-runs paragraph ${paragraphIndex} reconstruction`);
+  }
+  const heading = document.headings.find((item) => item.paragraphIndex === 22);
+  assertEqual(heading?.sectionName, "Genel Bilgiler ve Literatür Çalışması",
+    "split-runs heading section detection");
+  const caption = document.captions.items.find((item) => item.paragraphIndex === 28);
+  assertEqual(caption?.kind, "table", "split-runs caption kind");
+  assertEqual(caption?.number, "1", "split-runs caption number");
+  const reference = document.objectReferences.items.find((item) => item.paragraphIndex === 34);
+  assertEqual(reference?.kind, "figure", "split-runs reference kind");
+  assertEqual(reference?.number, "1", "split-runs reference number");
+  assert(document.abbreviations.items.some((item) => item.value === "DNA"),
+    "split-runs abbreviation reconstruction");
 }

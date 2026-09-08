@@ -209,6 +209,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "split-runs-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Run sınırlarında parçalanan heading, caption, object reference, keywords ve body tokenlarının paragraph düzeyinde eksiksiz yeniden oluşturulması.",
+      "targetedFeatures": ["split-run-heading-text-reconstruction", "split-run-caption-token-detection", "split-run-in-text-reference-detection", "split-run-keywords-detection", "split-run-body-and-abbreviation-reconstruction"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML run fragmentation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }
