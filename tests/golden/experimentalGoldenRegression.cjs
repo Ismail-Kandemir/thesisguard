@@ -1594,7 +1594,11 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exitCode = 1;
-});
+module.exports = { runAnalysisFixture };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  });
+}

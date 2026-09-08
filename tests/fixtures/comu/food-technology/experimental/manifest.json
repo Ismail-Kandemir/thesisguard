@@ -1,0 +1,157 @@
+{
+  "schemaVersion": 1,
+  "fixtures": [
+    {
+      "file": "full-correct.docx",
+      "tier": 0,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Experimental kural setinin tam başarılı golden regresyonu.",
+      "targetedFeatures": ["complete-experimental-rule-set"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "python-docx",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-indentation-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Tek bir akademik gövde paragrafında geçersiz ilk satır girintisi.",
+      "targetedFeatures": ["paragraph-first-line-indentation"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.applied-sciences.food-technology.bachelor.paragraph-indentation"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-typography-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Tek bir akademik gövde run'ında geçersiz yazı boyutu.",
+      "targetedFeatures": ["direct-run-font-size"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.bachelor.typography.font-size"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-paragraph-format-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Tek bir akademik gövde paragrafında geçersiz satır aralığı.",
+      "targetedFeatures": ["direct-paragraph-line-spacing"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.bachelor.spacing.line-height"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-object-alignment-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Tek bir tablo nesnesinde geçersiz yatay hizalama.",
+      "targetedFeatures": ["direct-table-alignment"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.applied-sciences.food-technology.bachelor.table-object-alignment"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-margin-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Final section üzerinde geçersiz sağ sayfa kenar boşluğu.",
+      "targetedFeatures": ["final-section-right-margin"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.bachelor.margin.right"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-page-number-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Footer PAGE alanını taşıyan paragrafta geçersiz hizalama.",
+      "targetedFeatures": ["footer-page-field-alignment"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.applied-sciences.food-technology.bachelor.page-number"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "experimental-page-sequence-fail.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Ana metin section geçişinde geçersiz sayfa numarası başlangıç değeri.",
+      "targetedFeatures": ["section-page-number-restart"],
+      "expected": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.applied-sciences.food-technology.bachelor.page-number-sequence"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    }
+  ]
+}
