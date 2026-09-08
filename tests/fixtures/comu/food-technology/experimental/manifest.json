@@ -247,6 +247,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü complex REF field mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "toc-field-marked-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "TOC1 style ve Table of Contents content-control marker'ı taşıyan 11 pt cached TOC result paragraph'ının academic body typography kontrollerinden dışlanması.",
+      "targetedFeatures": ["toc1-style-detection", "toc-content-control-marker-detection", "cached-toc-result-exclusion", "font-size-body-exclusion", "font-family-body-exclusion"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü marked complex TOC field mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }

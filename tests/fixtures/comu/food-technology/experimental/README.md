@@ -23,7 +23,7 @@ yapmaz. `word-native` origin yalnız Microsoft Word tarafından kaydedilmiş DOC
 kullanılır. Word-native fixture metadata'sında mümkün olduğunda Word sürümü,
 platform ve creation method belirtilmelidir.
 
-Mevcut on üç fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
+Mevcut on dört fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
 negative fixture'lar bunun kontrollü OOXML mutation türevleridir.
 
 ## Manifest alanları
@@ -130,6 +130,13 @@ covers heading, caption, reference, keywords, and body/abbreviation reconstructi
 Derived synthetic OOXML regression fixture that wraps an in-text figure reference
 in a complex REF field. It verifies only control/instruction text exclusion and
 split cached-result text reconstruction; it does not claim REF instruction semantics.
+
+`toc-field-marked-synthetic.docx`
+
+Supported marked-TOC regression fixture. Its cached result is identified by both
+TOC1 style and a Table of Contents content-control marker, and intentionally uses
+11 pt text to prove exclusion from academic body typography. It does not verify
+unmarked TOC caches, field-range ownership, rendered page numbers, or cache freshness.
 
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

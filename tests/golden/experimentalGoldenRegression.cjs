@@ -107,6 +107,15 @@ const COMPLEX_FIELD_FIXTURE_PATH = path.join(
   "experimental",
   "complex-field-cached-result-synthetic.docx",
 );
+const MARKED_TOC_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "toc-field-marked-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -181,6 +190,7 @@ async function main() {
   await assertDerivedNegativeFixtures();
   await assertSplitRunsFixture();
   await assertComplexFieldFixture();
+  await assertMarkedTocFixture();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -795,6 +805,32 @@ function runNegativeRegressionSmoke() {
   assertEqual(fontFamilyResult.evidence?.[0]?.runIndex, 0, "negative font family run index");
   assertEqual(fontFamilyResult.evidence?.[0]?.expected, "Times New Roman", "negative font family expected");
   assertEqual(fontFamilyResult.evidence?.[0]?.actual, "Arial", "negative font family actual");
+  const markedTocDocument = createNegativeDocument();
+  markedTocDocument.paragraphs.push({
+    ...markedTocDocument.paragraphs[1],
+    id: "marked-toc-entry",
+    text: "1. GİRİŞ    1",
+    runs: [{
+      ...markedTocDocument.paragraphs[1].runs[0],
+      text: "1. GİRİŞ    1",
+      fontFamily: "Arial",
+      fontSize: 11,
+    }],
+    styleId: "TOC1",
+    isTableOfContentsEntry: true,
+  });
+  const markedTocFontSizeResult = new FontSizeValidator().validate(markedTocDocument, {
+    ...ruleBase("marked TOC font size exclusion"),
+    type: "FONT_SIZE",
+    expected: 12,
+  });
+  assertEqual(markedTocFontSizeResult.status, "PASSED", "marked TOC 11pt is excluded");
+  const markedTocFontFamilyResult = new FontFamilyValidator().validate(markedTocDocument, {
+    ...ruleBase("marked TOC font family exclusion"),
+    type: "FONT_FAMILY",
+    expected: "Times New Roman",
+  });
+  assertEqual(markedTocFontFamilyResult.status, "PASSED", "marked TOC Arial is excluded");
   const lineSpacingResult = new LineSpacingValidator().validate(createNegativeDocument({ bodyLineSpacing: 240 }), {
     ...ruleBase("line spacing"),
     type: "LINE_SPACING",
@@ -1802,4 +1838,19 @@ async function assertComplexFieldFixture() {
   );
   assertEqual(noCacheDocument.paragraphs[0].text, "", "field without cached result text");
   assertEqual(noCacheDocument.paragraphs[0].isEmpty, true, "field without cached result is empty");
+}
+
+async function assertMarkedTocFixture() {
+  assert(fs.existsSync(MARKED_TOC_FIXTURE_PATH), "marked TOC fixture missing");
+  const { document, report } = await runAnalysisFixture(MARKED_TOC_FIXTURE_PATH);
+  assertEqual(report.totalRules, 46, "marked TOC fixture total rule count");
+  assertEqual(report.passedRules, 46, "marked TOC fixture passed rule count");
+  assertEqual(report.failedRules, 0, "marked TOC fixture failed rule count");
+  assertEqual(report.notApplicableRules, 0, "marked TOC fixture not applicable count");
+  const paragraph = document.paragraphs[13];
+  assertEqual(paragraph.isTableOfContentsEntry, true, "marked TOC paragraph marker");
+  assertEqual(paragraph.runs.filter((run) => run.text.length > 0).every((run) => run.fontSize === 11),
+    true, "marked TOC intentional 11pt formatting");
+  assertEqual(document.tableOfContents.hasField, true, "marked TOC field detection");
+  assertEqual(document.tableOfContents.fields[0]?.structure, "complex", "marked TOC field structure");
 }

@@ -80,7 +80,7 @@ function getFontFamilyObservations(document: NormalizedDocument): FontFamilyObse
 
   const paragraphIndexById = new Map(document.paragraphs.map((paragraph, index) => [paragraph.id, index]));
 
-  return getBodyParagraphs(document).flatMap((paragraph) =>
+  return getBodyParagraphs(document, { excludeTableOfContents: true }).flatMap((paragraph) =>
     paragraph.runs.flatMap((run, runIndex) => {
       if (!isVisibleRun(run)) {
         return [];
