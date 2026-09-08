@@ -70,7 +70,7 @@
       "severity": "error",
       "score": 10,
       "message": "Heading 2 baslik stili beklenen tez formati ile uyumlu degil.",
-      "solution": "Heading 2 stilini Times New Roman, 12 punto ve kalin olarak duzenleyin.",
+      "solution": "Heading 2 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -90,7 +90,7 @@
       "severity": "warning",
       "score": 8,
       "message": "Heading 3 baslik stili beklenen tez formati ile uyumlu degil.",
-      "solution": "Heading 3 stilini Times New Roman, 12 punto ve kalin olarak duzenleyin.",
+      "solution": "Heading 3 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -106,7 +106,7 @@
       "severity": "warning",
       "score": 8,
       "message": "Satır aralığı beklenen tez formatı ile uyumlu değil.",
-      "solution": "Ana metin satır aralığını 1.5 olarak düzenleyin.",
+      "solution": "Ana metin satır aralığını 1,5 satır olarak ayarlayın.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -151,7 +151,7 @@
       "severity": "error",
       "score": 10,
       "message": "Sağ kenar boşluğu beklenen tez formatı ile uyumlu değil.",
-      "solution": "Sağ kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "solution": "Sağ kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -167,7 +167,7 @@
       "severity": "error",
       "score": 10,
       "message": "Üst kenar boşluğu beklenen tez formatı ile uyumlu değil.",
-      "solution": "Üst kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "solution": "Üst kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -183,7 +183,7 @@
       "severity": "error",
       "score": 10,
       "message": "Alt kenar boşluğu beklenen tez formatı ile uyumlu değil.",
-      "solution": "Alt kenar boşluğunu 2.5 cm olarak düzenleyin.",
+      "solution": "Alt kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     }

@@ -160,7 +160,7 @@
       "severity": "error",
       "score": 10,
       "message": "İçindekiler bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir İçindekiler bölümü ekleyin.",
+      "solution": "Teze bağımsız bir İçindekiler bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -179,7 +179,7 @@
       "severity": "error",
       "score": 10,
       "message": "Kaynaklar bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Kaynaklar bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Kaynaklar bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -198,7 +198,7 @@
       "severity": "error",
       "score": 10,
       "message": "Özet bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Özet bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Özet bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -217,7 +217,7 @@
       "severity": "error",
       "score": 10,
       "message": "Abstract bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Abstract bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Abstract bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -236,7 +236,7 @@
       "severity": "error",
       "score": 10,
       "message": "İntihal (Aşırma) Beyan Sayfası tespit edilemedi.",
-      "solution": "Teze bağımsız bir İntihal (Aşırma) Beyan Sayfası bölümü ekleyin.",
+      "solution": "Teze bağımsız bir İntihal (Aşırma) Beyan Sayfası bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -275,7 +275,7 @@
       "severity": "error",
       "score": 10,
       "message": "Tablo nesnesi ortalanmış olmalıdır.",
-      "solution": "Tabloyu metin alanı içinde yatay olarak ortalayın; tablo başlığını sola yaslı bırakın.",
+      "solution": "Tabloyu metin alanı içinde yatay olarak ortalayın.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -290,7 +290,7 @@
       "severity": "error",
       "score": 10,
       "message": "Şekil nesnesi ortalanmış olmalıdır.",
-      "solution": "Inline şekli taşıyan paragrafı ortalayın; şekil başlığını sola yaslı bırakın.",
+      "solution": "Şekli taşıyan paragrafı yatay olarak ortalayın.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -365,7 +365,7 @@
       "severity": "error",
       "score": 10,
       "message": "Bazı tablolar için metin içi atıf bulunamadı.",
-      "solution": "Her tabloya görünür tez metni içinde numarasıyla atıf yapın.",
+      "solution": "Her tabloya görünür tez metni içinde numarasıyla atıf yapın ve tablo numaralarını benzersiz kullanın.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -380,7 +380,7 @@
       "severity": "error",
       "score": 10,
       "message": "Bazı şekiller için metin içi atıf bulunamadı.",
-      "solution": "Her şekle görünür tez metni içinde numarasıyla atıf yapın.",
+      "solution": "Her şekle görünür tez metni içinde numarasıyla atıf yapın ve şekil numaralarını benzersiz kullanın.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -403,7 +403,7 @@
       "severity": "error",
       "score": 10,
       "message": "Kabul ve Onay Sayfası tespit edilemedi.",
-      "solution": "Teze bağımsız bir Kabul ve Onay Sayfası bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Kabul ve Onay Sayfası bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -422,7 +422,7 @@
       "severity": "error",
       "score": 10,
       "message": "Teşekkür bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Teşekkür bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Teşekkür bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -441,7 +441,7 @@
       "severity": "error",
       "score": 10,
       "message": "Giriş bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Giriş bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Giriş bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -460,7 +460,7 @@
       "severity": "error",
       "score": 10,
       "message": "Sonuç bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Sonuç bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Sonuç bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -479,7 +479,7 @@
       "severity": "error",
       "score": 10,
       "message": "Özgeçmiş bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Özgeçmiş bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Özgeçmiş bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },

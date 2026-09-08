@@ -209,6 +209,7 @@ function assertRuleComposition() {
   assertEqual(results.length, experimentalRules.length, "Engine result count does not match resolved rules");
   assertEqual(missingValidatorCount, 0, "Missing validator count changed");
   assertUnique(experimentalRules.map((rule) => rule.id), "duplicate resolved rule ID");
+  assertSolutionCoverage(experimentalRules);
   assertEqual(
     departmentRuleSet?.metadata.guide?.title,
     "Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu",
@@ -231,6 +232,41 @@ function assertRuleComposition() {
   );
 
   return { rules: experimentalRules, results };
+}
+
+function assertSolutionCoverage(rules) {
+  const enabledRules = rules.filter((rule) => rule.enabled);
+
+  assertEqual(enabledRules.length, EXPECTED_RULE_COUNTS.experimental, "Enabled rule count changed");
+
+  for (const rule of enabledRules) {
+    assert(
+      typeof rule.solution === "string" && rule.solution.trim().length > 0,
+      `Rule has an empty solution: ${rule.id}`,
+    );
+    assert(
+      rule.solution.trim() !== rule.message.trim(),
+      `Rule solution duplicates its message: ${rule.id}`,
+    );
+  }
+
+  for (const category of ["typography", "spacing", "margin", "structure", "heading", "format"]) {
+    assert(
+      enabledRules.some(
+        (rule) => rule.category === category && rule.solution.trim().length > 0,
+      ),
+      `Representative category has no solution: ${category}`,
+    );
+  }
+
+  assert(
+    enabledRules.some(
+      (rule) =>
+        (rule.id.includes("table-") || rule.id.includes("figure-")) &&
+        rule.solution.trim().length > 0,
+    ),
+    "Table/figure rules have no solution",
+  );
 }
 
 function resolveRuleSet(ruleSetId, allRuleSets, ruleSetsById, RuleResolver) {

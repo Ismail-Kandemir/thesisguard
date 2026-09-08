@@ -30,7 +30,7 @@
       "severity": "error",
       "score": 10,
       "message": "Genel Bilgiler ve Literatür Çalışması bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Genel Bilgiler ve Literatür Çalışması bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Genel Bilgiler ve Literatür Çalışması bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -52,7 +52,7 @@
       "severity": "error",
       "score": 10,
       "message": "Materyal ve Metot bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Materyal ve Metot bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Materyal ve Metot bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -74,7 +74,7 @@
       "severity": "error",
       "score": 10,
       "message": "Bulgular ve Tartışma bölümü tespit edilemedi.",
-      "solution": "Teze bağımsız bir Bulgular ve Tartışma bölümü ekleyin.",
+      "solution": "Teze bağımsız bir Bulgular ve Tartışma bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
       "version": "1.0.0"
     },
@@ -109,7 +109,7 @@
       "severity": "error",
       "score": 10,
       "message": "Deneysel tez bölümleri kılavuzdaki relative sırayı izlemiyor.",
-      "solution": "Tez bölümlerini kılavuzdaki deneysel çalışma sırasına göre düzenleyin.",
+      "solution": "Tez bölümlerini raporda gösterilen beklenen deneysel çalışma sırasına göre yeniden düzenleyin.",
       "enabled": true,
       "version": "1.0.0"
     },
