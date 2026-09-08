@@ -116,6 +116,15 @@ const MARKED_TOC_FIXTURE_PATH = path.join(
   "experimental",
   "toc-field-marked-synthetic.docx",
 );
+const UNMARKED_TOC_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "toc-field-unmarked-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -190,7 +199,9 @@ async function main() {
   await assertDerivedNegativeFixtures();
   await assertSplitRunsFixture();
   await assertComplexFieldFixture();
+  assertComplexTocFieldOwnership();
   await assertMarkedTocFixture();
+  await assertUnmarkedTocFixture();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -1853,4 +1864,106 @@ async function assertMarkedTocFixture() {
     true, "marked TOC intentional 11pt formatting");
   assertEqual(document.tableOfContents.hasField, true, "marked TOC field detection");
   assertEqual(document.tableOfContents.fields[0]?.structure, "complex", "marked TOC field structure");
+}
+
+function assertComplexTocFieldOwnership() {
+  const { parseDocumentXml } = require("../../src/features/analysis/parsers/documentXmlParser.ts");
+  const document = parseDocumentXml(wrapDocumentXml(
+    paragraphXml(fieldBegin() + instructionXml(" TO") + instructionXml("C \\o &quot;1-3&quot; ") +
+      instructionXml("\\h \\z \\u ") + fieldSeparate()) +
+    paragraphXml(textRunXml("A", "Arial", 22) + fieldBegin() +
+      instructionXml(" PAGEREF _Toc1 \\h ") + fieldSeparate() + textRunXml("1") + fieldEnd()) +
+    paragraphXml(textRunXml("B") + simpleFieldXml("PAGEREF _Toc2 \\h", "2")) +
+    paragraphXml(textRunXml("C") + fieldEnd()) +
+    paragraphXml(textRunXml("D")) +
+    paragraphXml(fieldBegin() + instructionXml(" REF Bookmark ") + fieldSeparate() +
+      textRunXml("REF result") + fieldEnd()) +
+    paragraphXml(fieldBegin() + instructionXml(" PAGEREF Bookmark ") + fieldSeparate() +
+      textRunXml("PAGEREF result") + fieldEnd()) +
+    paragraphXml(textRunXml("TOC örneği")) +
+    paragraphXml(fieldEnd()) +
+    paragraphXml(fieldBegin() + instructionXml(" TOC ") + textRunXml("no separate") + fieldEnd()) +
+    paragraphXml(fieldBegin() + instructionXml(" TOC ") + fieldSeparate() + textRunXml("unclosed"))
+  ));
+
+  assertEqual(document.tableOfContents.fields.filter((field) => field.structure === "complex").length,
+    2, "balanced complex TOC metadata count");
+  for (const paragraphIndex of [1, 2, 3]) {
+    assertEqual(document.paragraphs[paragraphIndex].isTableOfContentsEntry, true,
+      `nested multi-paragraph TOC membership ${paragraphIndex}`);
+  }
+  for (const paragraphIndex of [0, 4, 5, 6, 7, 8, 9]) {
+    assertEqual(document.paragraphs[paragraphIndex].isTableOfContentsEntry, false,
+      `TOC false-positive safety ${paragraphIndex}`);
+  }
+
+  const secondTocDocument = parseDocumentXml(wrapDocumentXml(
+    paragraphXml(fieldBegin() + instructionXml(" TOC ") + fieldSeparate() + textRunXml("First") + fieldEnd()) +
+    paragraphXml(fieldBegin() + instructionXml(" TOC ") + fieldSeparate() + textRunXml("Second") + fieldEnd())
+  ));
+  assertEqual(secondTocDocument.tableOfContents.fields.length, 2, "multiple TOC field count");
+  assertEqual(secondTocDocument.paragraphs.every((paragraph) => paragraph.isTableOfContentsEntry),
+    true, "multiple TOC field independent membership");
+
+  const { FontFamilyValidator } = require(
+    "../../src/features/analysis/rules/validators/FontFamilyValidator.ts"
+  );
+  const { FontSizeValidator } = require(
+    "../../src/features/analysis/rules/validators/FontSizeValidator.ts"
+  );
+  assertEqual(new FontFamilyValidator().validate(document, {
+    ...ruleBase("field-range TOC font family exclusion"),
+    type: "FONT_FAMILY",
+    expected: "Times New Roman",
+  }).status, "PASSED", "field-range TOC Arial is excluded");
+  assertEqual(new FontSizeValidator().validate(document, {
+    ...ruleBase("field-range TOC font size exclusion"),
+    type: "FONT_SIZE",
+    expected: 12,
+  }).status, "PASSED", "field-range TOC 11pt is excluded");
+}
+
+async function assertUnmarkedTocFixture() {
+  assert(fs.existsSync(UNMARKED_TOC_FIXTURE_PATH), "unmarked TOC fixture missing");
+  const { document, report } = await runAnalysisFixture(UNMARKED_TOC_FIXTURE_PATH);
+  assertEqual(report.totalRules, 46, "unmarked TOC fixture total rule count");
+  assertEqual(report.passedRules, 46, "unmarked TOC fixture passed rule count");
+  assertEqual(report.failedRules, 0, "unmarked TOC fixture failed rule count");
+  assertEqual(report.notApplicableRules, 0, "unmarked TOC fixture not applicable count");
+  assertEqual(document.paragraphs[13].isTableOfContentsEntry, true,
+    "unmarked TOC first cached paragraph membership");
+  assertEqual(document.paragraphs[14].isTableOfContentsEntry, true,
+    "unmarked TOC second cached paragraph membership");
+}
+
+function wrapDocumentXml(bodyXml) {
+  return `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${bodyXml}</w:body></w:document>`;
+}
+
+function paragraphXml(content) {
+  return `<w:p>${content}</w:p>`;
+}
+
+function fieldBegin() {
+  return `<w:r><w:fldChar w:fldCharType="begin"/></w:r>`;
+}
+
+function fieldSeparate() {
+  return `<w:r><w:fldChar w:fldCharType="separate"/></w:r>`;
+}
+
+function fieldEnd() {
+  return `<w:r><w:fldChar w:fldCharType="end"/></w:r>`;
+}
+
+function instructionXml(value) {
+  return `<w:r><w:instrText xml:space="preserve">${value}</w:instrText></w:r>`;
+}
+
+function textRunXml(value, fontFamily = "Times New Roman", halfPoints = 24) {
+  return `<w:r><w:rPr><w:rFonts w:ascii="${fontFamily}" w:hAnsi="${fontFamily}"/><w:sz w:val="${halfPoints}"/></w:rPr><w:t>${value}</w:t></w:r>`;
+}
+
+function simpleFieldXml(instruction, result) {
+  return `<w:fldSimple w:instr="${instruction}">${textRunXml(result)}</w:fldSimple>`;
 }

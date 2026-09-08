@@ -266,6 +266,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü marked complex TOC field mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "toc-field-unmarked-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Balanced complex TOC field-result paragraph ownership and exclusion from academic body typography.",
+      "targetedFeatures": ["multi-paragraph-complex-toc-field", "field-result-ownership", "nested-pageref-safety", "unmarked-cached-toc-paragraph-detection", "body-typography-exclusion"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü complex TOC OOXML mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }

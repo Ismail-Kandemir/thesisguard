@@ -6,7 +6,7 @@ import type {
   ParagraphNumbering,
   Run,
 } from "../types";
-import { parseTableOfContents } from "./tableOfContentsXmlParser";
+import { analyzeTableOfContentsFields } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
@@ -22,7 +22,11 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     throw new Error("document.xml gecerli XML degil.");
   }
 
-  const paragraphs = parseParagraphs(xmlDocument);
+  const tableOfContentsAnalysis = analyzeTableOfContentsFields(xmlDocument);
+  const paragraphs = parseParagraphs(
+    xmlDocument,
+    tableOfContentsAnalysis.resultParagraphElements,
+  );
   const visualStructure = normalizeDocumentCaptions(xmlDocument, paragraphs);
 
   return {
@@ -44,7 +48,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       fields: [],
       sections: parsePageNumberSections(xmlDocument),
     },
-    tableOfContents: parseTableOfContents(xmlDocument),
+    tableOfContents: tableOfContentsAnalysis.tableOfContents,
     tables: visualStructure.tables,
     figures: visualStructure.figures,
     blocks: visualStructure.blocks,
@@ -104,7 +108,10 @@ function roundToTwoDecimals(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function parseParagraphs(xmlDocument: Document): Paragraph[] {
+function parseParagraphs(
+  xmlDocument: Document,
+  tableOfContentsResultParagraphs: ReadonlySet<Element>,
+): Paragraph[] {
   return getBodyDescendants(xmlDocument, "p").map(
     (paragraphElement, index) => {
       const runs = parseRuns(paragraphElement);
@@ -118,7 +125,9 @@ function parseParagraphs(xmlDocument: Document): Paragraph[] {
         paragraphFormatting: parseParagraphFormatting(paragraphElement),
         styleId: parseParagraphStyleId(paragraphElement),
         numbering: parseDirectNumbering(paragraphElement),
-        isTableOfContentsEntry: isTableOfContentsEntry(paragraphElement),
+        isTableOfContentsEntry:
+          isTableOfContentsEntry(paragraphElement) ||
+          tableOfContentsResultParagraphs.has(paragraphElement),
         isInTableCell: hasAncestor(paragraphElement, "tc"),
         isEmpty: runs.every((run) => run.text.length === 0),
       };

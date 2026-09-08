@@ -23,7 +23,7 @@ yapmaz. `word-native` origin yalnız Microsoft Word tarafından kaydedilmiş DOC
 kullanılır. Word-native fixture metadata'sında mümkün olduğunda Word sürümü,
 platform ve creation method belirtilmelidir.
 
-Mevcut on dört fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
+Mevcut on beş fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
 negative fixture'lar bunun kontrollü OOXML mutation türevleridir.
 
 ## Manifest alanları
@@ -135,8 +135,19 @@ split cached-result text reconstruction; it does not claim REF instruction seman
 
 Supported marked-TOC regression fixture. Its cached result is identified by both
 TOC1 style and a Table of Contents content-control marker, and intentionally uses
-11 pt text to prove exclusion from academic body typography. It does not verify
-unmarked TOC caches, field-range ownership, rendered page numbers, or cache freshness.
+11 pt text to prove exclusion from academic body typography.
+
+`toc-field-unmarked-synthetic.docx`
+
+Supported unmarked-TOC regression fixture. Its cached result paragraphs have no
+explicit TOC paragraph style or content-control marker; membership comes from the
+result range of a balanced, multi-paragraph complex TOC field. Nested PAGEREF fields
+must not interrupt that outer ownership range.
+
+Together these fixtures verify cached-result paragraph membership and academic-body
+typography exclusion for the supported marked and balanced complex-field forms. They
+do not verify rendered pagination, stale TOC cache correctness, arbitrary malformed
+Word field recovery, every possible Word TOC variant, or Word-native serialization.
 
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.
