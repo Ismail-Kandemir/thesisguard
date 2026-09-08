@@ -98,6 +98,15 @@ const SPLIT_RUNS_FIXTURE_PATH = path.join(
   "experimental",
   "split-runs-synthetic.docx",
 );
+const COMPLEX_FIELD_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "complex-field-cached-result-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -171,6 +180,7 @@ async function main() {
   assertFixtureFacts(document);
   await assertDerivedNegativeFixtures();
   await assertSplitRunsFixture();
+  await assertComplexFieldFixture();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -1759,4 +1769,37 @@ async function assertSplitRunsFixture() {
   assertEqual(reference?.number, "1", "split-runs reference number");
   assert(document.abbreviations.items.some((item) => item.value === "DNA"),
     "split-runs abbreviation reconstruction");
+}
+
+async function assertComplexFieldFixture() {
+  assert(fs.existsSync(COMPLEX_FIELD_FIXTURE_PATH), "complex-field fixture missing");
+  const { document, report } = await runAnalysisFixture(COMPLEX_FIELD_FIXTURE_PATH);
+  assertEqual(report.passedRules, 46, "complex-field fixture passed rule count");
+  assertEqual(report.failedRules, 0, "complex-field fixture failed rule count");
+  const paragraph = document.paragraphs[34];
+  assertEqual(paragraph.runs.length, 8, "complex-field run count");
+  assertEqual(paragraph.runs[1].text, "", "fldChar begin is not visible text");
+  assertEqual(paragraph.runs[2].text, "", "instrText is not visible text");
+  assertEqual(paragraph.runs[3].text, "", "fldChar separate is not visible text");
+  assertEqual(paragraph.runs.slice(4, 6).map((run) => run.text).join(""), "Şekil 1",
+    "split cached field result reconstruction");
+  assertEqual(paragraph.runs[6].text, "", "fldChar end is not visible text");
+  assertEqual(paragraph.text,
+    "Çalışmada kullanılan örnek düzen Şekil 1'de gösterilmiştir.",
+    "complex-field paragraph reconstruction");
+  const reference = document.objectReferences.items.find((item) => item.paragraphIndex === 34);
+  assertEqual(reference?.kind, "figure", "complex-field cached result reference kind");
+  assertEqual(reference?.number, "1", "complex-field cached result reference number");
+
+  const { parseDocumentXml } = require("../../src/features/analysis/parsers/documentXmlParser.ts");
+  const noCacheDocument = parseDocumentXml(
+    `<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body><w:p>` +
+      `<w:r><w:fldChar w:fldCharType="begin"/></w:r>` +
+      `<w:r><w:instrText xml:space="preserve"> REF Missing </w:instrText></w:r>` +
+      `<w:r><w:fldChar w:fldCharType="separate"/></w:r>` +
+      `<w:r><w:fldChar w:fldCharType="end"/></w:r>` +
+      `</w:p></w:body></w:document>`,
+  );
+  assertEqual(noCacheDocument.paragraphs[0].text, "", "field without cached result text");
+  assertEqual(noCacheDocument.paragraphs[0].isEmpty, true, "field without cached result is empty");
 }

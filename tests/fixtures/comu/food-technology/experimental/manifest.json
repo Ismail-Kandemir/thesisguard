@@ -228,6 +228,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü OOXML run fragmentation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "complex-field-cached-result-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Complex REF field wrapper'ları içindeki split cached-result w:t metninin paragraph text ve figure reference olarak yeniden oluşturulması.",
+      "targetedFeatures": ["complex-field-cached-result-text-reconstruction", "field-control-and-instruction-text-exclusion", "split-cached-result-run-order", "cached-result-object-reference-detection"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü complex REF field mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }
