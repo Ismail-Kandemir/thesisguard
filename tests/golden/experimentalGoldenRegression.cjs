@@ -563,6 +563,9 @@ function assertFixtureFacts(document) {
 
 function runNegativeRegressionSmoke() {
   const {
+    EffectiveFormattingResolver,
+  } = require("../../src/features/analysis/parsers/effectiveFormattingResolver.ts");
+  const {
     ObjectAlignmentValidator,
   } = require("../../src/features/analysis/rules/validators/ObjectAlignmentValidator.ts");
   const {
@@ -623,6 +626,57 @@ function runNegativeRegressionSmoke() {
   const {
     SectionWordCountValidator,
   } = require("../../src/features/analysis/rules/validators/SectionWordCountValidator.ts");
+
+  const formattingDefaults = {
+    ...createNegativeDocument().documentDefaults,
+    fontFamily: "Default Font",
+    fontFamilyReference: null,
+    fontSize: 10,
+  };
+  const unformattedRun = {
+    text: "Body text",
+    styleId: null,
+    bold: null,
+    italic: null,
+    underline: null,
+    fontFamily: null,
+    fontFamilyReference: null,
+    fontSize: null,
+  };
+  const precedenceStyle = {
+    ...createStyle("FormattingTest", "Formatting Test"),
+    fontFamily: "Style Font",
+    fontFamilyReference: null,
+    fontSize: 11,
+  };
+  const formattingResolver = new EffectiveFormattingResolver([precedenceStyle], formattingDefaults);
+  const defaultsFormatting = formattingResolver.resolveRun(unformattedRun, null);
+  assertEqual(defaultsFormatting.fontFamily, "Default Font", "docDefaults font fallback");
+  assertEqual(defaultsFormatting.fontSize, 10, "docDefaults size fallback");
+  const styleFormatting = formattingResolver.resolveRun(unformattedRun, "FormattingTest");
+  assertEqual(styleFormatting.fontFamily, "Style Font", "style font overrides docDefaults");
+  assertEqual(styleFormatting.fontSize, 11, "style size overrides docDefaults");
+  const directFormatting = formattingResolver.resolveRun({
+    ...unformattedRun,
+    fontFamily: "Direct Font",
+    fontSize: 12,
+  }, "FormattingTest");
+  assertEqual(directFormatting.fontFamily, "Direct Font", "direct font overrides style and docDefaults");
+  assertEqual(directFormatting.fontSize, 12, "direct size overrides style and docDefaults");
+  const themeFormatting = new EffectiveFormattingResolver([], {
+    ...formattingDefaults,
+    fontFamily: null,
+    fontFamilyReference: {
+      ascii: { kind: "theme", value: "minorHAnsi" },
+      highAnsi: { kind: "theme", value: "minorHAnsi" },
+      eastAsia: null,
+      complexScript: null,
+    },
+  }, {
+    major: { latin: "Major Font", eastAsia: null, complexScript: null, scriptOverrides: {} },
+    minor: { latin: "Theme Font", eastAsia: null, complexScript: null, scriptOverrides: {} },
+  }).resolveRun(unformattedRun, null);
+  assertEqual(themeFormatting.fontFamily, "Theme Font", "docDefaults theme token resolution");
 
   const tableAlignmentResult = new ObjectAlignmentValidator().validate(
     createNegativeDocument({ tableAlignment: "left" }),

@@ -171,6 +171,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "docdefaults-theme-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Akademik gövde run'ında font ailesi ve boyutunun docDefaults fallback'i ile, font ailesinin minorHAnsi theme mapping'i üzerinden çözümlenmesi.",
+      "targetedFeatures": ["run-docdefaults-fallback", "docdefaults-font-size", "minor-hansi-theme-font-resolution"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }
