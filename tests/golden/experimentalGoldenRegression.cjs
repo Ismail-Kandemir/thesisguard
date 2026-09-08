@@ -566,6 +566,9 @@ function runNegativeRegressionSmoke() {
     EffectiveFormattingResolver,
   } = require("../../src/features/analysis/parsers/effectiveFormattingResolver.ts");
   const {
+    normalizeDocumentNumbering,
+  } = require("../../src/features/analysis/parsers/documentNumberingNormalizer.ts");
+  const {
     ObjectAlignmentValidator,
   } = require("../../src/features/analysis/rules/validators/ObjectAlignmentValidator.ts");
   const {
@@ -677,6 +680,35 @@ function runNegativeRegressionSmoke() {
     minor: { latin: "Theme Font", eastAsia: null, complexScript: null, scriptOverrides: {} },
   }).resolveRun(unformattedRun, null);
   assertEqual(themeFormatting.fontFamily, "Theme Font", "docDefaults theme token resolution");
+
+  const automaticNumberingDocument = createNegativeDocument();
+  automaticNumberingDocument.paragraphs = [
+    { ...automaticNumberingDocument.paragraphs[0], text: "FIRST", numbering: { source: "word", numId: "10", level: 0, visibleLabel: null } },
+    { ...automaticNumberingDocument.paragraphs[0], id: "second", text: "SECOND", numbering: { source: "word", numId: "10", level: 0, visibleLabel: null } },
+    { ...automaticNumberingDocument.paragraphs[0], id: "child", text: "CHILD", numbering: { source: "word", numId: "10", level: 1, visibleLabel: null } },
+  ];
+  automaticNumberingDocument.numberingDefinitions = [{
+    numId: "10",
+    abstractNumId: "9",
+    levels: [
+      { level: 0, format: "decimal", levelText: "%1.", start: 1 },
+      { level: 1, format: "decimal", levelText: "%1.%2.", start: 1 },
+    ],
+  }];
+  const automaticNumbering = normalizeDocumentNumbering(automaticNumberingDocument).paragraphs;
+  assertEqual(automaticNumbering[0].numbering.visibleLabel, "1.", "automatic numbering first counter");
+  assertEqual(automaticNumbering[1].numbering.visibleLabel, "2.", "automatic numbering second counter");
+  assertEqual(automaticNumbering[2].numbering.visibleLabel, "2.1.", "automatic numbering child counter");
+  const manualNumberingDocument = createNegativeDocument();
+  manualNumberingDocument.paragraphs = [{
+    ...manualNumberingDocument.paragraphs[0],
+    text: "2.1. FERMENTE ÜRÜNLER",
+    numbering: { source: "word", numId: "10", level: 1, visibleLabel: null },
+  }];
+  manualNumberingDocument.numberingDefinitions = automaticNumberingDocument.numberingDefinitions;
+  const manualNumbering = normalizeDocumentNumbering(manualNumberingDocument).paragraphs[0].numbering;
+  assertEqual(manualNumbering.source, "text", "manual prefix prevents double numbering");
+  assertEqual(manualNumbering.visibleLabel, "2.1.", "manual prefix remains single visible label");
 
   const tableAlignmentResult = new ObjectAlignmentValidator().validate(
     createNegativeDocument({ tableAlignment: "left" }),

@@ -190,6 +190,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "automatic-heading-numbering-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Literal sayı prefix'i bulunmayan akademik heading'lerin numPr ve multilevel numbering.xml üzerinden tanınması ve görünür numaralarının counter state ile hesaplanması.",
+      "targetedFeatures": ["automatic-heading-numbering", "multilevel-numbering-counter-state", "numid-abstractnum-level-mapping", "literal-prefix-free-heading-detection"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }
