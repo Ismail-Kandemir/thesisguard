@@ -720,6 +720,37 @@ function runNegativeRegressionSmoke() {
   assertEqual(alignmentResult.evidence?.[0]?.paragraphIndex, 1, "negative alignment paragraph index");
   assertEqual(alignmentResult.evidence?.[0]?.expected, "Iki yana yasli", "negative alignment expected");
   assertEqual(alignmentResult.evidence?.[0]?.actual, "Sola hizali", "negative alignment actual");
+  const inheritedAlignmentDocument = createNegativeDocument();
+  inheritedAlignmentDocument.paragraphs[1].alignment = null;
+  inheritedAlignmentDocument.paragraphs[1].styleId = "ThesisGuardBodyTest";
+  inheritedAlignmentDocument.documentDefaults.alignment = null;
+  inheritedAlignmentDocument.styles.push(
+    {
+      ...createStyle("ThesisGuardBodyBase", "ThesisGuard Body Base"),
+      alignment: "justify",
+    },
+    {
+      ...createStyle("ThesisGuardBodyTest", "ThesisGuard Body Test"),
+      basedOn: "ThesisGuardBodyBase",
+      alignment: null,
+    },
+  );
+  const inheritedAlignmentResult = new AlignmentValidator().validate(inheritedAlignmentDocument, {
+    ...ruleBase("inherited alignment"),
+    type: "ALIGNMENT",
+    expected: "justify",
+  });
+  assertEqual(inheritedAlignmentResult.status, "PASSED", "style-inherited alignment");
+
+  inheritedAlignmentDocument.paragraphs[1].alignment = "left";
+  const directAlignmentOverrideResult = new AlignmentValidator().validate(inheritedAlignmentDocument, {
+    ...ruleBase("direct alignment override"),
+    type: "ALIGNMENT",
+    expected: "justify",
+  });
+  assertEqual(directAlignmentOverrideResult.status, "FAILED", "direct alignment overrides inherited style");
+  assertEqual(directAlignmentOverrideResult.evidenceTotal, 1, "direct alignment override evidence total");
+  assertEqual(directAlignmentOverrideResult.evidence?.[0]?.actual, "Sola hizali", "direct alignment override actual");
   const marginResult = new MarginValidator("left").validate(createNegativeDocument(), {
     ...ruleBase("left margin"),
     type: "MARGIN",

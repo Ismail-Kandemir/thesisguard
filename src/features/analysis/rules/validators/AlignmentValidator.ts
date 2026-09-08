@@ -7,6 +7,7 @@ import type {
   RuleResult,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
+import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import { getBodyParagraphs } from "./bodyParagraphs";
 import { createParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
@@ -59,13 +60,15 @@ export class AlignmentValidator implements RuleValidator {
 }
 
 function getAlignmentObservations(document: NormalizedDocument): AlignmentObservation[] {
+  const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults);
+
   return getBodyParagraphs(document, {
     excludeCaptions: true,
     excludeTableCells: true,
     excludeTableOfContents: true,
     excludeFigureCarriers: true,
   }).map((paragraph) => ({
-    actual: paragraph.alignment,
+    actual: resolver.resolveParagraphAlignment(paragraph.styleId, paragraph.alignment),
     paragraph,
     paragraphIndex: document.paragraphs.indexOf(paragraph),
   }));

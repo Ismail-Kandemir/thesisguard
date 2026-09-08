@@ -23,7 +23,7 @@ yapmaz. `word-native` origin yalnız Microsoft Word tarafından kaydedilmiş DOC
 kullanılır. Word-native fixture metadata'sında mümkün olduğunda Word sürümü,
 platform ve creation method belirtilmelidir.
 
-Mevcut sekiz fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
+Mevcut dokuz fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
 negative fixture'lar bunun kontrollü OOXML mutation türevleridir.
 
 ## Manifest alanları
@@ -101,6 +101,11 @@ footer page number alignment.
 
 Derived manual/runtime negative fixture with exactly one intentionally invalid
 page number restart value at the main-text section transition.
+
+`style-inheritance-synthetic.docx`
+
+Derived synthetic OOXML regression fixture whose academic body paragraph receives
+its effective justified alignment through a child/base paragraph-style chain.
 
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

@@ -152,6 +152,25 @@
       "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
       "verifiedWith": "Production-equivalent golden harness ve manuel runtime",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "style-inheritance-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Akademik gövde paragrafı hizalamasının basedOn style zincirinden effective formatting olarak çözümlenmesi.",
+      "targetedFeatures": ["paragraph-style-inheritance", "based-on-style-inheritance", "effective-alignment"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "verifiedWith": "Production-equivalent corpus harness",
+      "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     }
   ]
 }
