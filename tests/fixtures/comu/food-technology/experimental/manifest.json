@@ -173,6 +173,63 @@
       "privacyStatus": "Fully synthetic; contains no personal data"
     },
     {
+      "file": "drawingml-textbox-ownership-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A DrawingML WordprocessingShape textbox contains visible diagnostic text; textbox ownership must be preserved without creating a figure object fact.",
+      "targetedFeatures": ["drawingml-textbox", "wordprocessing-shape", "wps-txbx", "txbxContent", "textbox-ownership", "drawing-object-false-positive"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "verifiedWith": "tests/audit/drawingMlTextBoxAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "drawingml-textbox-font-size-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A DrawingML WordprocessingShape textbox contains visible 11 pt text; body typography must exclude the textbox paragraph and object detection must not count it as a figure.",
+      "targetedFeatures": ["drawingml-textbox", "wordprocessing-shape", "wps-txbx", "textbox-body-typography", "drawing-object-false-positive"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "verifiedWith": "tests/audit/drawingMlTextBoxAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "drawingml-textbox-semantic-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A DrawingML WordprocessingShape textbox contains required-section-like text; section detection must exclude it and object detection must not count it as a figure.",
+      "targetedFeatures": ["drawingml-textbox", "wordprocessing-shape", "wps-txbx", "textbox-section-detection", "drawing-object-false-positive"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "verifiedWith": "tests/audit/drawingMlTextBoxAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
       "file": "experimental-indentation-fail.docx",
       "tier": 1,
       "origin": "synthetic-ooxml",

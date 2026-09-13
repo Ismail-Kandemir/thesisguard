@@ -116,6 +116,27 @@ Regression fixture derived from `full-correct.docx`. A VML textbox carries
 required-section-like text inside `w:txbxContent`. The text must be normalized
 under textbox ownership and must not create a document-flow section heading.
 
+`drawingml-textbox-ownership-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A DrawingML
+WordprocessingShape textbox carries visible diagnostic text through
+`w:drawing/wp:inline/a:graphic/a:graphicData/wps:wsp/wps:txbx/w:txbxContent`.
+Textbox ownership must be preserved and the drawing must not be counted as a
+figure object.
+
+`drawingml-textbox-font-size-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A DrawingML
+WordprocessingShape textbox carries 11 pt visible text. Body typography scope
+must exclude the textbox paragraph and object detection must not count it as a
+figure.
+
+`drawingml-textbox-semantic-collision-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A DrawingML
+WordprocessingShape textbox carries `KAYNAKLAR`. Section-order scope excludes
+the textbox paragraph and object detection must not count it as a figure.
+
 `experimental-indentation-fail.docx`
 
 Derived manual/runtime negative fixture with exactly one intentionally invalid

@@ -18,6 +18,8 @@ import type {
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const WORDPROCESSING_DRAWING_NAMESPACE =
   "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
+const WORDPROCESSING_SHAPE_NAMESPACE =
+  "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
 const CAPTION_PATTERN = /^\s*(tablo|şekil)\s+((?:\d+\.)*\d+)\.\s*(.*)$/u;
 
 export interface DocumentVisualStructure {
@@ -224,8 +226,10 @@ function parseFigures(
       .map((block) => [block.paragraphId, block.blockIndex]),
   );
   const drawingCountByParagraph = new Map<Element, number>();
+  const figureDrawings = Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing"))
+    .filter((drawing) => !isTextBoxDrawing(drawing));
 
-  for (const drawing of Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing"))) {
+  for (const drawing of figureDrawings) {
     const paragraphElement = findAncestor(drawing, "p");
 
     if (paragraphElement) {
@@ -236,7 +240,7 @@ function parseFigures(
     }
   }
 
-  return Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing")).map(
+  return figureDrawings.map(
     (drawing, index) => {
       const paragraphElement = findAncestor(drawing, "p");
       const paragraphIndex = paragraphElement
@@ -259,6 +263,13 @@ function parseFigures(
         captionPosition: "none",
       };
     },
+  );
+}
+
+function isTextBoxDrawing(drawing: Element): boolean {
+  return (
+    drawing.getElementsByTagNameNS(WORDPROCESSING_SHAPE_NAMESPACE, "txbx").length > 0 ||
+    drawing.getElementsByTagNameNS(WORD_NAMESPACE, "txbxContent").length > 0
   );
 }
 
