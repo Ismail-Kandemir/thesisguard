@@ -407,6 +407,18 @@ export interface PageMargins {
   bottom: number | null;
 }
 
+export type DocumentPageSectionSource =
+  | "paragraph"
+  | "body";
+
+export interface DocumentPageSection {
+  index: number;
+  startParagraphIndex: number;
+  endParagraphIndex: number;
+  pageMargins: PageMargins;
+  source: DocumentPageSectionSource;
+}
+
 export type PageNumberFieldType = "PAGE";
 
 export type PageNumberFieldStructure =
@@ -602,6 +614,7 @@ export interface NormalizedDocument {
   documentDefaults: DocumentDefaults;
   numberingDefinitions: NumberingDefinition[];
   pageMargins: PageMargins;
+  pageSections: DocumentPageSection[];
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;
   tables: DocumentTables;

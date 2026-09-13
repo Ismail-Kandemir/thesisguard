@@ -125,6 +125,33 @@ const UNMARKED_TOC_FIXTURE_PATH = path.join(
   "experimental",
   "toc-field-unmarked-synthetic.docx",
 );
+const MULTI_SECTION_MARGIN_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "multi-section-margin-synthetic.docx",
+);
+const MULTI_SECTION_FINAL_MARGIN_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "multi-section-final-margin-fail-synthetic.docx",
+);
+const MULTI_SECTION_MARGIN_ALL_CORRECT_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "multi-section-margin-all-correct-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -168,6 +195,7 @@ const INDENTATION_RULE_ID = "comu.applied-sciences.food-technology.bachelor.para
 const FONT_SIZE_RULE_ID = "comu.bachelor.typography.font-size";
 const LINE_SPACING_RULE_ID = "comu.bachelor.spacing.line-height";
 const RIGHT_MARGIN_RULE_ID = "comu.bachelor.margin.right";
+const LEFT_MARGIN_RULE_ID = "comu.bachelor.margin.left";
 const PAGE_NUMBER_RULE_ID = "comu.applied-sciences.food-technology.bachelor.page-number";
 const PAGE_SEQUENCE_RULE_ID = "comu.applied-sciences.food-technology.bachelor.page-number-sequence";
 const TABLE_OBJECT_ALIGNMENT_RULE_ID = "comu.applied-sciences.food-technology.bachelor.table-object-alignment";
@@ -202,6 +230,7 @@ async function main() {
   assertComplexTocFieldOwnership();
   await assertMarkedTocFixture();
   await assertUnmarkedTocFixture();
+  await assertMultiSectionMarginFixtures();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -1390,6 +1419,7 @@ function createNegativeDocument(options = {}) {
     },
     numberingDefinitions: [],
     pageMargins: { left: null, right: null, top: null, bottom: null },
+    pageSections: [],
     pageNumbering: { hasPageNumbers: false, fields: [], sections: [] },
     tableOfContents: { hasField: false, fields: [] },
     tables: {
@@ -1544,6 +1574,7 @@ function createEmptyDocument() {
     },
     numberingDefinitions: [],
     pageMargins: { left: null, right: null, top: null, bottom: null },
+    pageSections: [],
     pageNumbering: { hasPageNumbers: false, fields: [], sections: [] },
     tableOfContents: { hasField: false, fields: [] },
     tables: { count: 0, hasTables: false, items: [] },
@@ -1934,6 +1965,80 @@ async function assertUnmarkedTocFixture() {
     "unmarked TOC first cached paragraph membership");
   assertEqual(document.paragraphs[14].isTableOfContentsEntry, true,
     "unmarked TOC second cached paragraph membership");
+}
+
+async function assertMultiSectionMarginFixtures() {
+  assert(fs.existsSync(MULTI_SECTION_MARGIN_FIXTURE_PATH), "multi-section margin fixture missing");
+  assert(fs.existsSync(MULTI_SECTION_FINAL_MARGIN_FIXTURE_PATH), "multi-section final margin fixture missing");
+  assert(fs.existsSync(MULTI_SECTION_MARGIN_ALL_CORRECT_FIXTURE_PATH), "multi-section all-correct margin fixture missing");
+
+  const intermediateWrong = await runAnalysisFixture(MULTI_SECTION_MARGIN_FIXTURE_PATH);
+  assertMultiSectionOwnership(intermediateWrong.document, "intermediate wrong margin fixture");
+  assertEqual(intermediateWrong.document.pageSections[0].pageMargins.left, 1.76,
+    "intermediate wrong section 1 left margin");
+  assertEqual(intermediateWrong.document.pageSections[0].pageMargins.right, 1.76,
+    "intermediate wrong section 1 right margin");
+  assertEqual(intermediateWrong.report.totalRules, 46, "intermediate wrong total rule count");
+  assertEqual(intermediateWrong.report.passedRules, 44, "intermediate wrong passed rule count");
+  assertEqual(intermediateWrong.report.failedRules, 2, "intermediate wrong failed rule count");
+  assertMarginFailure(intermediateWrong.report, LEFT_MARGIN_RULE_ID, 0, 1.76, "intermediate wrong left margin");
+  assertMarginFailure(intermediateWrong.report, RIGHT_MARGIN_RULE_ID, 0, 1.76, "intermediate wrong right margin");
+
+  const finalWrong = await runAnalysisFixture(MULTI_SECTION_FINAL_MARGIN_FIXTURE_PATH);
+  assertMultiSectionOwnership(finalWrong.document, "final wrong margin fixture");
+  assertEqual(finalWrong.document.pageSections[2].pageMargins.left, 1.76,
+    "final wrong section 3 left margin");
+  assertEqual(finalWrong.document.pageSections[2].pageMargins.right, 1.76,
+    "final wrong section 3 right margin");
+  assertEqual(finalWrong.report.totalRules, 46, "final wrong total rule count");
+  assertEqual(finalWrong.report.passedRules, 44, "final wrong passed rule count");
+  assertEqual(finalWrong.report.failedRules, 2, "final wrong failed rule count");
+  assertMarginFailure(finalWrong.report, LEFT_MARGIN_RULE_ID, 2, 1.76, "final wrong left margin");
+  assertMarginFailure(finalWrong.report, RIGHT_MARGIN_RULE_ID, 2, 1.76, "final wrong right margin");
+
+  const allCorrect = await runAnalysisFixture(MULTI_SECTION_MARGIN_ALL_CORRECT_FIXTURE_PATH);
+  assertMultiSectionOwnership(allCorrect.document, "all-correct margin fixture");
+  for (const section of allCorrect.document.pageSections) {
+    assertEqual(section.pageMargins.left, 3, `all-correct section ${section.index} left margin`);
+    assertEqual(section.pageMargins.right, 2.5, `all-correct section ${section.index} right margin`);
+  }
+  assertEqual(allCorrect.report.totalRules, 46, "all-correct margin total rule count");
+  assertEqual(allCorrect.report.passedRules, 46, "all-correct margin passed rule count");
+  assertEqual(allCorrect.report.failedRules, 0, "all-correct margin failed rule count");
+  assertEqual(getResultById(allCorrect.report.results, LEFT_MARGIN_RULE_ID).status, "PASSED",
+    "all-correct left margin status");
+  assertEqual(getResultById(allCorrect.report.results, RIGHT_MARGIN_RULE_ID).status, "PASSED",
+    "all-correct right margin status");
+}
+
+function assertMultiSectionOwnership(document, label) {
+  assertEqual(document.pageSections.length, 3, `${label} page section count`);
+  assertPageSection(document.pageSections[0], 0, 0, 10, "paragraph", `${label} section 1`);
+  assertPageSection(document.pageSections[1], 1, 11, 19, "paragraph", `${label} section 2`);
+  assertEqual(document.pageSections[2].index, 2, `${label} section 3 index`);
+  assertEqual(document.pageSections[2].startParagraphIndex, 20, `${label} section 3 start`);
+  assertEqual(document.pageSections[2].endParagraphIndex, 46, `${label} section 3 end`);
+  assertEqual(document.pageSections[2].source, "body", `${label} section 3 source`);
+  assertEqual(document.pageNumbering.sections.length, 3, `${label} page numbering section count`);
+  assertEqual(document.pageNumbering.sections[0].endParagraphIndex, 10, `${label} page numbering section 1 end`);
+  assertEqual(document.pageNumbering.sections[1].endParagraphIndex, 19, `${label} page numbering section 2 end`);
+  assertEqual(document.pageNumbering.sections[2].endParagraphIndex, 46, `${label} page numbering section 3 end`);
+}
+
+function assertPageSection(section, index, start, end, source, label) {
+  assertEqual(section.index, index, `${label} index`);
+  assertEqual(section.startParagraphIndex, start, `${label} start`);
+  assertEqual(section.endParagraphIndex, end, `${label} end`);
+  assertEqual(section.source, source, `${label} source`);
+}
+
+function assertMarginFailure(report, ruleId, sectionIndex, actual, label) {
+  const result = getResultById(report.results, ruleId);
+  assertEqual(result.status, "FAILED", `${label} status`);
+  assertEqual(result.evidence?.[0]?.kind, "document-format", `${label} evidence kind`);
+  assertEqual(result.evidence?.[0]?.sectionIndex, sectionIndex, `${label} evidence section`);
+  assertEqual(result.evidence?.[0]?.actual, actual, `${label} evidence actual`);
+  assertEqual(result.evidenceTotal, 1, `${label} evidence total`);
 }
 
 function wrapDocumentXml(bodyXml) {

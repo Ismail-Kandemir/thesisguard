@@ -21,6 +21,63 @@
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
     },
     {
+      "file": "multi-section-margin-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Intermediate paragraph-level section left/right margins are intentionally wrong while the final body-level section margins remain correct.",
+      "targetedFeatures": ["multi-section-margin-section-ownership", "paragraph-level-section-margin"],
+      "expected": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.bachelor.margin.left", "comu.bachelor.margin.right"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML section mutation",
+      "verifiedWith": "tests/audit/multiSectionMarginAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "multi-section-final-margin-fail-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Intermediate paragraph-level section margins are correct while the final body-level section left/right margins are intentionally wrong.",
+      "targetedFeatures": ["multi-section-final-margin-validation", "body-level-final-section-margin"],
+      "expected": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0,
+        "failedRuleIds": ["comu.bachelor.margin.left", "comu.bachelor.margin.right"],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML section mutation",
+      "verifiedWith": "tests/audit/multiSectionMarginAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "multi-section-margin-all-correct-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Paragraph-level and final body-level section margins are all correct in a multi-section document.",
+      "targetedFeatures": ["multi-section-margin-pass", "section-boundary-ownership"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML section mutation",
+      "verifiedWith": "tests/audit/multiSectionMarginAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
       "file": "experimental-indentation-fail.docx",
       "tier": 1,
       "origin": "synthetic-ooxml",

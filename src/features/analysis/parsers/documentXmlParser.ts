@@ -1,5 +1,6 @@
 import type {
   NormalizedDocument,
+  DocumentPageSectionSource,
   PageMargins,
   Paragraph,
   ParagraphAlignment,
@@ -43,6 +44,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       paragraphFormatting: createEmptyParagraphFormatting(),
     },
     pageMargins: parsePageMargins(xmlDocument),
+    pageSections: parsePageSections(xmlDocument),
     pageNumbering: {
       hasPageNumbers: false,
       fields: [],
@@ -66,9 +68,32 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
 }
 
 function parsePageMargins(xmlDocument: Document): PageMargins {
-  const sectionProperties = Array.from(
-    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "sectPr"),
-  ).at(-1);
+  const sectionProperties = parseSectionProperties(xmlDocument).at(-1)?.element ?? null;
+
+  return parsePageMarginsFromSectionProperties(sectionProperties);
+}
+
+function parsePageSections(xmlDocument: Document) {
+  const sections = parseSectionProperties(xmlDocument);
+  let nextStartParagraphIndex = 0;
+
+  return sections.map((section, index) => {
+    const pageSection = {
+      index,
+      startParagraphIndex: nextStartParagraphIndex,
+      endParagraphIndex: section.endParagraphIndex,
+      pageMargins: parsePageMarginsFromSectionProperties(section.element),
+      source: section.source,
+    };
+
+    nextStartParagraphIndex = section.endParagraphIndex + 1;
+    return pageSection;
+  });
+}
+
+function parsePageMarginsFromSectionProperties(
+  sectionProperties: Element | null,
+): PageMargins {
   const pageMarginElement = sectionProperties
     ? getFirstDescendant(sectionProperties, "pgMar")
     : null;
@@ -196,7 +221,13 @@ function hasAncestor(element: Element, localName: string): boolean {
   return false;
 }
 
-function parsePageNumberSections(xmlDocument: Document) {
+interface ParsedSectionProperties {
+  element: Element;
+  endParagraphIndex: number;
+  source: DocumentPageSectionSource;
+}
+
+function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[] {
   const body = xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "body").item(0);
 
   if (!body) {
@@ -204,7 +235,7 @@ function parsePageNumberSections(xmlDocument: Document) {
   }
 
   const paragraphs = Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "p"));
-  const sections = paragraphs.flatMap((paragraph, paragraphIndex) => {
+  const sections: ParsedSectionProperties[] = paragraphs.flatMap((paragraph, paragraphIndex) => {
     const paragraphProperties = Array.from(paragraph.children).find(
       (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pPr",
     );
@@ -215,7 +246,11 @@ function parsePageNumberSections(xmlDocument: Document) {
       : null;
 
     return sectionProperties
-      ? [parsePageNumberSection(sectionProperties, paragraphIndex)]
+      ? [{
+          element: sectionProperties,
+          endParagraphIndex: paragraphIndex,
+          source: "paragraph",
+        }]
       : [];
   });
   const finalSectionProperties = Array.from(body.children).find(
@@ -223,12 +258,20 @@ function parsePageNumberSections(xmlDocument: Document) {
   );
 
   if (finalSectionProperties) {
-    sections.push(
-      parsePageNumberSection(finalSectionProperties, Math.max(paragraphs.length - 1, 0)),
-    );
+    sections.push({
+      element: finalSectionProperties,
+      endParagraphIndex: Math.max(paragraphs.length - 1, 0),
+      source: "body",
+    });
   }
 
   return sections;
+}
+
+function parsePageNumberSections(xmlDocument: Document) {
+  return parseSectionProperties(xmlDocument).map((section) =>
+    parsePageNumberSection(section.element, section.endParagraphIndex),
+  );
 }
 
 function parsePageNumberSection(sectionProperties: Element, endParagraphIndex: number) {

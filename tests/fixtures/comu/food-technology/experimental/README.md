@@ -23,8 +23,8 @@ yapmaz. `word-native` origin yalnız Microsoft Word tarafından kaydedilmiş DOC
 kullanılır. Word-native fixture metadata'sında mümkün olduğunda Word sürümü,
 platform ve creation method belirtilmelidir.
 
-Mevcut on beş fixture sentetiktir. `full-correct.docx` python-docx tabanlıdır;
-negative fixture'lar bunun kontrollü OOXML mutation türevleridir.
+Mevcut fixture'lar sentetiktir. `full-correct.docx` python-docx tabanlıdır;
+negative ve exploratory fixture'lar bunun kontrollü OOXML mutation türevleridir.
 
 ## Manifest alanları
 
@@ -66,6 +66,24 @@ Place the verified golden DOCX here:
 
 This file represents COMU / Applied Sciences / Food Technology / Bachelor /
 Experimental, verified manually as `46 PASSED / 0 FAILED / 0 NOT_APPLICABLE`.
+
+`multi-section-margin-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. An intermediate
+paragraph-level section has intentionally invalid left/right margins, while the
+final body-level section keeps the golden margins. It documents current
+section-aware margin validation behavior.
+
+`multi-section-final-margin-fail-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. Intermediate paragraph-level
+section margins are correct, while the final body-level section has intentionally
+invalid left/right margins.
+
+`multi-section-margin-all-correct-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. Paragraph-level and final
+body-level section margins are all correct in a multi-section document.
 
 `experimental-indentation-fail.docx`
 
