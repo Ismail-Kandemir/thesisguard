@@ -335,6 +335,7 @@ function isTableOfContentsEntry(paragraphElement: Element): boolean {
 
 function parseRuns(paragraphElement: Element): Run[] {
   return Array.from(paragraphElement.getElementsByTagNameNS(WORD_NAMESPACE, "r"))
+    .filter((runElement) => !hasAncestor(runElement, "del"))
     .map(parseRun);
 }
 

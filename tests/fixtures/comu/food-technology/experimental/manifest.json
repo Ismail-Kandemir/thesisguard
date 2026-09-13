@@ -78,6 +78,63 @@
       "privacyStatus": "Fully synthetic; contains no personal data"
     },
     {
+      "file": "tracked-deleted-run-font-size-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A body paragraph contains a tracked deleted run with invalid 11 pt text; deleted text must be excluded from visible-text typography validation.",
+      "targetedFeatures": ["tracked-changes-deleted-run", "visible-text-reconstruction", "body-font-size-validation"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML tracked-change mutation",
+      "verifiedWith": "tests/audit/trackedChangesAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "tracked-inserted-run-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A body paragraph contains a tracked inserted 12 pt run; inserted text must remain visible current content.",
+      "targetedFeatures": ["tracked-changes-inserted-run", "visible-text-reconstruction", "body-font-size-validation"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML tracked-change mutation",
+      "verifiedWith": "tests/audit/trackedChangesAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "tracked-deleted-reference-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A body paragraph contains a tracked deleted fake figure reference; deleted text must not create visible object-reference semantics.",
+      "targetedFeatures": ["tracked-changes-deleted-run", "deleted-reference-exclusion", "object-reference-normalization"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML tracked-change mutation",
+      "verifiedWith": "tests/audit/trackedChangesAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
       "file": "experimental-indentation-fail.docx",
       "tier": 1,
       "origin": "synthetic-ooxml",

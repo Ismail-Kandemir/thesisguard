@@ -152,6 +152,33 @@ const MULTI_SECTION_MARGIN_ALL_CORRECT_FIXTURE_PATH = path.join(
   "experimental",
   "multi-section-margin-all-correct-synthetic.docx",
 );
+const TRACKED_DELETED_FONT_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "tracked-deleted-run-font-size-synthetic.docx",
+);
+const TRACKED_INSERTED_RUN_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "tracked-inserted-run-synthetic.docx",
+);
+const TRACKED_DELETED_REFERENCE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "tracked-deleted-reference-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -231,6 +258,7 @@ async function main() {
   await assertMarkedTocFixture();
   await assertUnmarkedTocFixture();
   await assertMultiSectionMarginFixtures();
+  await assertTrackedChangesFixtures();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -2039,6 +2067,51 @@ function assertMarginFailure(report, ruleId, sectionIndex, actual, label) {
   assertEqual(result.evidence?.[0]?.sectionIndex, sectionIndex, `${label} evidence section`);
   assertEqual(result.evidence?.[0]?.actual, actual, `${label} evidence actual`);
   assertEqual(result.evidenceTotal, 1, `${label} evidence total`);
+}
+
+async function assertTrackedChangesFixtures() {
+  assert(fs.existsSync(TRACKED_DELETED_FONT_FIXTURE_PATH), "tracked deleted font fixture missing");
+  assert(fs.existsSync(TRACKED_INSERTED_RUN_FIXTURE_PATH), "tracked inserted run fixture missing");
+  assert(fs.existsSync(TRACKED_DELETED_REFERENCE_FIXTURE_PATH), "tracked deleted reference fixture missing");
+
+  const deletedFont = await runAnalysisFixture(TRACKED_DELETED_FONT_FIXTURE_PATH);
+  assertEqual(deletedFont.report.totalRules, 46, "tracked deleted font total rule count");
+  assertEqual(deletedFont.report.passedRules, 46, "tracked deleted font passed rule count");
+  assertEqual(deletedFont.report.failedRules, 0, "tracked deleted font failed rule count");
+  const deletedFontParagraph = deletedFont.document.paragraphs[24];
+  assertEqual(
+    deletedFontParagraph.text,
+    "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır.",
+    "deleted run is excluded from paragraph text",
+  );
+  assertEqual(deletedFontParagraph.runs.length, 1, "deleted run is excluded from visible runs");
+  assertEqual(getResultById(deletedFont.report.results, FONT_SIZE_RULE_ID).status, "PASSED",
+    "deleted 11pt run does not fail font size");
+
+  const inserted = await runAnalysisFixture(TRACKED_INSERTED_RUN_FIXTURE_PATH);
+  assertEqual(inserted.report.passedRules, 46, "tracked inserted run passed rule count");
+  const insertedParagraph = inserted.document.paragraphs[24];
+  assert(
+    insertedParagraph.text.endsWith(" eklenen gorunur metin"),
+    "inserted run contributes to paragraph text",
+  );
+  assertEqual(insertedParagraph.runs.length, 2, "inserted run remains visible");
+  assertEqual(insertedParagraph.runs[1].fontSize, 12, "inserted run formatting is preserved");
+  assertEqual(getResultById(inserted.report.results, FONT_SIZE_RULE_ID).status, "PASSED",
+    "inserted 12pt run keeps font size passing");
+
+  const deletedReference = await runAnalysisFixture(TRACKED_DELETED_REFERENCE_FIXTURE_PATH);
+  assertEqual(deletedReference.report.passedRules, 46, "tracked deleted reference passed rule count");
+  assert(
+    !deletedReference.document.paragraphs[24].text.includes("Şekil 99"),
+    "deleted fake figure reference is excluded from paragraph text",
+  );
+  assert(
+    !deletedReference.document.objectReferences.items.some(
+      (item) => item.kind === "figure" && item.number === "99",
+    ),
+    "deleted fake figure reference is excluded from object references",
+  );
 }
 
 function wrapDocumentXml(bodyXml) {

@@ -85,6 +85,24 @@ invalid left/right margins.
 Regression fixture derived from `full-correct.docx`. Paragraph-level and final
 body-level section margins are all correct in a multi-section document.
 
+`tracked-deleted-run-font-size-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A normal academic body
+paragraph contains a tracked deleted `w:del` run with 11 pt text. Current
+accepted-document semantics ignore deleted text, so typography remains 46/46.
+
+`tracked-inserted-run-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A normal academic body
+paragraph contains a tracked inserted `w:ins` run with 12 pt text. Inserted text
+remains visible current content.
+
+`tracked-deleted-reference-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A tracked deleted run
+contains a fake figure reference. Deleted text must not create visible
+object-reference semantics.
+
 `experimental-indentation-fail.docx`
 
 Derived manual/runtime negative fixture with exactly one intentionally invalid
