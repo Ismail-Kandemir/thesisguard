@@ -14,6 +14,10 @@ import type {
   Paragraph,
   ParagraphAlignment,
 } from "../types";
+import {
+  getSemanticChildElements,
+  getSemanticDescendantsByTagNameNS,
+} from "./markupCompatibilityResolver";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const WORDPROCESSING_DRAWING_NAMESPACE =
@@ -39,19 +43,17 @@ export function normalizeDocumentCaptions(
     return createEmptyStructure();
   }
 
-  const paragraphElements = Array.from(
-    body.getElementsByTagNameNS(WORD_NAMESPACE, "p"),
-  );
+  const paragraphElements = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "p");
   const paragraphIndexByElement = new Map(
     paragraphElements.map((element, index) => [element, index]),
   );
-  const directChildren = Array.from(body.children).filter(
+  const directChildren = getSemanticChildElements(body).filter(
     (element) =>
       element.namespaceURI === WORD_NAMESPACE &&
       (element.localName === "p" || element.localName === "tbl"),
   );
   const tableIdByElement = new Map(
-    Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "tbl")).map(
+    getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "tbl").map(
       (element, index) => [element, `table-${index + 1}`],
     ),
   );
@@ -196,7 +198,7 @@ function parseTables(
       .map((block) => [block.tableId, block.blockIndex]),
   );
 
-  return Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "tbl")).map(
+  return getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "tbl").map(
     (element, index) => {
       const directId = directTableIdByElement.get(element);
       const id = tableIdByElement.get(element) ?? `table-${index + 1}`;
@@ -226,7 +228,7 @@ function parseFigures(
       .map((block) => [block.paragraphId, block.blockIndex]),
   );
   const drawingCountByParagraph = new Map<Element, number>();
-  const figureDrawings = Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "drawing"))
+  const figureDrawings = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "drawing")
     .filter((drawing) => !isTextBoxDrawing(drawing));
 
   for (const drawing of figureDrawings) {

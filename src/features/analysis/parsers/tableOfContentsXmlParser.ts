@@ -2,6 +2,7 @@ import type {
   TableOfContents,
   TableOfContentsField,
 } from "../types";
+import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
 
 const WORD_NAMESPACE =
   "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
@@ -32,7 +33,7 @@ export function analyzeTableOfContentsFields(
   const fields: TableOfContentsField[] = [];
   const resultParagraphElements = new Set<Element>();
   const fieldStack: ComplexFieldState[] = [];
-  const elements = Array.from(xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "*"));
+  const elements = getSemanticDescendantsByTagNameNS(xmlDocument, WORD_NAMESPACE, "*");
 
   for (const element of elements) {
     if (element.localName === "fldSimple") {

@@ -527,6 +527,63 @@
       "createdWith": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
       "verifiedWith": "tests/audit/footnoteEndnoteAudit.cjs and production-equivalent corpus harness",
       "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "alternate-content-text-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Inline mc:AlternateContent puts distinct Choice/Fallback markers and identical logical text in one body paragraph to audit branch selection and duplicate text reconstruction.",
+      "targetedFeatures": ["mc-alternate-content", "choice-fallback-text", "duplicate-run-reconstruction", "body-typography-scope"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/alternateContentAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "alternate-content-semantic-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "Block-level mc:AlternateContent contains KAYNAKLAR in both Choice and Fallback as the real document section to verify inactive-branch section detection is excluded.",
+      "targetedFeatures": ["mc-alternate-content", "choice-fallback-section-collision", "section-detection", "section-order-rule-impact"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/alternateContentAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "alternate-content-figure-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A single logical inline DrawingML figure is represented in both mc:Choice and mc:Fallback to audit duplicate figure fact reconstruction.",
+      "targetedFeatures": ["mc-alternate-content", "choice-fallback-drawing", "figure-object-detection", "caption-association"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/alternateContentAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
     }
   ]
 }

@@ -11,6 +11,7 @@ import { analyzeTableOfContentsFields } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
+import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -235,7 +236,7 @@ function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[
     return [];
   }
 
-  const paragraphs = Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, "p"));
+  const paragraphs = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "p");
   const sections: ParsedSectionProperties[] = paragraphs.flatMap((paragraph, paragraphIndex) => {
     const paragraphProperties = Array.from(paragraph.children).find(
       (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pPr",
@@ -335,7 +336,7 @@ function isTableOfContentsEntry(paragraphElement: Element): boolean {
 }
 
 function parseRuns(paragraphElement: Element): Run[] {
-  return Array.from(paragraphElement.getElementsByTagNameNS(WORD_NAMESPACE, "r"))
+  return getSemanticDescendantsByTagNameNS(paragraphElement, WORD_NAMESPACE, "r")
     .filter((runElement) =>
       findNearestAncestor(runElement, "p") === paragraphElement &&
       !hasAncestor(runElement, "del")
@@ -375,7 +376,7 @@ function parseRunStyle(runElement: Element): Omit<Run, "text"> {
 }
 
 function parseRunText(runElement: Element): string {
-  return Array.from(runElement.getElementsByTagNameNS(WORD_NAMESPACE, "t"))
+  return getSemanticDescendantsByTagNameNS(runElement, WORD_NAMESPACE, "t")
     .filter((textElement) => findNearestAncestor(textElement, "r") === runElement)
     .map((textElement) => textElement.textContent ?? "")
     .join("");
@@ -504,7 +505,7 @@ function getBodyDescendants(xmlDocument: Document, localName: string): Element[]
     return [];
   }
 
-  return Array.from(body.getElementsByTagNameNS(WORD_NAMESPACE, localName));
+  return getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, localName);
 }
 
 function getWordAttribute(element: Element, localName: string): string | null {

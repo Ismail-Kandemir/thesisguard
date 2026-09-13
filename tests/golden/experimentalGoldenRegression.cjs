@@ -1677,13 +1677,14 @@ function installMinimalXmlDomParser() {
   if (typeof globalThis.DOMParser !== "undefined") return;
 
   class XmlNode {
-    constructor(localName, namespaceURI, attributes, parentElement) {
+    constructor(localName, namespaceURI, attributes, parentElement, namespaceDeclarations = {}) {
       this.localName = localName;
       this.namespaceURI = namespaceURI;
       this.attributes = attributes;
       this.parentElement = parentElement;
       this.children = [];
       this._text = "";
+      this.namespaceDeclarations = namespaceDeclarations;
     }
 
     get textContent() {
@@ -1714,6 +1715,14 @@ function installMinimalXmlDomParser() {
     getAttribute(name) {
       const found = this.attributes.find((attribute) => attribute.name === name);
       return found ? found.value : null;
+    }
+
+    lookupNamespaceURI(prefix) {
+      if (Object.prototype.hasOwnProperty.call(this.namespaceDeclarations, prefix)) {
+        return this.namespaceDeclarations[prefix];
+      }
+
+      return this.parentElement?.lookupNamespaceURI(prefix) ?? null;
     }
   }
 
@@ -1789,7 +1798,13 @@ function installMinimalXmlDomParser() {
               value: decodeEntities(attribute.value),
             };
           });
-        const node = new XmlNode(localName, namespaceScope[prefix] ?? null, attributes, current.node);
+        const node = new XmlNode(
+          localName,
+          namespaceScope[prefix] ?? null,
+          attributes,
+          current.node,
+          namespaceScope,
+        );
         current.node.children.push(node);
 
         if (!selfClosing) stack.push({ node, namespaces: namespaceScope });

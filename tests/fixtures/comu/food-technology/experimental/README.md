@@ -240,5 +240,27 @@ the deterministic marker `TG_FOOTNOTE_ONLY_KAYNAKLAR_MARKER`, while the body sti
 contains the real `KAYNAKLAR` section. This separates note content coverage from
 normal document-flow section detection.
 
+`alternate-content-text-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. One body paragraph contains
+inline `mc:AlternateContent` with distinct `TG_ALT_CHOICE` / `TG_ALT_FALLBACK`
+markers and a second block with identical `TG_ALT_TEXT_MARKER` text in both
+branches. Raw OOXML keeps both branches, but semantic parsing must expose only
+one branch so the identical marker appears once.
+
+`alternate-content-semantic-collision-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. The real references section
+is represented as block-level `mc:AlternateContent` with `KAYNAKLAR` in both
+Choice and Fallback. Raw OOXML keeps both branches, but semantic parsing must
+produce exactly one `KAYNAKLAR` section fact.
+
+`alternate-content-figure-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. The existing inline
+DrawingML figure run is represented once in `mc:Choice` and once in
+`mc:Fallback`, giving one logical visual object two branch representations. It
+must produce exactly one semantic figure fact and preserve caption association.
+
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

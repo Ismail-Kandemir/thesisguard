@@ -4,6 +4,7 @@ import type {
   PageNumbering,
   ParagraphAlignment,
 } from "../types";
+import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const PAGE_INSTRUCTION_PATTERN = /^PAGE(?:\s|$)/i;
@@ -27,15 +28,11 @@ function parsePartPageNumberFields(part: HeaderFooterXmlPart): PageNumberField[]
     throw new Error(`${part.path} gecerli XML degil.`);
   }
 
-  const simpleFields = Array.from(
-    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "fldSimple"),
-  )
+  const simpleFields = getSemanticDescendantsByTagNameNS(xmlDocument, WORD_NAMESPACE, "fldSimple")
     .filter((element) => isPageInstruction(getWordAttribute(element, "instr")))
     .map((element) => createPageNumberField(part, element, "fldSimple"));
 
-  const instructionTextFields = Array.from(
-    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "instrText"),
-  )
+  const instructionTextFields = getSemanticDescendantsByTagNameNS(xmlDocument, WORD_NAMESPACE, "instrText")
     .filter((element) => isPageInstruction(element.textContent))
     .map((element) => createPageNumberField(part, element, "instrText"));
 
