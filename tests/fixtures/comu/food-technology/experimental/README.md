@@ -277,5 +277,40 @@ represented through both `w:moveFrom` and `w:moveTo`. Current-document revision
 visibility must exclude the inactive source representation and keep one exact
 `KAYNAKLAR` section fact from the active destination representation.
 
+`chart-object-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A minimal DrawingML chart
+payload is inserted as `w:drawing` / `a:graphicData` / `c:chart` with a chart
+relationship and chart part. It audits whether chart objects are normalized as
+generic figure occurrences and how figure rules respond.
+
+`smartart-object-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A minimal DrawingML
+diagram/SmartArt payload is inserted as `w:drawing` / `a:graphicData` /
+`dgm:relIds`. It audits the generic drawing classification boundary for diagram
+objects.
+
+`grouped-drawing-object-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A minimal grouped
+DrawingML payload using the `wpg` namespace is inserted into a body drawing. It
+audits whether grouped drawing containers are normalized as figure occurrences.
+
+`ole-object-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A minimal embedded OLE
+object is inserted as `w:object` / `v:shape` / `o:OLEObject`. It audits the
+non-drawing embedded object boundary and currently should not create an
+additional figure occurrence.
+
+`smartart-caption-collision-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A SmartArt/diagram object
+is followed by a `Şekil 99.` caption. It audits whether generic drawing
+classification can associate a non-picture DrawingML object with figure caption
+and reference rules. Product semantics remain intentionally unresolved in this
+audit fixture.
+
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

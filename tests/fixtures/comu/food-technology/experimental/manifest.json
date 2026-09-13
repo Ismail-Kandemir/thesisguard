@@ -622,6 +622,61 @@
       "createdWith": "tests/audit/remainingRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
       "verifiedWith": "tests/audit/remainingRepresentationAudit.cjs, tests/audit/revisionVisibilityRegression.cjs, and production-equivalent corpus harness",
       "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "chart-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A minimal DrawingML chart object is inserted into the body to audit whether generic w:drawing detection classifies c:chart as a normalized figure occurrence.",
+      "targetedFeatures": ["chart-object", "c-chart", "graphicData-uri", "generic-drawing-classification", "figure-rule-impact"],
+      "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "smartart-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A minimal DrawingML diagram/SmartArt object is inserted into the body to audit whether dgm:relIds content is classified through generic w:drawing detection.",
+      "targetedFeatures": ["smartart-object", "diagram-object", "dgm-relIds", "generic-drawing-classification", "figure-rule-impact"],
+      "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "grouped-drawing-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A minimal grouped DrawingML object is inserted into the body to audit whether wpg-based content is classified as a figure by the generic drawing detector.",
+      "targetedFeatures": ["grouped-drawing", "wpg", "generic-drawing-classification", "figure-rule-impact"],
+      "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "ole-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A minimal embedded OLE object is inserted as w:object / v:shape / o:OLEObject to audit whether non-drawing embedded objects become normalized figure occurrences.",
+      "targetedFeatures": ["ole-object", "w-object", "o-oleObject", "vml-shape", "object-classification-boundary"],
+      "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "smartart-caption-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A SmartArt/diagram object followed by a Şekil 99 caption audits whether generic drawing classification can associate non-picture DrawingML with figure captions and reference rules.",
+      "targetedFeatures": ["smartart-object", "caption-association", "figure-reference-rule-impact", "ambiguous-product-semantics"],
+      "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
     }
   ]
 }
