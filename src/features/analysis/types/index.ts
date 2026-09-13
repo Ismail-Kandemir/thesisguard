@@ -377,6 +377,10 @@ export interface ParagraphFormatting {
   spacing: ParagraphSpacing;
 }
 
+export type ParagraphContentScope =
+  | "document"
+  | "textbox";
+
 export interface EffectiveFormatting {
   fontFamily: string | null;
   fontSize: number | null;
@@ -390,6 +394,7 @@ export interface Paragraph {
   id: string;
   text: string;
   runs: Run[];
+  contentScope: ParagraphContentScope;
   alignment: ParagraphAlignment | null;
   lineSpacing: number | null;
   paragraphFormatting: ParagraphFormatting;

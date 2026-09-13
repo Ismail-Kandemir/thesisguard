@@ -4,7 +4,11 @@ export function parseDocumentSections(paragraphs: readonly Paragraph[]): Documen
   const sections: DocumentSection[] = [];
 
   for (const [index, paragraph] of paragraphs.entries()) {
-    if (paragraph.isTableOfContentsEntry || paragraph.isInTableCell) {
+    if (
+      paragraph.contentScope !== "document" ||
+      paragraph.isTableOfContentsEntry ||
+      paragraph.isInTableCell
+    ) {
       continue;
     }
 

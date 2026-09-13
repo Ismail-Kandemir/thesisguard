@@ -179,6 +179,24 @@ const TRACKED_DELETED_REFERENCE_FIXTURE_PATH = path.join(
   "experimental",
   "tracked-deleted-reference-synthetic.docx",
 );
+const TEXTBOX_FONT_SIZE_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "textbox-font-size-synthetic.docx",
+);
+const TEXTBOX_SEMANTIC_COLLISION_FIXTURE_PATH = path.join(
+  process.cwd(),
+  "tests",
+  "fixtures",
+  "comu",
+  "food-technology",
+  "experimental",
+  "textbox-semantic-collision-synthetic.docx",
+);
 
 const SELECTION = {
   universityId: "comu",
@@ -259,6 +277,7 @@ async function main() {
   await assertUnmarkedTocFixture();
   await assertMultiSectionMarginFixtures();
   await assertTrackedChangesFixtures();
+  await assertTextboxFixtures();
 
   console.log("Golden fixture regression passed: 46/46.");
 }
@@ -1398,6 +1417,7 @@ function createNegativeDocument(options = {}) {
     paragraphFormatting: overrides.paragraphFormatting ?? goodIndent,
     styleId: overrides.styleId ?? "Normal",
     numbering: overrides.numbering ?? { source: "none", numId: null, level: null, visibleLabel: null },
+    contentScope: overrides.contentScope ?? "document",
     isTableOfContentsEntry: false,
     isInTableCell: false,
     isEmpty: text.length === 0,
@@ -2111,6 +2131,55 @@ async function assertTrackedChangesFixtures() {
       (item) => item.kind === "figure" && item.number === "99",
     ),
     "deleted fake figure reference is excluded from object references",
+  );
+}
+
+async function assertTextboxFixtures() {
+  assert(fs.existsSync(TEXTBOX_FONT_SIZE_FIXTURE_PATH), "textbox font-size fixture missing");
+  assert(fs.existsSync(TEXTBOX_SEMANTIC_COLLISION_FIXTURE_PATH), "textbox semantic collision fixture missing");
+
+  const fontSize = await runAnalysisFixture(TEXTBOX_FONT_SIZE_FIXTURE_PATH);
+  assertEqual(fontSize.report.totalRules, 46, "textbox font-size total rule count");
+  assertEqual(fontSize.report.passedRules, 46, "textbox font-size passed rule count");
+  assertEqual(fontSize.report.failedRules, 0, "textbox font-size failed rule count");
+  assertTextboxOwnership(fontSize.document, "Textbox diagnostic content", "textbox font-size");
+  assertEqual(getResultById(fontSize.report.results, FONT_SIZE_RULE_ID).status, "PASSED",
+    "textbox 11pt text is outside academic body font-size scope");
+
+  const semantic = await runAnalysisFixture(TEXTBOX_SEMANTIC_COLLISION_FIXTURE_PATH);
+  assertEqual(semantic.report.totalRules, 46, "textbox semantic total rule count");
+  assertEqual(semantic.report.passedRules, 46, "textbox semantic passed rule count");
+  assertEqual(semantic.report.failedRules, 0, "textbox semantic failed rule count");
+  assertTextboxOwnership(semantic.document, "KAYNAKLAR", "textbox semantic");
+  assertEqual(
+    semantic.document.sections.filter((section) => section.displayName === "KAYNAKLAR").length,
+    1,
+    "textbox KAYNAKLAR does not create an extra document-flow section",
+  );
+}
+
+function assertTextboxOwnership(document, text, label) {
+  const matchingParagraphs = document.paragraphs
+    .map((paragraph, index) => ({ paragraph, index }))
+    .filter((entry) => entry.paragraph.text.includes(text));
+  assertEqual(matchingParagraphs.length, text === "KAYNAKLAR" ? 2 : 1,
+    `${label} normalized visible occurrence count`);
+
+  const textboxParagraph = matchingParagraphs.find(
+    (entry) => entry.paragraph.contentScope === "textbox",
+  );
+  assert(textboxParagraph !== undefined, `${label} textbox paragraph exists`);
+  assertEqual(textboxParagraph.paragraph.text, text, `${label} textbox paragraph text`);
+  assertEqual(textboxParagraph.paragraph.runs.length, 1, `${label} textbox run count`);
+  assertEqual(textboxParagraph.paragraph.runs[0].text, text, `${label} textbox run text`);
+
+  const previousParagraph = document.paragraphs[textboxParagraph.index - 1];
+  assert(previousParagraph !== undefined, `${label} outer carrier paragraph exists`);
+  assertEqual(previousParagraph.contentScope, "document", `${label} outer paragraph scope`);
+  assert(!previousParagraph.text.includes(text), `${label} outer paragraph excludes textbox text`);
+  assert(
+    !previousParagraph.runs.some((run) => run.text.includes(text)),
+    `${label} outer paragraph runs exclude textbox text`,
   );
 }
 

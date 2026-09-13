@@ -145,6 +145,7 @@ function parseParagraphs(
         id: `paragraph-${index + 1}`,
         text: getParagraphText(runs),
         runs,
+        contentScope: hasAncestor(paragraphElement, "txbxContent") ? "textbox" : "document",
         alignment: parseAlignment(paragraphElement),
         lineSpacing: parseLineSpacing(paragraphElement),
         paragraphFormatting: parseParagraphFormatting(paragraphElement),
@@ -335,7 +336,10 @@ function isTableOfContentsEntry(paragraphElement: Element): boolean {
 
 function parseRuns(paragraphElement: Element): Run[] {
   return Array.from(paragraphElement.getElementsByTagNameNS(WORD_NAMESPACE, "r"))
-    .filter((runElement) => !hasAncestor(runElement, "del"))
+    .filter((runElement) =>
+      findNearestAncestor(runElement, "p") === paragraphElement &&
+      !hasAncestor(runElement, "del")
+    )
     .map(parseRun);
 }
 
@@ -372,6 +376,7 @@ function parseRunStyle(runElement: Element): Omit<Run, "text"> {
 
 function parseRunText(runElement: Element): string {
   return Array.from(runElement.getElementsByTagNameNS(WORD_NAMESPACE, "t"))
+    .filter((textElement) => findNearestAncestor(textElement, "r") === runElement)
     .map((textElement) => textElement.textContent ?? "")
     .join("");
 }
@@ -481,6 +486,15 @@ function getParagraphText(runs: Run[]): string {
 
 function getFirstDescendant(element: Element, localName: string): Element | null {
   return element.getElementsByTagNameNS(WORD_NAMESPACE, localName).item(0);
+}
+
+function findNearestAncestor(element: Element, localName: string): Element | null {
+  let ancestor = element.parentElement;
+  while (ancestor) {
+    if (ancestor.namespaceURI === WORD_NAMESPACE && ancestor.localName === localName) return ancestor;
+    ancestor = ancestor.parentElement;
+  }
+  return null;
 }
 
 function getBodyDescendants(xmlDocument: Document, localName: string): Element[] {

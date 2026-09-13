@@ -103,6 +103,19 @@ Regression fixture derived from `full-correct.docx`. A tracked deleted run
 contains a fake figure reference. Deleted text must not create visible
 object-reference semantics.
 
+`textbox-font-size-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A VML textbox carries
+11 pt visible text inside `w:txbxContent`. The text must be normalized exactly
+once under textbox ownership and must not affect academic body typography
+validation.
+
+`textbox-semantic-collision-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A VML textbox carries
+required-section-like text inside `w:txbxContent`. The text must be normalized
+under textbox ownership and must not create a document-flow section heading.
+
 `experimental-indentation-fail.docx`
 
 Derived manual/runtime negative fixture with exactly one intentionally invalid

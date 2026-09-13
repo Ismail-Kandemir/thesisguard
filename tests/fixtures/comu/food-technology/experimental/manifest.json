@@ -135,6 +135,44 @@
       "privacyStatus": "Fully synthetic; contains no personal data"
     },
     {
+      "file": "textbox-font-size-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A VML textbox contains visible 11 pt text; textbox-owned text must remain visible exactly once while staying outside academic body typography validation.",
+      "targetedFeatures": ["vml-textbox", "txbxContent", "textbox-body-typography", "nested-paragraph-duplication"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML VML textbox mutation",
+      "verifiedWith": "tests/audit/textBoxRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "textbox-semantic-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A VML textbox contains required-section-like text; textbox-owned text must not collide with normal document-flow section detection.",
+      "targetedFeatures": ["vml-textbox", "txbxContent", "textbox-section-detection", "nested-paragraph-duplication"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "full-correct.docx controlled OOXML VML textbox mutation",
+      "verifiedWith": "tests/audit/textBoxRepresentationAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
       "file": "experimental-indentation-fail.docx",
       "tier": 1,
       "origin": "synthetic-ooxml",

@@ -43,6 +43,7 @@ export function getBodyParagraphs(
   return document.paragraphs.filter(
     (paragraph) =>
       !paragraph.isEmpty &&
+      paragraph.contentScope === "document" &&
       !isHeadingParagraph(paragraph.styleId, stylesById) &&
       !sectionHeadingParagraphIds.has(paragraph.id) &&
       !(options.excludeCaptions && captionParagraphIds.has(paragraph.id)) &&

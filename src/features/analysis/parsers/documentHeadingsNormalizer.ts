@@ -45,6 +45,7 @@ export function normalizeDocumentHeadings(
 
   const headings = document.paragraphs.flatMap((paragraph, paragraphIndex) => {
     if (
+      paragraph.contentScope !== "document" ||
       paragraph.isEmpty || paragraph.isTableOfContentsEntry || paragraph.isInTableCell ||
       captionIds.has(paragraph.id)
     ) return [];
