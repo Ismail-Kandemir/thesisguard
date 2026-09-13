@@ -219,5 +219,26 @@ typography exclusion for the supported marked and balanced complex-field forms. 
 do not verify rendered pagination, stale TOC cache correctness, arbitrary malformed
 Word field recovery, every possible Word TOC variant, or Word-native serialization.
 
+`footnote-visible-content-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A normal academic body
+paragraph contains `w:footnoteReference w:id="2"` while the visible note text lives
+in `word/footnotes.xml`. It audits current package, reference-marker, and
+normalized-model coverage only; it does not define a regression expectation.
+
+`endnote-visible-content-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. A normal academic body
+paragraph contains `w:endnoteReference w:id="2"` while the visible note text lives
+in `word/endnotes.xml`. It audits current package, reference-marker, and
+normalized-model coverage only; it does not define a regression expectation.
+
+`footnote-section-collision-synthetic.docx`
+
+Exploratory fixture derived from `full-correct.docx`. The footnote part contains
+the deterministic marker `TG_FOOTNOTE_ONLY_KAYNAKLAR_MARKER`, while the body still
+contains the real `KAYNAKLAR` section. This separates note content coverage from
+normal document-flow section detection.
+
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.

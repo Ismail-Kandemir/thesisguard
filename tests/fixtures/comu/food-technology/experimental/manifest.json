@@ -494,6 +494,39 @@
       "createdWith": "full-correct.docx üzerinde kontrollü complex TOC OOXML mutation",
       "verifiedWith": "Production-equivalent corpus harness",
       "privacyStatus": "Tamamen sentetik; kişisel veri içermez"
+    },
+    {
+      "file": "footnote-visible-content-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A body paragraph contains a w:footnoteReference whose visible note content lives in word/footnotes.xml; audits current cross-part representation coverage without changing production behavior.",
+      "targetedFeatures": ["footnotes-xml-part", "footnote-reference-marker", "cross-part-visible-content-coverage"],
+      "createdWith": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/footnoteEndnoteAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "endnote-visible-content-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A body paragraph contains a w:endnoteReference whose visible note content lives in word/endnotes.xml; audits current cross-part representation coverage without changing production behavior.",
+      "targetedFeatures": ["endnotes-xml-part", "endnote-reference-marker", "cross-part-visible-content-coverage"],
+      "createdWith": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/footnoteEndnoteAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "footnote-section-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A footnote contains a deterministic KAYNAKLAR-like marker while the real document body still contains the KAYNAKLAR section; audits that body occurrence count is not misread as parsed note content.",
+      "targetedFeatures": ["footnote-section-collision", "required-section-scope", "note-marker-disambiguation"],
+      "createdWith": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/footnoteEndnoteAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
     }
   ]
 }
