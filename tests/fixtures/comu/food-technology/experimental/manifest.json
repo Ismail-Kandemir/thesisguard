@@ -584,6 +584,44 @@
       "createdWith": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
       "verifiedWith": "tests/audit/alternateContentAudit.cjs and production-equivalent corpus harness",
       "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "tracked-move-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "A body paragraph contains w:moveFrom and w:moveTo revisions with the same moved visible marker to audit current-document revision visibility and duplicate reconstruction.",
+      "targetedFeatures": ["tracked-move-revisions", "moveFrom", "moveTo", "revision-visibility", "duplicate-run-reconstruction"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "tests/audit/remainingRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/remainingRepresentationAudit.cjs, tests/audit/revisionVisibilityRegression.cjs, and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "tracked-move-semantic-collision-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "purpose": "The KAYNAKLAR heading is represented through both w:moveFrom and w:moveTo to audit whether old moved source and current moved destination are both treated as academic body content.",
+      "targetedFeatures": ["tracked-move-revisions", "moveFrom", "moveTo", "section-detection", "revision-visibility-gap"],
+      "expected": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "createdWith": "tests/audit/remainingRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/remainingRepresentationAudit.cjs, tests/audit/revisionVisibilityRegression.cjs, and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
     }
   ]
 }

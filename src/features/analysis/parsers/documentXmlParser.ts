@@ -12,6 +12,7 @@ import { parseDocumentSections } from "./documentSectionsParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
 import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
+import { isRunVisibleInCurrentDocument } from "./revisionVisibility";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const TWIPS_PER_INCH = 1440;
@@ -339,7 +340,7 @@ function parseRuns(paragraphElement: Element): Run[] {
   return getSemanticDescendantsByTagNameNS(paragraphElement, WORD_NAMESPACE, "r")
     .filter((runElement) =>
       findNearestAncestor(runElement, "p") === paragraphElement &&
-      !hasAncestor(runElement, "del")
+      isRunVisibleInCurrentDocument(runElement)
     )
     .map(parseRun);
 }

@@ -262,5 +262,20 @@ DrawingML figure run is represented once in `mc:Choice` and once in
 `mc:Fallback`, giving one logical visual object two branch representations. It
 must produce exactly one semantic figure fact and preserve caption association.
 
+`tracked-move-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. A normal academic body
+paragraph contains `w:moveFrom` and `w:moveTo` revisions with the same
+`TG_MOVED_TEXT` marker. Current-document revision visibility must exclude the
+old moved source and keep the moved destination, so the marker is normalized
+exactly once and the fixture remains 46/46.
+
+`tracked-move-semantic-collision-synthetic.docx`
+
+Regression fixture derived from `full-correct.docx`. The `KAYNAKLAR` heading is
+represented through both `w:moveFrom` and `w:moveTo`. Current-document revision
+visibility must exclude the inactive source representation and keep one exact
+`KAYNAKLAR` section fact from the active destination representation.
+
 Do not regenerate or edit this binary just to satisfy the regression. A failing
 golden run after a production change is evidence to investigate first.
