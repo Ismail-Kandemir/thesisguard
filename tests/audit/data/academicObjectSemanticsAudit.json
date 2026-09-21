@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "phase": "4E-18",
+  "decision": "OPTION_C",
+  "records": [
+    {
+      "fixture": "full-correct.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "representation": "picture",
+      "captionSemantic": "declared-figure",
+      "association": "matched",
+      "currentAcademicType": "figure",
+      "proposedResolution": "resolved-figure",
+      "sourceSupport": ["A1", "A2", "C", "D"],
+      "classification": "EXPECTED_BEHAVIOR",
+      "note": "Geçerli Şekil başlığıyla ilişkilendirilmiş DrawingML resim; temsil tek başına değil, başlık beyanı güçlü akademik kimlik kanıtıdır."
+    },
+    {
+      "fixture": "chart-object-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "representation": "chart",
+      "captionSemantic": "none",
+      "association": "missing",
+      "currentAcademicType": "figure",
+      "proposedResolution": "unresolved-candidate",
+      "sourceSupport": ["C", "D"],
+      "classification": "SEMANTIC_OVERCLAIM",
+      "note": "Genel w:drawing algısı chart nesnesini şekil olarak adlandırıyor; birincil kaynak chart→Şekil eşlemesini kurmuyor."
+    },
+    {
+      "fixture": "smartart-object-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "representation": "diagram",
+      "captionSemantic": "none",
+      "association": "missing",
+      "currentAcademicType": "figure",
+      "proposedResolution": "unresolved-candidate",
+      "sourceSupport": ["C", "D"],
+      "classification": "SEMANTIC_OVERCLAIM",
+      "note": "dgm:relIds içeren DrawingML nesnesi başlıksız olduğu halde akademik figure dizisine giriyor."
+    },
+    {
+      "fixture": "grouped-drawing-object-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "representation": "group",
+      "captionSemantic": "none",
+      "association": "missing",
+      "currentAcademicType": "figure",
+      "proposedResolution": "unresolved-candidate",
+      "sourceSupport": ["C", "D"],
+      "classification": "SEMANTIC_OVERCLAIM",
+      "note": "wpg grubu teknik temsilden akademik şekle doğrudan yükseltiliyor."
+    },
+    {
+      "fixture": "ole-object-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "representation": "ole",
+      "captionSemantic": "none",
+      "association": "not-attempted",
+      "currentAcademicType": "none",
+      "proposedResolution": "unresolved-candidate",
+      "sourceSupport": ["C", "D"],
+      "classification": "REPRESENTATION_GAP",
+      "note": "w:object/o:OLEObject mevcut nesne normalizasyonunda temsil olgusu olarak tutulmuyor."
+    },
+    {
+      "fixture": "smartart-caption-collision-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "representation": "diagram",
+      "captionSemantic": "declared-figure",
+      "association": "matched",
+      "currentAcademicType": "figure",
+      "proposedResolution": "resolved-figure",
+      "sourceSupport": ["A1", "C", "D"],
+      "classification": "EXPECTED_BEHAVIOR",
+      "note": "Geçerli Şekil 99. beyanı diagram nesnesine güçlü akademik şekil kimliği sağlar; eksik metin içi atıf ayrı bir kural ihlalidir."
+    },
+    {
+      "fixture": "drawingml-textbox-ownership-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "representation": "textbox",
+      "captionSemantic": "none",
+      "association": "not-attempted",
+      "currentAcademicType": "none",
+      "proposedResolution": "excluded-from-object-candidacy",
+      "sourceSupport": ["B", "C", "D"],
+      "classification": "EXPECTED_BEHAVIOR",
+      "note": "wps:txbx/w:txbxContent sahibi çizim figure olgusu üretmez; metin sahipliği korunur."
+    },
+    {
+      "fixture": "alternate-content-figure-synthetic.docx",
+      "origin": "synthetic-ooxml",
+      "mode": "regression",
+      "representation": "picture",
+      "captionSemantic": "declared-figure",
+      "association": "matched",
+      "currentAcademicType": "figure",
+      "proposedResolution": "resolved-figure",
+      "sourceSupport": ["B", "C", "D"],
+      "classification": "EXPECTED_BEHAVIOR",
+      "note": "Etkin AlternateContent dalı tek mantıksal nesne üretir; Choice/Fallback kopyası çift sayılmaz."
+    }
+  ]
+}
