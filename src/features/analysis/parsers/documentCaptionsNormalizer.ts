@@ -6,6 +6,7 @@ import type {
   DocumentCaptions,
   DocumentFigureOccurrence,
   DocumentFigures,
+  DocumentObjectSemantics,
   DocumentTableOccurrence,
   DocumentTables,
   FigureDrawingType,
@@ -14,6 +15,8 @@ import type {
   Paragraph,
   ParagraphAlignment,
 } from "../types";
+import { normalizeObjectSemantics } from "./objectSemanticsNormalizer";
+import { parseCaptionText } from "./captionTextParser";
 import {
   getSemanticChildElements,
   getSemanticDescendantsByTagNameNS,
@@ -24,13 +27,13 @@ const WORDPROCESSING_DRAWING_NAMESPACE =
   "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
 const WORDPROCESSING_SHAPE_NAMESPACE =
   "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
-const CAPTION_PATTERN = /^\s*(tablo|şekil)\s+((?:\d+\.)*\d+)\.\s*(.*)$/u;
 
 export interface DocumentVisualStructure {
   blocks: DocumentBlock[];
   captions: DocumentCaptions;
   tables: DocumentTables;
   figures: DocumentFigures;
+  objectSemantics: DocumentObjectSemantics;
 }
 
 export function normalizeDocumentCaptions(
@@ -99,6 +102,7 @@ export function normalizeDocumentCaptions(
       .map((item) => item.captionId)
       .filter((captionId): captionId is string => captionId !== null),
   );
+  const objectSemantics = normalizeObjectSemantics(xmlDocument, paragraphs, blocks);
 
   return {
     blocks,
@@ -118,6 +122,7 @@ export function normalizeDocumentCaptions(
       hasFigures: associated.figures.length > 0,
       items: associated.figures,
     },
+    objectSemantics,
   };
 }
 
@@ -127,6 +132,7 @@ function createEmptyStructure(): DocumentVisualStructure {
     captions: { items: [], orphanCaptionIds: [] },
     tables: { count: 0, hasTables: false, items: [] },
     figures: { count: 0, hasFigures: false, items: [] },
+    objectSemantics: { representations: [], captions: [], associations: [], resolutions: [] },
   };
 }
 
@@ -164,26 +170,6 @@ function parseCaptions(
       number: parsed.number,
     }];
   });
-}
-
-export function parseCaptionText(
-  text: string,
-): Pick<DocumentCaption, "kind" | "label" | "number"> | null {
-  const match = CAPTION_PATTERN.exec(text.toLocaleLowerCase("tr-TR"));
-
-  if (!match) {
-    return null;
-  }
-
-  const kind: CaptionKind = match[1].toLocaleLowerCase("tr-TR") === "tablo"
-    ? "table"
-    : "figure";
-
-  return {
-    kind,
-    label: kind === "table" ? "Tablo" : "Şekil",
-    number: match[2],
-  };
 }
 
 function parseTables(

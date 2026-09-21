@@ -556,6 +556,106 @@ export interface DocumentCaptions {
   orphanCaptionIds: string[];
 }
 
+export type ObjectRepresentationKind =
+  | "picture"
+  | "chart"
+  | "diagram"
+  | "group"
+  | "textbox"
+  | "vml-image"
+  | "ole"
+  | "equation"
+  | "table"
+  | "unknown-drawing";
+
+export type ObjectRepresentationScope =
+  | "body"
+  | "table-cell"
+  | "textbox";
+
+export interface ObjectRepresentationOccurrence {
+  id: string;
+  kind: ObjectRepresentationKind;
+  sourcePart: "word/document.xml";
+  xmlOrder: number;
+  blockIndex: number | null;
+  paragraphId: string | null;
+  paragraphIndex: number | null;
+  scope: ObjectRepresentationScope;
+  drawingType: FigureDrawingType | null;
+  evidence: string[];
+}
+
+export type CaptionSemantic =
+  | {
+      status: "declared";
+      academicType: CaptionKind;
+      label: "Tablo" | "Şekil";
+      number: string;
+    }
+  | {
+      status: "malformed" | "unnumbered" | "unknown";
+      academicType: null;
+      candidateLabel: "Tablo" | "Şekil" | null;
+      reason: string;
+    };
+
+export interface CaptionFieldEvidence {
+  instruction: string;
+}
+
+export interface CaptionOccurrence {
+  id: string;
+  rawText: string;
+  normalizedText: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number;
+  sourcePart: "word/document.xml";
+  scope: "body";
+  semantic: CaptionSemantic;
+  fieldEvidence: CaptionFieldEvidence[];
+  isOrphan: boolean;
+}
+
+export type ObjectCaptionAssociationStatus =
+  | "matched"
+  | "missing"
+  | "ambiguous"
+  | "conflicting"
+  | "not-attempted";
+
+export interface ObjectCaptionAssociation {
+  objectId: string;
+  status: ObjectCaptionAssociationStatus;
+  captionId: string | null;
+  candidateCaptionIds: string[];
+  position: "before" | "after" | null;
+  distanceInBlocks: number | null;
+  reasons: string[];
+}
+
+export type AcademicObjectResolutionStatus =
+  | "declared"
+  | "unresolved"
+  | "ambiguous"
+  | "excluded";
+
+export interface AcademicObjectResolution {
+  objectId: string;
+  status: AcademicObjectResolutionStatus;
+  academicType: CaptionKind | null;
+  captionId: string | null;
+  reasons: string[];
+}
+
+export interface DocumentObjectSemantics {
+  representations: ObjectRepresentationOccurrence[];
+  captions: CaptionOccurrence[];
+  associations: ObjectCaptionAssociation[];
+  resolutions: AcademicObjectResolution[];
+}
+
 export interface DocumentObjectReference {
   kind: CaptionKind;
   number: string;
@@ -626,6 +726,7 @@ export interface NormalizedDocument {
   figures: DocumentFigures;
   blocks: DocumentBlock[];
   captions: DocumentCaptions;
+  objectSemantics: DocumentObjectSemantics;
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
   sections: DocumentSection[];

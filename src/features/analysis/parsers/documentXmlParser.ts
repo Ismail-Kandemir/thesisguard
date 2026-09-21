@@ -57,6 +57,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     figures: visualStructure.figures,
     blocks: visualStructure.blocks,
     captions: visualStructure.captions,
+    objectSemantics: visualStructure.objectSemantics,
     objectReferences: { items: [] },
     abbreviations: {
       items: [],
