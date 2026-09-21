@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local immutable institutional evidence; metadata and directory marker remain trackable.
+docs/sources/**/original/*
+!docs/sources/**/original/.gitkeep

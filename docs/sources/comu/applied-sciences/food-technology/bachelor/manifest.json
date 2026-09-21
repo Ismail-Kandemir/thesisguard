@@ -1,0 +1,70 @@
+{
+  "schemaVersion": 1,
+  "collectionId": "comu-cubf-food-technology-bachelor-2026-09-21",
+  "institution": "Çanakkale Onsekiz Mart Üniversitesi",
+  "faculty": "Çanakkale Uygulamalı Bilimler Fakültesi",
+  "department": "Gıda Teknolojisi Bölümü",
+  "programLevel": "bachelor",
+  "officialPageTitle": "Bitirme Tezi Yazım Kuralları",
+  "officialPageUrl": "https://gida.cubf.comu.edu.tr/arsiv/duyurular/bitirme-tezi-yazim-kurallari-r56.html",
+  "officialPagePublishedAt": "2022-03-25",
+  "retrievedAt": "2026-09-21T11:17:47Z",
+  "artifacts": [
+    {
+      "sourceId": "comu-cubf-food-tech-bachelor-guide-102",
+      "documentType": "normative-guide",
+      "title": "Bitirme Tezi Hazırlama Kılavuzu",
+      "downloadUrl": "https://cdn.comu.edu.tr/cms/cubf.gida/files/102-bitirme-tezi-hazirlama-kilavuzu.pdf",
+      "publishedAt": null,
+      "documentVersion": null,
+      "effectiveDate": null,
+      "filename": "original/102-bitirme-tezi-hazirlama-kilavuzu.pdf",
+      "sha256": "70326c5854bc6a1c7c1b71fbd9b5d9e1cae59d3afb3b309dc18a617de7359a83",
+      "byteSize": 293554,
+      "mimeType": "application/pdf",
+      "trustLevel": "A1"
+    },
+    {
+      "sourceId": "comu-cubf-food-tech-bachelor-citation-guide-101",
+      "documentType": "citation-guide",
+      "title": "Bitirme Tezi Kaynakça Gösterim Kılavuzu",
+      "downloadUrl": "https://cdn.comu.edu.tr/cms/cubf.gida/files/101-bitirme-tezi-kaynakca-gosterim-kilavuzu.docx",
+      "publishedAt": null,
+      "documentVersion": null,
+      "effectiveDate": null,
+      "filename": "original/101-bitirme-tezi-kaynakca-gosterim-kilavuzu.docx",
+      "sha256": "0d0bd2be26cabf8f7e826e18e16ef33eee234bcc868a8b3aa2abce352289c3a4",
+      "byteSize": 17885,
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "trustLevel": "A2"
+    },
+    {
+      "sourceId": "comu-cubf-food-tech-bachelor-literature-template-103",
+      "documentType": "thesis-template-literature",
+      "title": "Bitirme Tezi Şablonu (Literatür Çalışması)",
+      "downloadUrl": "https://cdn.comu.edu.tr/cms/cubf.gida/files/103-bitirme-tezi-sablo-literatur-calismasi.docx",
+      "publishedAt": null,
+      "documentVersion": null,
+      "effectiveDate": null,
+      "filename": "original/103-bitirme-tezi-sablo-literatur-calismasi.docx",
+      "sha256": "8b26e40baa86a64c2a33cca1126818b6a7c71f20c22d2d071d1cdadb48fd1cca",
+      "byteSize": 152710,
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "trustLevel": "A2"
+    },
+    {
+      "sourceId": "comu-cubf-food-tech-bachelor-laboratory-template-104",
+      "documentType": "thesis-template-laboratory",
+      "title": "Bitirme Tezi Şablonu (Laboratuvar Çalışması)",
+      "downloadUrl": "https://cdn.comu.edu.tr/cms/cubf.gida/files/104-bitirme-tezi-sablonu-laboratuvar-calismasi.docx",
+      "publishedAt": null,
+      "documentVersion": null,
+      "effectiveDate": null,
+      "filename": "original/104-bitirme-tezi-sablonu-laboratuvar-calismasi.docx",
+      "sha256": "84123c7f79e76395d37fd90e9278a3ed36b0c6192cd8d02017e024d54b344cfa",
+      "byteSize": 152886,
+      "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      "trustLevel": "A2"
+    }
+  ]
+}
