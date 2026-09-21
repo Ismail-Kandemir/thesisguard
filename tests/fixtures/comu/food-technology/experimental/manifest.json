@@ -677,6 +677,39 @@
       "createdWith": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
       "verifiedWith": "tests/audit/objectRepresentationAudit.cjs and production-equivalent corpus harness",
       "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "vml-image-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A standalone w:pict/v:imagedata body object proves shadow vml-image detection remains distinct from VML textbox and does not invent academic figure identity.",
+      "targetedFeatures": ["vml-image", "w-pict", "v-imagedata", "shadow-representation", "unresolved-academic-identity"],
+      "createdWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "equation-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "A minimal m:oMathPara object proves shadow equation detection without creating academic figure identity or changing legacy figure rules.",
+      "targetedFeatures": ["office-math", "m-oMathPara", "shadow-representation", "unresolved-academic-identity"],
+      "createdWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
+    },
+    {
+      "file": "unknown-drawing-object-synthetic.docx",
+      "tier": 1,
+      "origin": "synthetic-ooxml",
+      "mode": "exploratory",
+      "purpose": "An unrecognized a:graphicData payload proves generic semantic w:drawing is retained as unknown-drawing and remains academically unresolved in shadow mode.",
+      "targetedFeatures": ["unknown-drawing", "unrecognized-graphicData-uri", "shadow-fallback", "legacy-rule-parity"],
+      "createdWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "verifiedWith": "tests/audit/objectSemanticCoverageReadinessAudit.cjs and production-equivalent corpus harness",
+      "privacyStatus": "Fully synthetic; contains no personal data"
     }
   ]
 }
