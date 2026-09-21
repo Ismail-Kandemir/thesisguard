@@ -15,6 +15,8 @@ import type { RuleValidator } from "./RuleValidator";
 import { createCaptionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const OOXML_UNITS_PER_LINE = 240;
+const FIGURE_CAPTION_FORMAT_PILOT_RULE_ID =
+  "comu.applied-sciences.food-technology.bachelor.figure-caption-format";
 
 interface CaptionFormatting {
   caption: DocumentCaption;
@@ -26,7 +28,9 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertRule(rule);
     const expected = getExpected(rule.expected);
-    const formatting = getAssociatedCaptionFormatting(document, expected.object);
+    const formatting = rule.id === FIGURE_CAPTION_FORMAT_PILOT_RULE_ID
+      ? getDeclaredFigureCaptionFormatting(document)
+      : getLegacyAssociatedCaptionFormatting(document, expected.object);
 
     if (formatting.length === 0) {
       return createResult(
@@ -64,7 +68,7 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
   }
 }
 
-function getAssociatedCaptionFormatting(
+function getLegacyAssociatedCaptionFormatting(
   document: Readonly<NormalizedDocument>,
   object: CaptionKind,
 ): CaptionFormatting[] {
@@ -86,6 +90,62 @@ function getAssociatedCaptionFormatting(
     return caption && paragraph
       ? [resolveFormatting(caption, paragraph, resolver)]
       : [];
+  });
+}
+
+function getDeclaredFigureCaptionFormatting(
+  document: Readonly<NormalizedDocument>,
+): CaptionFormatting[] {
+  const representationById = new Map(
+    document.objectSemantics.representations.map((item) => [item.id, item]),
+  );
+  const associationByObjectId = new Map(
+    document.objectSemantics.associations.map((item) => [item.objectId, item]),
+  );
+  const semanticCaptionById = new Map(
+    document.objectSemantics.captions.map((item) => [item.id, item]),
+  );
+  const legacyCaptionByParagraphId = new Map(
+    document.captions.items.map((caption) => [caption.paragraphId, caption]),
+  );
+  const paragraphById = new Map(
+    document.paragraphs.map((paragraph) => [paragraph.id, paragraph]),
+  );
+  const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults);
+
+  return document.objectSemantics.resolutions.flatMap((resolution) => {
+    if (resolution.status !== "declared" || resolution.academicType !== "figure") return [];
+
+    const representation = representationById.get(resolution.objectId);
+    const association = associationByObjectId.get(resolution.objectId);
+
+    if (
+      !representation || representation.scope !== "body" || representation.drawingType !== "inline" ||
+      !association || association.status !== "matched" || association.captionId === null ||
+      resolution.captionId !== association.captionId
+    ) {
+      return [];
+    }
+
+    const semanticCaption = semanticCaptionById.get(association.captionId);
+    if (
+      !semanticCaption || semanticCaption.semantic.status !== "declared" ||
+      semanticCaption.semantic.academicType !== "figure"
+    ) {
+      return [];
+    }
+
+    const caption = legacyCaptionByParagraphId.get(semanticCaption.paragraphId);
+    const paragraph = paragraphById.get(semanticCaption.paragraphId);
+
+    if (
+      !caption || caption.kind !== "figure" ||
+      caption.number !== semanticCaption.semantic.number || !paragraph
+    ) {
+      return [];
+    }
+
+    return [resolveFormatting(caption, paragraph, resolver)];
   });
 }
 

@@ -1629,6 +1629,7 @@ function createEmptyDocument() {
     figures: { count: 0, hasFigures: false, items: [] },
     blocks: [],
     captions: { items: [], orphanCaptionIds: [] },
+    objectSemantics: { representations: [], captions: [], associations: [], resolutions: [] },
     objectReferences: { items: [] },
     abbreviations: { items: [], count: 0, hasAbbreviations: false },
     sections: [],
