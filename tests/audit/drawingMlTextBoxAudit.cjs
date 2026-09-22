@@ -180,20 +180,22 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
   const figureCaptionPlacementResult = report.results.find((result) =>
     result.ruleId === FIGURE_CAPTION_PLACEMENT_RULE_ID,
   );
-  const figureFacts = document.figures.items.map((figure) => ({
-    id: figure.id,
-    paragraphId: figure.paragraphId,
-    paragraphIndex: figure.paragraphIndex,
-    blockIndex: figure.blockIndex,
-    drawingType: figure.drawingType,
-    alignment: figure.alignment,
-    alignmentSource: figure.alignmentSource,
-    captionId: figure.captionId,
-    captionPosition: figure.captionPosition,
+  const objectRepresentations = document.objectSemantics.representations.map((representation) => ({
+    id: representation.id,
+    kind: representation.kind,
+    paragraphId: representation.paragraphId,
+    paragraphIndex: representation.paragraphIndex,
+    blockIndex: representation.blockIndex,
+    drawingType: representation.drawingType,
+    alignment: representation.alignment,
+    alignmentSource: representation.alignmentSource,
   }));
-  const textboxFigureFacts = figureFacts.filter(
-    (figure) => figure.paragraphIndex === outerCarrierParagraph?.index,
+  const textboxOwnedRepresentations = objectRepresentations.filter(
+    (representation) =>
+      representation.kind === "textbox" &&
+      representation.paragraphIndex === outerCarrierParagraph?.index,
   );
+  const pictureRepresentations = objectRepresentations.filter((representation) => representation.kind === "picture");
   const matchingSections = document.sections
     .filter((section) => section.displayName.includes(textboxText))
     .map((section) => ({
@@ -210,9 +212,9 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
     outerCarrierParagraph,
     innerTextboxParagraphs,
     paragraphsWithTextboxText,
-    figureFacts,
-    figureCount: document.figures.count,
-    textboxFigureFacts,
+    objectRepresentations,
+    pictureRepresentationCount: pictureRepresentations.length,
+    textboxOwnedRepresentations,
     matchingSections,
     report: {
       total: report.totalRules,
@@ -248,11 +250,11 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
   assertEqual(innerTextboxParagraphs[0].contentScope, "textbox", `${fixturePath} textbox scope`);
   assertEqual(innerTextboxParagraphs[0].runs.length, 1, `${fixturePath} textbox run count`);
   assertEqual(innerTextboxParagraphs[0].runs[0].text, textboxText, `${fixturePath} textbox run text`);
-  assertEqual(document.figures.count, 1, `${fixturePath} figure count`);
-  assertEqual(textboxFigureFacts.length, 0, `${fixturePath} textbox figure fact count`);
+  assertEqual(pictureRepresentations.length, 1, `${fixturePath} picture representation count`);
+  assertEqual(textboxOwnedRepresentations.length, 0, `${fixturePath} textbox-owned representation count`);
   assert(
-    figureFacts.some((figure) => figure.captionPosition === "after" && figure.alignment === "center"),
-    `${fixturePath} normal figure detection`,
+    pictureRepresentations.some((representation) => representation.alignment === "center"),
+    `${fixturePath} normal picture representation detection`,
   );
   assertEqual(report.failedRules, 0, `${fixturePath} failed rule count`);
   assertEqual(fontSizeResult?.status, "PASSED", `${fixturePath} font-size status`);

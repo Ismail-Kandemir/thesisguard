@@ -66,11 +66,10 @@ async function main() {
     const resolution = result.resolutions.find((item) => item.objectId === representation.id);
     assertEqual(resolution?.status, fixture.resolutionStatus, `${fixture.file}: academic resolution`);
     assertEqual(resolution?.academicType, null, `${fixture.file}: academic type`);
-    assertEqual(result.document.figures.count, fixture.legacyFigureCount, `${fixture.file}: legacy figure count`);
     assertEqual(
       JSON.stringify(result.report.results.filter((item) => item.status === "FAILED").map((item) => item.ruleId)),
       JSON.stringify(fixture.failedRuleIds),
-      `${fixture.file}: legacy RuleResult parity`,
+      `${fixture.file}: RuleResult parity`,
     );
     differential.push(summarize(result));
   }
@@ -172,7 +171,6 @@ function summarize(result) {
   }
   return {
     fixture: result.file,
-    legacyFigures: result.document.figures.count,
     legacyTables: result.document.tables.count,
     shadow: counts,
     failedRuleIds: result.report.results.filter((item) => item.status === "FAILED").map((item) => item.ruleId),

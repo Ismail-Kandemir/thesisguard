@@ -1,9 +1,9 @@
 import type {
   CaptionKind,
   CaptionPosition,
-  DocumentFigureOccurrence,
   DocumentTableOccurrence,
   NormalizedDocument,
+  ObjectRepresentationOccurrence,
   ObjectCaptionPlacementRuleExpected,
   RuleDefinition,
   RuleEvidence,
@@ -12,9 +12,13 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
-import { getDeclaredAcademicFigureOccurrences } from "../objectApplicability";
+import { getDeclaredAcademicFigures } from "../objectApplicability";
 
-type CaptionOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
+type CaptionOccurrence = DocumentTableOccurrence | FigureCaptionOccurrence;
+
+interface FigureCaptionOccurrence extends ObjectRepresentationOccurrence {
+  captionPosition: CaptionPosition;
+}
 
 export class ObjectCaptionPlacementValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
@@ -69,9 +73,12 @@ function getReliableOccurrences(
 ): CaptionOccurrence[] {
   return object === "table"
     ? document.tables.items.filter((item) => !item.isNested)
-    : getDeclaredAcademicFigureOccurrences(document).filter(
-        (item) => item.drawingType === "inline",
-      );
+    : getDeclaredAcademicFigures(document)
+        .filter((item) => item.representation.drawingType === "inline")
+        .map((item) => ({
+          ...item.representation,
+          captionPosition: item.association?.position ?? "none",
+        }));
 }
 
 function assertRule(

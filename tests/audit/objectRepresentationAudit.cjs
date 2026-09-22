@@ -136,8 +136,8 @@ async function inspectFixture(fixturePath, kind) {
       alternateContentCount: countMatches(documentXml, /<mc:AlternateContent\b/g),
     },
     normalized: {
-      figureCount: document.figures.count,
-      figures: document.figures.items,
+      objectRepresentationCount: document.objectSemantics.representations.length,
+      objectRepresentations: document.objectSemantics.representations,
       captions: document.captions.items,
       orphanCaptionIds: document.captions.orphanCaptionIds,
       references: document.objectReferences.items.filter((reference) => reference.kind === "figure"),

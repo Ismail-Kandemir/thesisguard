@@ -87,7 +87,11 @@ function main() {
     choice: figureParagraph(),
     fallback: figureParagraph(),
   })));
-  assertEqual(drawingDocument.figures.items.length, 1, "inactive branch drawing absent from semantic facts");
+  assertEqual(
+    drawingDocument.objectSemantics.representations.length,
+    1,
+    "inactive branch drawing absent from semantic facts",
+  );
 
   console.log("AlternateContent resolution regression passed.");
 }

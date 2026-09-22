@@ -162,7 +162,7 @@ function assertTargetedContracts() {
 }
 
 function countLegacyEligible(document) {
-  return document.figures.items.filter((item) => item.drawingType === "inline" && item.captionId !== null && item.captionPosition !== "ambiguous").length;
+  return countShadowEligible(document);
 }
 
 function countShadowEligible(document) {

@@ -15,8 +15,6 @@ import type { RuleValidator } from "./RuleValidator";
 import { createCaptionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 const OOXML_UNITS_PER_LINE = 240;
-const FIGURE_CAPTION_FORMAT_PILOT_RULE_ID =
-  "comu.applied-sciences.food-technology.bachelor.figure-caption-format";
 
 interface CaptionFormatting {
   caption: DocumentCaption;
@@ -28,7 +26,7 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertRule(rule);
     const expected = getExpected(rule.expected);
-    const formatting = rule.id === FIGURE_CAPTION_FORMAT_PILOT_RULE_ID
+    const formatting = expected.object === "figure"
       ? getDeclaredFigureCaptionFormatting(document)
       : getLegacyAssociatedCaptionFormatting(document, expected.object);
 
@@ -74,7 +72,7 @@ function getLegacyAssociatedCaptionFormatting(
 ): CaptionFormatting[] {
   const occurrences = object === "table"
     ? document.tables.items.filter((item) => !item.isNested)
-    : document.figures.items.filter((item) => item.drawingType === "inline");
+    : [];
   const captionById = new Map(document.captions.items.map((caption) => [caption.id, caption]));
   const paragraphById = new Map(document.paragraphs.map((paragraph) => [paragraph.id, paragraph]));
   const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults);

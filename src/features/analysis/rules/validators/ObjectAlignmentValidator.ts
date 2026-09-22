@@ -2,12 +2,12 @@ import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingRe
 import { StyleInheritanceResolver } from "../../parsers/styleInheritanceResolver";
 import type {
   CaptionKind,
-  DocumentFigureOccurrence,
   DocumentTableOccurrence,
   NormalizedDocument,
   ObjectAlignment,
   ObjectAlignmentRuleExpected,
   ObjectAlignmentSource,
+  ObjectRepresentationOccurrence,
   RuleDefinition,
   RuleEvidence,
   RuleEvaluationCoverage,
@@ -17,12 +17,12 @@ import type {
 import type { RuleValidator } from "./RuleValidator";
 import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 import {
-  getDeclaredAcademicFigureOccurrences,
+  getDeclaredAcademicFigures,
   getFigurePhysicalAlignmentCoverage,
   isFigurePhysicalAlignmentEvaluable,
 } from "../objectApplicability";
 
-type AlignableOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
+type AlignableOccurrence = DocumentTableOccurrence | ObjectRepresentationOccurrence;
 
 interface ResolvedObjectAlignment {
   occurrence: AlignableOccurrence;
@@ -170,7 +170,6 @@ function resolveTableAlignment(
 function resolveFigureAlignments(
   document: Readonly<NormalizedDocument>,
 ): ResolvedObjectAlignment[] {
-  const captionsById = new Map(document.captions.items.map((caption) => [caption.id, caption]));
   const paragraphsById = new Map(document.paragraphs.map((paragraph) => [paragraph.id, paragraph]));
   const drawingCountByParagraphId = new Map<string, number>();
   const formattingResolver = new EffectiveFormattingResolver(
@@ -178,26 +177,31 @@ function resolveFigureAlignments(
     document.documentDefaults,
   );
 
-  const declaredFigures = getDeclaredAcademicFigureOccurrences(document);
+  const declaredFigures = getDeclaredAcademicFigures(document);
 
   for (const figure of declaredFigures) {
-    drawingCountByParagraphId.set(
-      figure.paragraphId,
-      (drawingCountByParagraphId.get(figure.paragraphId) ?? 0) + 1,
-    );
+    const paragraphId = figure.representation.paragraphId;
+    if (paragraphId) {
+      drawingCountByParagraphId.set(
+        paragraphId,
+        (drawingCountByParagraphId.get(paragraphId) ?? 0) + 1,
+      );
+    }
   }
 
-  return declaredFigures.filter(isFigurePhysicalAlignmentEvaluable).map((figure, index) => {
+  return declaredFigures
+    .filter((figure) => isFigurePhysicalAlignmentEvaluable(figure.representation))
+    .map((figure, index) => {
     const resolved = resolveFigureAlignment(
-      figure,
+      figure.representation,
       paragraphsById,
       drawingCountByParagraphId,
       formattingResolver,
     );
-    const caption = figure.captionId ? captionsById.get(figure.captionId) : undefined;
+    const caption = figure.caption ?? undefined;
 
     return {
-      occurrence: figure,
+      occurrence: figure.representation,
       label: getObjectLabel("figure", caption, index),
       captionId: caption?.id ?? null,
       captionNumber: caption?.number ?? null,
@@ -208,16 +212,20 @@ function resolveFigureAlignments(
 }
 
 function resolveFigureAlignment(
-  figure: Readonly<DocumentFigureOccurrence>,
+  figure: Readonly<ObjectRepresentationOccurrence>,
   paragraphsById: ReadonlyMap<string, NormalizedDocument["paragraphs"][number]>,
   drawingCountByParagraphId: ReadonlyMap<string, number>,
   formattingResolver: EffectiveFormattingResolver,
 ): { alignment: ObjectAlignment; source: ObjectAlignmentSource } {
-  if (figure.alignment !== "unknown") {
-    return { alignment: figure.alignment, source: figure.alignmentSource };
+  if (figure.alignment !== null && figure.alignment !== "unknown") {
+    return { alignment: figure.alignment, source: figure.alignmentSource ?? "unknown" };
   }
 
-  if (figure.drawingType !== "inline" || (drawingCountByParagraphId.get(figure.paragraphId) ?? 0) !== 1) {
+  if (
+    figure.drawingType !== "inline" ||
+    figure.paragraphId === null ||
+    (drawingCountByParagraphId.get(figure.paragraphId) ?? 0) !== 1
+  ) {
     return { alignment: "unknown", source: "unknown" };
   }
 

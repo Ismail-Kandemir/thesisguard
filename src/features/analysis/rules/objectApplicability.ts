@@ -1,54 +1,41 @@
 import type {
   CaptionKind,
-  DocumentFigureOccurrence,
+  CaptionOccurrence,
   DocumentCaption,
   NormalizedDocument,
+  ObjectCaptionAssociation,
   ObjectRepresentationOccurrence,
   RuleEvaluationCoverage,
 } from "../types";
 
-interface DeclaredAcademicFigure {
+export interface DeclaredAcademicFigure {
+  association: ObjectCaptionAssociation | null;
   caption: DocumentCaption | null;
   representation: ObjectRepresentationOccurrence;
-  structuralOccurrence: DocumentFigureOccurrence | null;
+  semanticCaption: CaptionOccurrence | null;
+}
+
+export interface DeclaredAcademicFigureIdentity {
+  caption: DocumentCaption;
+  representation: ObjectRepresentationOccurrence;
 }
 
 export function isFigurePhysicalAlignmentEvaluable(
-  figure: Readonly<DocumentFigureOccurrence>,
+  representation: Readonly<ObjectRepresentationOccurrence>,
 ): boolean {
-  return figure.drawingType === "inline";
+  return representation.drawingType === "inline";
 }
 
 export function getFigurePhysicalAlignmentCoverage(
   document: Readonly<NormalizedDocument>,
 ): RuleEvaluationCoverage {
-  if (!document.objectSemantics) {
-    const evaluatedCount = document.figures.items.filter(isFigurePhysicalAlignmentEvaluable).length;
-
-    return evaluatedCount === 0
-      ? {
-          status: "none",
-          evaluatedCount: 0,
-          relevantCount: 0,
-          unevaluatedCount: 0,
-          reasons: ["no-relevant-object"],
-        }
-      : {
-          status: "complete",
-          evaluatedCount,
-          relevantCount: evaluatedCount,
-          unevaluatedCount: 0,
-          reasons: ["all-relevant-objects-evaluable"],
-        };
-  }
-
   const declaredFigures = getDeclaredAcademicFigures(document);
-  const evaluatedCount = declaredFigures.filter(
-    (figure) =>
-      figure.structuralOccurrence !== null &&
-      isFigurePhysicalAlignmentEvaluable(figure.structuralOccurrence),
+  const evaluatedCount = declaredFigures.filter((figure) =>
+    isFigurePhysicalAlignmentEvaluable(figure.representation),
   ).length;
-  const unevaluatedCount = countDeclaredAnchoredFigureCandidates(document);
+  const unevaluatedCount =
+    declaredFigures.filter((figure) => figure.representation.drawingType === "anchor").length +
+    countUndeclaredAnchoredFigureCandidates(document, declaredFigures);
   const relevantCount = evaluatedCount + unevaluatedCount;
 
   if (relevantCount === 0) {
@@ -93,46 +80,15 @@ export function getFigurePhysicalAlignmentCoverage(
 export function hasFigurePresenceForConditionalRequirement(
   document: Readonly<NormalizedDocument>,
 ): boolean {
-  if (!document.objectSemantics) {
-    return document.figures.items.some((figure) => figure.drawingType !== "anchor");
-  }
-
   return getDeclaredAcademicFigures(document).length > 0;
-}
-
-export function getDeclaredAcademicFigureOccurrences(
-  document: Readonly<NormalizedDocument>,
-): DocumentFigureOccurrence[] {
-  if (!document.objectSemantics) {
-    return document.figures.items.filter((figure) =>
-      isLegacyFigureCaptioned(document, figure),
-    );
-  }
-
-  return getDeclaredAcademicFigures(document).flatMap((figure) =>
-    figure.structuralOccurrence ? [figure.structuralOccurrence] : [],
-  );
 }
 
 export function getDeclaredAcademicFigureIdentities(
   document: Readonly<NormalizedDocument>,
-): Array<{
-  caption: DocumentCaption;
-  occurrence: DocumentFigureOccurrence;
-}> {
-  if (!document.objectSemantics) {
-    const captionById = new Map(document.captions.items.map((caption) => [caption.id, caption]));
-
-    return document.figures.items.flatMap((figure) => {
-      const caption = figure.captionId ? captionById.get(figure.captionId) : undefined;
-
-      return caption?.kind === "figure" ? [{ caption, occurrence: figure }] : [];
-    });
-  }
-
+): DeclaredAcademicFigureIdentity[] {
   return getDeclaredAcademicFigures(document).flatMap((figure) =>
-    figure.caption && figure.structuralOccurrence
-      ? [{ caption: figure.caption, occurrence: figure.structuralOccurrence }]
+    figure.caption
+      ? [{ caption: figure.caption, representation: figure.representation }]
       : [],
   );
 }
@@ -140,33 +96,21 @@ export function getDeclaredAcademicFigureIdentities(
 export function getDeclaredAcademicFigureCarrierParagraphIds(
   document: Readonly<NormalizedDocument>,
 ): Set<string> {
-  if (!document.objectSemantics) {
-    return new Set(document.figures.items.map((figure) => figure.paragraphId));
-  }
-
   return new Set(
-    getDeclaredAcademicFigureOccurrences(document).map((figure) => figure.paragraphId),
-  );
-}
-
-export function isDeclaredAcademicFigureOccurrence(
-  document: Readonly<NormalizedDocument>,
-  figure: Readonly<DocumentFigureOccurrence>,
-): boolean {
-  return getDeclaredAcademicFigureOccurrences(document).some(
-    (item) => item.id === figure.id,
+    getDeclaredAcademicFigures(document)
+      .map((figure) => figure.representation.paragraphId)
+      .filter((paragraphId): paragraphId is string => paragraphId !== null),
   );
 }
 
 export function getDeclaredAcademicFigures(
   document: Readonly<NormalizedDocument>,
 ): DeclaredAcademicFigure[] {
-  if (!document.objectSemantics) {
-    return [];
-  }
-
   const representationById = new Map(
     document.objectSemantics.representations.map((item) => [item.id, item]),
+  );
+  const associationByObjectId = new Map(
+    document.objectSemantics.associations.map((item) => [item.objectId, item]),
   );
   const semanticCaptionById = new Map(
     document.objectSemantics.captions.map((caption) => [caption.id, caption]),
@@ -186,31 +130,21 @@ export function getDeclaredAcademicFigures(
       return [];
     }
 
+    const association = associationByObjectId.get(resolution.objectId) ?? null;
     const semanticCaption = resolution.captionId
-      ? semanticCaptionById.get(resolution.captionId)
-      : undefined;
+      ? semanticCaptionById.get(resolution.captionId) ?? null
+      : null;
     const caption = semanticCaption
       ? legacyCaptionByParagraphId.get(semanticCaption.paragraphId) ?? null
       : null;
 
     return [{
+      association,
       caption: caption && isFigureCaption(caption) ? caption : null,
       representation,
-      structuralOccurrence: findStructuralFigureOccurrence(document, representation),
+      semanticCaption,
     }];
   });
-}
-
-function findStructuralFigureOccurrence(
-  document: Readonly<NormalizedDocument>,
-  representation: Readonly<ObjectRepresentationOccurrence>,
-): DocumentFigureOccurrence | null {
-  return document.figures.items.find((figure) =>
-    figure.paragraphId === representation.paragraphId &&
-    figure.paragraphIndex === representation.paragraphIndex &&
-    figure.blockIndex === representation.blockIndex &&
-    figure.drawingType === representation.drawingType
-  ) ?? null;
 }
 
 function isFigureCaption(caption: Readonly<DocumentCaption>): caption is DocumentCaption & {
@@ -219,73 +153,46 @@ function isFigureCaption(caption: Readonly<DocumentCaption>): caption is Documen
   return caption.kind === "figure";
 }
 
-function isLegacyFigureCaptioned(
+function countUndeclaredAnchoredFigureCandidates(
   document: Readonly<NormalizedDocument>,
-  figure: Readonly<DocumentFigureOccurrence>,
-): boolean {
-  if (!figure.captionId) {
-    return false;
-  }
-
-  const caption = document.captions.items.find((item) => item.id === figure.captionId);
-  return caption?.kind === "figure";
-}
-
-function countDeclaredAnchoredFigureCandidates(
-  document: Readonly<NormalizedDocument>,
+  declaredFigures: readonly DeclaredAcademicFigure[],
 ): number {
+  const declaredRepresentationIds = new Set(
+    declaredFigures.map((figure) => figure.representation.id),
+  );
   const figureCaptionsByBlock = new Map(
-    document.captions.items
-      .filter((caption) => caption.kind === "figure")
+    document.objectSemantics.captions
+      .filter((caption) =>
+        caption.semantic.status === "declared" &&
+        caption.semantic.academicType === "figure"
+      )
       .map((caption) => [caption.blockIndex, caption]),
   );
 
-  return document.figures.items.filter((figure) => {
-    if (figure.drawingType !== "anchor" || isDeclaredAcademicFigureOccurrence(document, figure) || !isVisibleSemanticAnchorPicture(document, figure)) {
+  return document.objectSemantics.representations.filter((representation) => {
+    if (
+      declaredRepresentationIds.has(representation.id) ||
+      representation.kind !== "picture" ||
+      representation.drawingType !== "anchor" ||
+      representation.academicScope.scope === "front-matter"
+    ) {
       return false;
     }
 
-    const scope = getVisibleSemanticAnchorScope(document, figure);
-    if (scope === "front-matter") {
-      return false;
-    }
-
-    return hasAdjacentFigureCaption(figure, figureCaptionsByBlock);
+    return hasAdjacentFigureCaption(representation, figureCaptionsByBlock);
   }).length;
 }
 
-function isVisibleSemanticAnchorPicture(
-  document: Readonly<NormalizedDocument>,
-  figure: Readonly<DocumentFigureOccurrence>,
-): boolean {
-  return getVisibleSemanticAnchorScope(document, figure) !== null;
-}
-
-function getVisibleSemanticAnchorScope(
-  document: Readonly<NormalizedDocument>,
-  figure: Readonly<DocumentFigureOccurrence>,
-): NormalizedDocument["objectSemantics"]["representations"][number]["academicScope"]["scope"] | null {
-  const representation = document.objectSemantics.representations.find(
-    (item) =>
-      item.kind === "picture" &&
-      item.drawingType === "anchor" &&
-      item.paragraphId === figure.paragraphId &&
-      item.blockIndex === figure.blockIndex,
-  );
-
-  return representation?.academicScope.scope ?? null;
-}
-
 function hasAdjacentFigureCaption(
-  figure: Readonly<DocumentFigureOccurrence>,
+  representation: Readonly<ObjectRepresentationOccurrence>,
   figureCaptionsByBlock: ReadonlyMap<number, unknown>,
 ): boolean {
-  if (figure.blockIndex === null) {
+  if (representation.blockIndex === null) {
     return false;
   }
 
   return (
-    figureCaptionsByBlock.has(figure.blockIndex - 1) ||
-    figureCaptionsByBlock.has(figure.blockIndex + 1)
+    figureCaptionsByBlock.has(representation.blockIndex - 1) ||
+    figureCaptionsByBlock.has(representation.blockIndex + 1)
   );
 }

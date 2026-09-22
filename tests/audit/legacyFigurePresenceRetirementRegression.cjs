@@ -167,7 +167,6 @@ function summarize(item) {
       status: resolution.status,
       academicType: resolution.academicType,
     })),
-    legacyFigureCount: item.document.figures.items.length,
     semanticAcademicFigureCount: getDeclaredAcademicFigures(item.document).length,
     diagnostics: item.diagnostics.map((diagnostic) => diagnostic.code),
     rules: Object.fromEntries(item.results.map((result) => [result.ruleId.split(".").at(-1), {

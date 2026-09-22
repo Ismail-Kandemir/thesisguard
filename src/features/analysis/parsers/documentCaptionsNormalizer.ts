@@ -4,12 +4,9 @@ import type {
   DocumentBlock,
   DocumentCaption,
   DocumentCaptions,
-  DocumentFigureOccurrence,
-  DocumentFigures,
   DocumentObjectSemantics,
   DocumentTableOccurrence,
   DocumentTables,
-  FigureDrawingType,
   ObjectAlignment,
   ObjectAlignmentSource,
   Paragraph,
@@ -23,16 +20,11 @@ import {
 } from "./markupCompatibilityResolver";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
-const WORDPROCESSING_DRAWING_NAMESPACE =
-  "http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing";
-const WORDPROCESSING_SHAPE_NAMESPACE =
-  "http://schemas.microsoft.com/office/word/2010/wordprocessingShape";
 
 export interface DocumentVisualStructure {
   blocks: DocumentBlock[];
   captions: DocumentCaptions;
   tables: DocumentTables;
-  figures: DocumentFigures;
   objectSemantics: DocumentObjectSemantics;
 }
 
@@ -84,21 +76,14 @@ export function normalizeDocumentCaptions(
 
   const captions = parseCaptions(paragraphs, blocks);
   const tableItems = parseTables(body, tableIdByElement, directTableIdByElement, blocks);
-  const figureItems = parseFigures(
-    body,
-    paragraphIndexByElement,
-    paragraphs,
-    blocks,
-  );
   const associated = associateCaptionOccurrences(
     tableItems,
-    figureItems,
     captions,
     paragraphs,
     blocks,
   );
   const associatedCaptionIds = new Set(
-    [...associated.tables, ...associated.figures]
+    associated.tables
       .map((item) => item.captionId)
       .filter((captionId): captionId is string => captionId !== null),
   );
@@ -117,11 +102,6 @@ export function normalizeDocumentCaptions(
       hasTables: associated.tables.length > 0,
       items: associated.tables,
     },
-    figures: {
-      count: associated.figures.length,
-      hasFigures: associated.figures.length > 0,
-      items: associated.figures,
-    },
     objectSemantics,
   };
 }
@@ -131,7 +111,6 @@ function createEmptyStructure(): DocumentVisualStructure {
     blocks: [],
     captions: { items: [], orphanCaptionIds: [] },
     tables: { count: 0, hasTables: false, items: [] },
-    figures: { count: 0, hasFigures: false, items: [] },
     objectSemantics: { representations: [], captions: [], associations: [], resolutions: [] },
   };
 }
@@ -202,65 +181,6 @@ function parseTables(
   );
 }
 
-function parseFigures(
-  body: Element,
-  paragraphIndexByElement: ReadonlyMap<Element, number>,
-  paragraphs: readonly Paragraph[],
-  blocks: readonly DocumentBlock[],
-): DocumentFigureOccurrence[] {
-  const blockIndexByParagraphId = new Map(
-    blocks
-      .filter((block) => block.type === "paragraph")
-      .map((block) => [block.paragraphId, block.blockIndex]),
-  );
-  const drawingCountByParagraph = new Map<Element, number>();
-  const figureDrawings = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "drawing")
-    .filter((drawing) => !isTextBoxDrawing(drawing));
-
-  for (const drawing of figureDrawings) {
-    const paragraphElement = findAncestor(drawing, "p");
-
-    if (paragraphElement) {
-      drawingCountByParagraph.set(
-        paragraphElement,
-        (drawingCountByParagraph.get(paragraphElement) ?? 0) + 1,
-      );
-    }
-  }
-
-  return figureDrawings.map(
-    (drawing, index) => {
-      const paragraphElement = findAncestor(drawing, "p");
-      const paragraphIndex = paragraphElement
-        ? paragraphIndexByElement.get(paragraphElement) ?? -1
-        : -1;
-      const paragraph = paragraphs[paragraphIndex];
-
-      return {
-        id: `figure-${index + 1}`,
-        paragraphId: paragraph?.id ?? `unresolved-figure-paragraph-${index + 1}`,
-        paragraphIndex,
-        blockIndex: paragraph ? blockIndexByParagraphId.get(paragraph.id) ?? null : null,
-        drawingType: getDrawingType(drawing),
-        ...parseFigureAlignment(
-          drawing,
-          paragraph,
-          paragraphElement ? drawingCountByParagraph.get(paragraphElement) ?? 0 : 0,
-        ),
-        captionId: null,
-        captionPosition: "none",
-      };
-    },
-  );
-}
-
-function isTextBoxDrawing(drawing: Element): boolean {
-  return (
-    drawing.getElementsByTagNameNS(WORDPROCESSING_SHAPE_NAMESPACE, "txbx").length > 0 ||
-    drawing.getElementsByTagNameNS(WORD_NAMESPACE, "txbxContent").length > 0
-  );
-}
-
 function parseTableStyleId(tableElement: Element): string | null {
   const tableProperties = getFirstDirectChild(tableElement, "tblPr");
   const tableStyle = tableProperties ? getFirstDirectChild(tableProperties, "tblStyle") : null;
@@ -283,23 +203,6 @@ function parseTableAlignment(
   };
 }
 
-function parseFigureAlignment(
-  drawing: Element,
-  paragraph: Paragraph | undefined,
-  drawingCountInParagraph: number,
-): { alignment: ObjectAlignment; alignmentSource: ObjectAlignmentSource } {
-  if (!paragraph || getDrawingType(drawing) !== "inline" || drawingCountInParagraph !== 1 || !paragraph.isEmpty) {
-    return { alignment: "unknown", alignmentSource: "unknown" };
-  }
-
-  const alignment = toObjectAlignment(paragraph.alignment);
-
-  return {
-    alignment,
-    alignmentSource: alignment === "unknown" ? "unknown" : "paragraph",
-  };
-}
-
 function toObjectAlignment(value: ParagraphAlignment | string | null): ObjectAlignment {
   switch (value) {
     case "left":
@@ -317,17 +220,13 @@ function toObjectAlignment(value: ParagraphAlignment | string | null): ObjectAli
 
 export function associateCaptionOccurrences(
   tables: readonly DocumentTableOccurrence[],
-  figures: readonly DocumentFigureOccurrence[],
   captions: readonly DocumentCaption[],
   paragraphs: readonly Paragraph[],
   blocks: readonly DocumentBlock[],
-): { tables: DocumentTableOccurrence[]; figures: DocumentFigureOccurrence[] } {
+): { tables: DocumentTableOccurrence[] } {
   const captionByBlock = new Map(captions.map((caption) => [caption.blockIndex, caption]));
   const paragraphById = new Map(paragraphs.map((paragraph) => [paragraph.id, paragraph]));
-  const proposals = [
-    ...tables.map((item) => createProposal("table", item, captionByBlock, paragraphById, blocks)),
-    ...figures.map((item) => createProposal("figure", item, captionByBlock, paragraphById, blocks)),
-  ];
+  const proposals = tables.map((item) => createProposal("table", item, captionByBlock, paragraphById, blocks));
   const proposalCountByCaptionId = new Map<string, number>();
 
   for (const proposal of proposals) {
@@ -346,24 +245,21 @@ export function associateCaptionOccurrences(
   );
 
   return {
-    tables: resolved.slice(0, tables.length) as DocumentTableOccurrence[],
-    figures: resolved.slice(tables.length) as DocumentFigureOccurrence[],
+    tables: resolved,
   };
 }
 
-function createProposal<TItem extends DocumentTableOccurrence | DocumentFigureOccurrence>(
+function createProposal(
   kind: CaptionKind,
-  item: TItem,
+  item: DocumentTableOccurrence,
   captionByBlock: ReadonlyMap<number, DocumentCaption>,
   paragraphById: ReadonlyMap<string, Paragraph>,
   blocks: readonly DocumentBlock[],
-): TItem {
-  if (item.blockIndex === null || ("drawingType" in item && item.drawingType === "anchor")) {
+): DocumentTableOccurrence {
+  if (item.blockIndex === null) {
     return {
       ...item,
-      captionPosition: "drawingType" in item && item.drawingType === "anchor"
-        ? "ambiguous"
-        : "none",
+      captionPosition: "none",
     };
   }
 
@@ -436,32 +332,6 @@ function collectCandidates(
   }
 
   return candidates;
-}
-
-function getDrawingType(drawing: Element): FigureDrawingType {
-  if (drawing.getElementsByTagNameNS(WORDPROCESSING_DRAWING_NAMESPACE, "anchor").length > 0) {
-    return "anchor";
-  }
-
-  if (drawing.getElementsByTagNameNS(WORDPROCESSING_DRAWING_NAMESPACE, "inline").length > 0) {
-    return "inline";
-  }
-
-  return "unknown";
-}
-
-function findAncestor(element: Element, localName: string): Element | null {
-  let current = element.parentElement;
-
-  while (current) {
-    if (current.namespaceURI === WORD_NAMESPACE && current.localName === localName) {
-      return current;
-    }
-
-    current = current.parentElement;
-  }
-
-  return null;
 }
 
 function getFirstDirectChild(element: Element, localName: string): Element | null {

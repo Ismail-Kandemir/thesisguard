@@ -655,8 +655,13 @@ function assertCriticalRules(results) {
 function assertFixtureFacts(document) {
   assertEqual(document.tables.hasTables, true, "hasTables fact");
   assertAtLeast(document.tables.items.length, 1, "table count");
-  assertEqual(document.figures.hasFigures, true, "hasFigures fact");
-  assertAtLeast(document.figures.items.length, 1, "figure count");
+  assertAtLeast(
+    document.objectSemantics.resolutions.filter(
+      (resolution) => resolution.status === "declared" && resolution.academicType === "figure",
+    ).length,
+    1,
+    "semantic declared figure count",
+  );
   assertEqual(document.abbreviations.hasAbbreviations, true, "hasAbbreviations fact");
   assert(
     document.abbreviations.items.some((item) => item.value === "DNA"),
@@ -1488,21 +1493,6 @@ function createNegativeDocument(options = {}) {
         captionPosition: options.tableCaptionPosition ?? "before",
       }],
     },
-    figures: {
-      count: 1,
-      hasFigures: true,
-      items: [{
-        id: "figure-1",
-        paragraphId: "figure-carrier",
-        paragraphIndex: 3,
-        blockIndex: 3,
-        drawingType: "inline",
-        alignment: options.figureAlignment ?? "center",
-        alignmentSource: "paragraph",
-        captionId: "figure-caption",
-        captionPosition: options.figureCaptionPosition ?? "after",
-      }],
-    },
     blocks: [
       { id: "block-1", blockIndex: 0, type: "paragraph", paragraphId: "intro" },
       { id: "block-2", blockIndex: 1, type: "paragraph", paragraphId: "body" },
@@ -1534,6 +1524,62 @@ function createNegativeDocument(options = {}) {
         },
       ],
       orphanCaptionIds: [],
+    },
+    objectSemantics: {
+      representations: [{
+        id: "figure-1",
+        kind: "picture",
+        sourcePart: "word/document.xml",
+        xmlOrder: 0,
+        blockIndex: 3,
+        paragraphId: "figure-carrier",
+        paragraphIndex: 3,
+        scope: "body",
+        academicScope: {
+          scope: "main-content",
+          reason: "main-content-section",
+          boundaryParagraphId: "intro",
+          boundaryParagraphIndex: 0,
+        },
+        drawingType: "inline",
+        alignment: options.figureAlignment ?? "center",
+        alignmentSource: "paragraph",
+        evidence: ["w:drawing", "pic:pic"],
+      }],
+      captions: [{
+        id: "semantic-figure-caption",
+        rawText: "Åekil 1. Ã–rnek Åekil",
+        normalizedText: "ÅŸekil 1. Ã¶rnek ÅŸekil",
+        paragraphId: "figure-caption",
+        paragraphIndex: 4,
+        blockIndex: 4,
+        sourcePart: "word/document.xml",
+        scope: "body",
+        semantic: {
+          status: "declared",
+          academicType: "figure",
+          label: "Åekil",
+          number: "1",
+        },
+        fieldEvidence: [],
+        isOrphan: false,
+      }],
+      associations: [{
+        objectId: "figure-1",
+        status: "matched",
+        captionId: "semantic-figure-caption",
+        candidateCaptionIds: ["semantic-figure-caption"],
+        position: options.figureCaptionPosition ?? "after",
+        distanceInBlocks: 1,
+        reasons: ["synthetic-negative-document"],
+      }],
+      resolutions: [{
+        objectId: "figure-1",
+        status: "declared",
+        academicType: "figure",
+        captionId: "semantic-figure-caption",
+        reasons: ["synthetic-negative-document"],
+      }],
     },
     objectReferences: {
       items: options.figureReference === false
@@ -1630,7 +1676,6 @@ function createEmptyDocument() {
     pageNumbering: { hasPageNumbers: false, fields: [], sections: [] },
     tableOfContents: { hasField: false, fields: [] },
     tables: { count: 0, hasTables: false, items: [] },
-    figures: { count: 0, hasFigures: false, items: [] },
     blocks: [],
     captions: { items: [], orphanCaptionIds: [] },
     objectSemantics: { representations: [], captions: [], associations: [], resolutions: [] },

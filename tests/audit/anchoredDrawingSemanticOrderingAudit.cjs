@@ -270,16 +270,15 @@ function summarize(label, document) {
     })),
     associations: document.objectSemantics.associations,
     resolutions: document.objectSemantics.resolutions,
-    legacyFigures: document.figures.items.map((item) => ({
+    objectRepresentations: document.objectSemantics.representations.map((item) => ({
       id: item.id,
+      kind: item.kind,
       drawingType: item.drawingType,
       paragraphId: item.paragraphId,
       paragraphIndex: item.paragraphIndex,
       blockIndex: item.blockIndex,
       alignment: item.alignment,
       alignmentSource: item.alignmentSource,
-      captionId: item.captionId,
-      captionPosition: item.captionPosition,
     })),
     diagnostics: buildAnalysisDiagnostics(document.objectSemantics).map((item) => ({
       code: item.code,

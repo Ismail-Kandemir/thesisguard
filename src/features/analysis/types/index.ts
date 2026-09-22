@@ -472,12 +472,6 @@ export interface DocumentTables {
   items: DocumentTableOccurrence[];
 }
 
-export interface DocumentFigures {
-  count: number;
-  hasFigures: boolean;
-  items: DocumentFigureOccurrence[];
-}
-
 export type CaptionKind = "table" | "figure";
 
 export type CaptionPosition =
@@ -519,18 +513,6 @@ export interface DocumentTableOccurrence {
   blockIndex: number | null;
   isNested: boolean;
   tableStyleId: string | null;
-  alignment: ObjectAlignment;
-  alignmentSource: ObjectAlignmentSource;
-  captionId: string | null;
-  captionPosition: CaptionPosition;
-}
-
-export interface DocumentFigureOccurrence {
-  id: string;
-  paragraphId: string;
-  paragraphIndex: number;
-  blockIndex: number | null;
-  drawingType: FigureDrawingType;
   alignment: ObjectAlignment;
   alignmentSource: ObjectAlignmentSource;
   captionId: string | null;
@@ -584,6 +566,8 @@ export interface ObjectRepresentationOccurrence {
   scope: ObjectRepresentationScope;
   academicScope: AcademicScopeAssignment;
   drawingType: FigureDrawingType | null;
+  alignment: ObjectAlignment | null;
+  alignmentSource: ObjectAlignmentSource | null;
   evidence: string[];
 }
 
@@ -749,7 +733,6 @@ export interface NormalizedDocument {
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;
   tables: DocumentTables;
-  figures: DocumentFigures;
   blocks: DocumentBlock[];
   captions: DocumentCaptions;
   objectSemantics: DocumentObjectSemantics;

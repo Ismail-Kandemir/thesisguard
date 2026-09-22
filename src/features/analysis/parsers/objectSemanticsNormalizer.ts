@@ -5,11 +5,14 @@ import type {
   DocumentBlock,
   DocumentObjectSemantics,
   FigureDrawingType,
+  ObjectAlignment,
+  ObjectAlignmentSource,
   ObjectCaptionAssociation,
   ObjectRepresentationKind,
   ObjectRepresentationOccurrence,
   ObjectRepresentationScope,
   Paragraph,
+  ParagraphAlignment,
 } from "../types";
 import {
   getSemanticChildElements,
@@ -126,6 +129,7 @@ function parseRepresentations(
   const occurrences: Omit<ObjectRepresentationOccurrence, "id" | "xmlOrder">[] = [];
   const semanticElements = getSemanticDescendantsByTagNameNS(body, "*", "*")
     .filter((element) => !isInsideInvisibleCurrentDocumentRevision(element));
+  const nonTextboxDrawingCountByParagraph = countNonTextboxDrawingsByParagraph(semanticElements);
 
   for (const element of semanticElements) {
     const kind = classifyRepresentationRoot(element);
@@ -139,6 +143,13 @@ function parseRepresentations(
     const tableBlockIndex = kind === "table"
       ? indexes.blockIndexByTableElement.get(element) ?? null
       : null;
+    const drawingAlignment = element.namespaceURI === WORD_NAMESPACE && element.localName === "drawing"
+      ? parseDrawingAlignment(
+          element,
+          paragraph,
+          paragraphElement ? nonTextboxDrawingCountByParagraph.get(paragraphElement) ?? 0 : 0,
+        )
+      : { alignment: null, alignmentSource: null };
 
     occurrences.push({
       kind,
@@ -153,6 +164,7 @@ function parseRepresentations(
       drawingType: element.namespaceURI === WORD_NAMESPACE && element.localName === "drawing"
         ? getDrawingType(element)
         : null,
+      ...drawingAlignment,
       evidence: getRepresentationEvidence(element, kind),
     });
   }
@@ -162,6 +174,63 @@ function parseRepresentations(
     xmlOrder: index,
     ...occurrence,
   }));
+}
+
+function countNonTextboxDrawingsByParagraph(
+  semanticElements: readonly Element[],
+): ReadonlyMap<Element, number> {
+  const counts = new Map<Element, number>();
+
+  for (const element of semanticElements) {
+    if (element.namespaceURI !== WORD_NAMESPACE || element.localName !== "drawing") {
+      continue;
+    }
+
+    if (classifyRepresentationRoot(element) === "textbox") {
+      continue;
+    }
+
+    const paragraphElement = findAncestor(element, WORD_NAMESPACE, "p");
+    if (!paragraphElement) {
+      continue;
+    }
+
+    counts.set(paragraphElement, (counts.get(paragraphElement) ?? 0) + 1);
+  }
+
+  return counts;
+}
+
+function parseDrawingAlignment(
+  drawing: Element,
+  paragraph: Paragraph | undefined,
+  drawingCountInParagraph: number,
+): { alignment: ObjectAlignment; alignmentSource: ObjectAlignmentSource } {
+  if (!paragraph || getDrawingType(drawing) !== "inline" || drawingCountInParagraph !== 1 || !paragraph.isEmpty) {
+    return { alignment: "unknown", alignmentSource: "unknown" };
+  }
+
+  const alignment = toObjectAlignment(paragraph.alignment);
+
+  return {
+    alignment,
+    alignmentSource: alignment === "unknown" ? "unknown" : "paragraph",
+  };
+}
+
+function toObjectAlignment(value: ParagraphAlignment | string | null): ObjectAlignment {
+  switch (value) {
+    case "left":
+    case "start":
+      return "left";
+    case "right":
+    case "end":
+      return "right";
+    case "center":
+      return "center";
+    default:
+      return "unknown";
+  }
 }
 
 function createUnknownAcademicScope(

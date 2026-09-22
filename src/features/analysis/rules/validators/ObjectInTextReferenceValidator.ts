@@ -1,9 +1,9 @@
 import type {
   CaptionKind,
   DocumentCaption,
-  DocumentFigureOccurrence,
   DocumentTableOccurrence,
   NormalizedDocument,
+  ObjectRepresentationOccurrence,
   ObjectInTextReferenceRuleExpected,
   RuleDefinition,
   RuleEvidence,
@@ -18,7 +18,7 @@ interface ObjectIdentity {
   caption: DocumentCaption;
   kind: CaptionKind;
   number: string;
-  occurrence: DocumentTableOccurrence | DocumentFigureOccurrence;
+  occurrence: DocumentTableOccurrence | ObjectRepresentationOccurrence;
 }
 
 export class ObjectInTextReferenceValidator implements RuleValidator {
@@ -98,7 +98,7 @@ function getReliableObjectIdentities(
   const captionsById = new Map(document.captions.items.map((caption) => [caption.id, caption]));
   if (object === "figure") {
     return getDeclaredAcademicFigureIdentities(document).map((identity) =>
-      toIdentity(identity.caption, identity.occurrence),
+      toIdentity(identity.caption, identity.representation),
     );
   }
 
@@ -117,7 +117,7 @@ function getReliableObjectIdentities(
 
 function toIdentity(
   caption: DocumentCaption,
-  occurrence: DocumentTableOccurrence | DocumentFigureOccurrence,
+  occurrence: DocumentTableOccurrence | ObjectRepresentationOccurrence,
 ): ObjectIdentity {
   return { caption, kind: caption.kind, number: caption.number, occurrence };
 }

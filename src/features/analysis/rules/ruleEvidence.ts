@@ -2,10 +2,10 @@ import type {
   CaptionRuleEvidence,
   DocumentFormatRuleEvidence,
   DocumentCaption,
-  DocumentFigureOccurrence,
   DocumentHeadingOccurrence,
   DocumentSection,
   DocumentTableOccurrence,
+  ObjectRepresentationOccurrence,
   HeadingRuleEvidence,
   ObjectRuleEvidence,
   Paragraph,
@@ -204,7 +204,7 @@ export function createCaptionEvidence(
 
 export function createObjectEvidence(
   objectKind: "table" | "figure",
-  occurrence: Readonly<DocumentTableOccurrence | DocumentFigureOccurrence>,
+  occurrence: Readonly<DocumentTableOccurrence | ObjectRepresentationOccurrence>,
   values: Readonly<{
     actual?: RuleResultValue;
     captionId?: string;
@@ -220,8 +220,12 @@ export function createObjectEvidence(
     kind: objectKind,
     objectId: occurrence.id,
     ...(occurrence.blockIndex !== null ? { blockIndex: occurrence.blockIndex } : {}),
-    ...("paragraphId" in occurrence ? { paragraphId: occurrence.paragraphId } : {}),
-    ...("paragraphIndex" in occurrence ? { paragraphIndex: occurrence.paragraphIndex } : {}),
+    ...("paragraphId" in occurrence && occurrence.paragraphId !== null
+      ? { paragraphId: occurrence.paragraphId }
+      : {}),
+    ...("paragraphIndex" in occurrence && occurrence.paragraphIndex !== null
+      ? { paragraphIndex: occurrence.paragraphIndex }
+      : {}),
     ...(values.objectLabel ? { objectLabel: values.objectLabel } : {}),
     ...(values.captionId ? { captionId: values.captionId } : {}),
     ...(captionText ? { captionText } : {}),

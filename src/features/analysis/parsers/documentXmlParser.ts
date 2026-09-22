@@ -54,7 +54,6 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     },
     tableOfContents: tableOfContentsAnalysis.tableOfContents,
     tables: visualStructure.tables,
-    figures: visualStructure.figures,
     blocks: visualStructure.blocks,
     captions: visualStructure.captions,
     objectSemantics: visualStructure.objectSemantics,
