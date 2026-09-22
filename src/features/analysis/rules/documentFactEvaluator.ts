@@ -3,13 +3,14 @@ import type {
   ConditionalRequiredSectionFact,
   NormalizedDocument,
 } from "../types";
+import { hasFigurePresenceForConditionalRequirement } from "./objectApplicability";
 
 const DOCUMENT_FACT_READERS: Record<
   ConditionalRequiredSectionFact,
   (document: Readonly<NormalizedDocument>) => boolean
 > = {
   hasTables: (document) => document.tables.hasTables,
-  hasFigures: (document) => document.figures.hasFigures,
+  hasFigures: hasFigurePresenceForConditionalRequirement,
   hasAbbreviations: (document) => document.abbreviations.hasAbbreviations,
 };
 

@@ -12,6 +12,7 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import { getDeclaredAcademicFigureIdentities } from "../objectApplicability";
 
 interface ObjectIdentity {
   caption: DocumentCaption;
@@ -95,11 +96,13 @@ function getReliableObjectIdentities(
   object: CaptionKind,
 ): ObjectIdentity[] {
   const captionsById = new Map(document.captions.items.map((caption) => [caption.id, caption]));
-  const occurrences = object === "table"
-    ? document.tables.items.filter((item) => !item.isNested && item.captionId !== null)
-    : document.figures.items.filter(
-        (item) => item.drawingType === "inline" && item.captionId !== null,
-      );
+  if (object === "figure") {
+    return getDeclaredAcademicFigureIdentities(document).map((identity) =>
+      toIdentity(identity.caption, identity.occurrence),
+    );
+  }
+
+  const occurrences = document.tables.items.filter((item) => !item.isNested && item.captionId !== null);
 
   return occurrences.flatMap((occurrence) => {
     const caption = occurrence.captionId

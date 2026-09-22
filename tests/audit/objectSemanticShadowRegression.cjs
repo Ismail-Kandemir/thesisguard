@@ -68,7 +68,7 @@ async function assertFixtureObservations() {
 
   const chart = await analyze("chart-object-synthetic.docx");
   assert(hasResolution(chart.document, "chart", "unresolved", null), "uncaptioned chart unresolved");
-  assertEqual(chart.report.failedRules, 1, "chart legacy RuleResult parity");
+  assertEqual(chart.report.failedRules, 0, "chart semantic retirement RuleResult parity");
 
   const diagram = await analyze("smartart-object-synthetic.docx");
   assert(hasResolution(diagram.document, "diagram", "unresolved", null), "uncaptioned diagram unresolved");

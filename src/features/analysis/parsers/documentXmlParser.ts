@@ -58,6 +58,21 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     blocks: visualStructure.blocks,
     captions: visualStructure.captions,
     objectSemantics: visualStructure.objectSemantics,
+    academicScopes: {
+      paragraphs: paragraphs.map(() => ({
+        scope: "unknown",
+        reason: "missing-main-boundary",
+        boundaryParagraphId: null,
+        boundaryParagraphIndex: null,
+      })),
+      blocks: visualStructure.blocks.map(() => ({
+        scope: "unknown",
+        reason: "missing-main-boundary",
+        boundaryParagraphId: null,
+        boundaryParagraphIndex: null,
+      })),
+      mainContentBoundary: null,
+    },
     objectReferences: { items: [] },
     abbreviations: {
       items: [],

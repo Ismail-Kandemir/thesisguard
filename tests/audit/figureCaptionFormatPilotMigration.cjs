@@ -73,10 +73,10 @@ async function assertCorpusParity() {
   }
 
   const expectedNonPilotFailures = new Map([
-    ["chart-object-synthetic.docx", ["comu.applied-sciences.food-technology.bachelor.figure-caption-placement"]],
-    ["smartart-object-synthetic.docx", ["comu.applied-sciences.food-technology.bachelor.figure-caption-placement"]],
-    ["grouped-drawing-object-synthetic.docx", ["comu.applied-sciences.food-technology.bachelor.figure-caption-placement"]],
-    ["unknown-drawing-object-synthetic.docx", ["comu.applied-sciences.food-technology.bachelor.figure-caption-placement"]],
+    ["chart-object-synthetic.docx", []],
+    ["smartart-object-synthetic.docx", []],
+    ["grouped-drawing-object-synthetic.docx", []],
+    ["unknown-drawing-object-synthetic.docx", []],
     ["smartart-caption-collision-synthetic.docx", ["comu.applied-sciences.food-technology.bachelor.figure-in-text-reference"]],
   ]);
   for (const [fixture, expected] of expectedNonPilotFailures) {

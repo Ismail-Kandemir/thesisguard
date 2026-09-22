@@ -34,7 +34,7 @@ const COVERAGE_FIXTURES = [
     xml: '<w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:drawing><wp:inline xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="urn:thesisguard:unknown"><tg:payload xmlns:tg="urn:thesisguard:unknown"/></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>',
     legacyFigureCount: 2,
     resolutionStatus: "unresolved",
-    failedRuleIds: ["comu.applied-sciences.food-technology.bachelor.figure-caption-placement"],
+    failedRuleIds: [],
   },
 ];
 

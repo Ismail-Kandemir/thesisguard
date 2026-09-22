@@ -582,8 +582,34 @@ export interface ObjectRepresentationOccurrence {
   paragraphId: string | null;
   paragraphIndex: number | null;
   scope: ObjectRepresentationScope;
+  academicScope: AcademicScopeAssignment;
   drawingType: FigureDrawingType | null;
   evidence: string[];
+}
+
+export type AcademicDocumentScopeKind =
+  | "front-matter"
+  | "main-content"
+  | "unknown";
+
+export type AcademicScopeReason =
+  | "before-main-content-boundary"
+  | "main-content-section"
+  | "missing-main-boundary"
+  | "ambiguous-main-boundary"
+  | "insufficient-location-evidence";
+
+export interface AcademicScopeAssignment {
+  scope: AcademicDocumentScopeKind;
+  reason: AcademicScopeReason;
+  boundaryParagraphId: string | null;
+  boundaryParagraphIndex: number | null;
+}
+
+export interface AcademicDocumentScopes {
+  paragraphs: AcademicScopeAssignment[];
+  blocks: AcademicScopeAssignment[];
+  mainContentBoundary: AcademicScopeAssignment | null;
 }
 
 export type CaptionSemantic =
@@ -727,6 +753,7 @@ export interface NormalizedDocument {
   blocks: DocumentBlock[];
   captions: DocumentCaptions;
   objectSemantics: DocumentObjectSemantics;
+  academicScopes: AcademicDocumentScopes;
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
   sections: DocumentSection[];
@@ -736,6 +763,12 @@ export interface NormalizedDocument {
 
 export type {
   AnalysisAcademicContext,
+  AnalysisDiagnostic,
+  AnalysisDiagnosticCaptionEvidence,
+  AnalysisDiagnosticCode,
+  AnalysisDiagnosticEvidence,
+  AnalysisDiagnosticReason,
+  AnalysisDiagnosticSeverity,
   AnalysisReport,
   AnalysisRuleSource,
 } from "./AnalysisReport";
@@ -753,6 +786,9 @@ export type {
   ParagraphRuleEvidence,
   RunRuleEvidence,
   RuleEvidence,
+  RuleEvaluationCoverage,
+  RuleEvaluationCoverageReason,
+  RuleEvaluationCoverageStatus,
   RuleResult,
   RuleResultStatus,
   RuleResultValue,

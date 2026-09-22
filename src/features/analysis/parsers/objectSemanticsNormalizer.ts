@@ -149,6 +149,7 @@ function parseRepresentations(
       paragraphId: paragraph?.id ?? null,
       paragraphIndex,
       scope: getRepresentationScope(element),
+      academicScope: createUnknownAcademicScope("missing-main-boundary"),
       drawingType: element.namespaceURI === WORD_NAMESPACE && element.localName === "drawing"
         ? getDrawingType(element)
         : null,
@@ -161,6 +162,17 @@ function parseRepresentations(
     xmlOrder: index,
     ...occurrence,
   }));
+}
+
+function createUnknownAcademicScope(
+  reason: ObjectRepresentationOccurrence["academicScope"]["reason"],
+): ObjectRepresentationOccurrence["academicScope"] {
+  return {
+    scope: "unknown",
+    reason,
+    boundaryParagraphId: null,
+    boundaryParagraphIndex: null,
+  };
 }
 
 function classifyRepresentationRoot(element: Element): ObjectRepresentationKind | null {

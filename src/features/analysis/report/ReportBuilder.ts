@@ -1,5 +1,6 @@
 import type {
   AnalysisAcademicContext,
+  AnalysisDiagnostic,
   AnalysisReport,
   AnalysisRuleSource,
   RuleResult,
@@ -10,6 +11,7 @@ export class ReportBuilder {
     results: RuleResult[],
     academicContext?: AnalysisAcademicContext,
     ruleSource?: AnalysisRuleSource,
+    diagnostics: AnalysisDiagnostic[] = [],
   ): AnalysisReport {
     const totalRules = results.length;
     const passedRules = countRules(results, "PASSED");
@@ -24,6 +26,7 @@ export class ReportBuilder {
       failedRules,
       notApplicableRules,
       score: calculateScore(passedRules, evaluatedRules),
+      diagnostics,
       ...(academicContext ? { academicContext } : {}),
       ...(ruleSource ? { ruleSource } : {}),
       results,

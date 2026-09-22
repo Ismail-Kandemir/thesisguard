@@ -4,6 +4,24 @@ export type RuleResultValue = string | number | boolean | null;
 
 export type RuleResultStatus = "PASSED" | "FAILED" | "NOT_APPLICABLE";
 
+export type RuleEvaluationCoverageStatus =
+  | "complete"
+  | "partial"
+  | "none";
+
+export type RuleEvaluationCoverageReason =
+  | "all-relevant-objects-evaluable"
+  | "no-relevant-object"
+  | "unsupported-anchored-placement";
+
+export interface RuleEvaluationCoverage {
+  status: RuleEvaluationCoverageStatus;
+  evaluatedCount: number;
+  relevantCount: number;
+  unevaluatedCount: number;
+  reasons: RuleEvaluationCoverageReason[];
+}
+
 export interface ParagraphRuleEvidence {
   kind: "paragraph";
   paragraphId: string;
@@ -122,6 +140,7 @@ export interface RuleResult {
   actual: RuleResultValue;
   message: string;
 
+  coverage?: RuleEvaluationCoverage;
   evidence?: RuleEvidence[];
   evidenceTotal?: number;
 }

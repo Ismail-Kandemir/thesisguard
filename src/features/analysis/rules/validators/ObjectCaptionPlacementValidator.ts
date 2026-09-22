@@ -12,6 +12,7 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import { getDeclaredAcademicFigureOccurrences } from "../objectApplicability";
 
 type CaptionOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
 
@@ -68,7 +69,9 @@ function getReliableOccurrences(
 ): CaptionOccurrence[] {
   return object === "table"
     ? document.tables.items.filter((item) => !item.isNested)
-    : document.figures.items.filter((item) => item.drawingType === "inline");
+    : getDeclaredAcademicFigureOccurrences(document).filter(
+        (item) => item.drawingType === "inline",
+      );
 }
 
 function assertRule(

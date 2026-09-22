@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type {
   AnalysisAcademicContext,
+  AnalysisDiagnostic,
   AnalysisReport,
   RuleCategory,
   RuleEvidence,
@@ -10,6 +11,16 @@ import type {
   RuleResultValue,
 } from '../../types'
 import { Button, Card } from '../../../../shared'
+import {
+  formatReviewRequiredCount,
+  getScoreTrustMessage,
+  hasReviewRequiredDiagnostics,
+  toDiagnosticPresentation,
+} from '../diagnosticPresentation'
+import {
+  getCoverageTrustMessage,
+  toRuleCoveragePresentation,
+} from '../ruleCoveragePresentation'
 import './AnalysisReportView.css'
 
 type ResultFilter = 'all' | RuleResultStatus
@@ -98,7 +109,8 @@ export function AnalysisReportView({
       </header>
 
       <ReportSummary analysisReport={analysisReport} />
-      <ScoreTrustNote />
+      <ScoreTrustNote analysisReport={analysisReport} />
+      <DiagnosticReviewSection diagnostics={analysisReport.diagnostics} />
       <SeverityLegend results={analysisReport.results} />
       <AcademicContextSummary academicContext={analysisReport.academicContext} />
       <RuleSourceSummary analysisReport={analysisReport} />
@@ -151,6 +163,8 @@ function RuleSourceSummary({ analysisReport }: { analysisReport: AnalysisReport 
 }
 
 function ReportSummary({ analysisReport }: { analysisReport: AnalysisReport }) {
+  const hasDiagnostics = hasReviewRequiredDiagnostics(analysisReport.diagnostics)
+
   return (
     <section className="analysis-report__summary" aria-label="Rapor özeti">
       <SummaryItem label="Uyumluluk" value={`%${analysisReport.score}`} tone="score" />
@@ -158,19 +172,102 @@ function ReportSummary({ analysisReport }: { analysisReport: AnalysisReport }) {
       <SummaryItem label="Başarılı" value={analysisReport.passedRules} tone="passed" />
       <SummaryItem label="Başarısız" value={analysisReport.failedRules} tone="failed" />
       <SummaryItem label="Uygulanamaz" value={analysisReport.notApplicableRules} tone="neutral" />
+      {hasDiagnostics ? (
+        <SummaryItem
+          label="Manuel inceleme"
+          tone="review"
+          value={formatReviewRequiredCount(analysisReport.diagnostics.length)}
+        />
+      ) : null}
     </section>
   )
 }
 
-function ScoreTrustNote() {
+function ScoreTrustNote({ analysisReport }: { analysisReport: AnalysisReport }) {
+  const hasDiagnostics = hasReviewRequiredDiagnostics(analysisReport.diagnostics)
+  const coverageTrustMessage = getCoverageTrustMessage(analysisReport.results)
+
   return (
-    <section className="analysis-report__trust-note" aria-labelledby="score-trust-heading">
+    <section
+      className={[
+        'analysis-report__trust-note',
+        hasDiagnostics ? 'analysis-report__trust-note--review' : '',
+      ].join(' ').trim()}
+      aria-labelledby="score-trust-heading"
+    >
       <h2 id="score-trust-heading">Uyumluluk puanı hakkında</h2>
       <p>
         Uyumluluk puanı, otomatik olarak değerlendirilebilen kontrollerin
         sonucudur. Tezin akademik içerik kalitesini veya tüm kılavuz
         gerekliliklerini garanti etmez.
       </p>
+      {coverageTrustMessage ? <p>{coverageTrustMessage}</p> : null}
+    </section>
+  )
+}
+
+function DiagnosticReviewSection({
+  diagnostics,
+}: {
+  diagnostics: readonly AnalysisDiagnostic[]
+}) {
+  if (diagnostics.length === 0) {
+    return null
+  }
+
+  const presentations = diagnostics.map(toDiagnosticPresentation)
+
+  return (
+    <section className="analysis-report__diagnostics" aria-labelledby="diagnostics-heading">
+      <div className="analysis-report__diagnostics-header">
+        <div>
+          <h2 id="diagnostics-heading">İnceleme Gerektirenler</h2>
+          <p>{getScoreTrustMessage(diagnostics)}</p>
+          <p>{formatReviewRequiredCount(diagnostics.length)} manuel inceleme gerektiriyor.</p>
+        </div>
+      </div>
+
+      <div className="analysis-report__diagnostic-list">
+        {presentations.map((diagnostic) => (
+          <Card
+            className={[
+              'analysis-report__diagnostic-card',
+              `analysis-report__diagnostic-card--${diagnostic.severity}`,
+            ].join(' ')}
+            key={diagnostic.id}
+          >
+            <div className="analysis-report__diagnostic-title">
+              <div>
+                <h3>{diagnostic.title}</h3>
+                <p>{diagnostic.description}</p>
+              </div>
+              <span
+                className={[
+                  'analysis-report__diagnostic-severity',
+                  `analysis-report__diagnostic-severity--${diagnostic.severity}`,
+                ].join(' ')}
+              >
+                {diagnostic.severityLabel}
+              </span>
+            </div>
+
+            <p className="analysis-report__diagnostic-action">
+              {diagnostic.actionText}
+            </p>
+
+            {diagnostic.details.length > 0 ? (
+              <dl className="analysis-report__diagnostic-details">
+                {diagnostic.details.map((detail) => (
+                  <div key={detail.label}>
+                    <dt>{detail.label}</dt>
+                    <dd>{detail.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </Card>
+        ))}
+      </div>
     </section>
   )
 }
@@ -245,7 +342,7 @@ function AcademicContextSummary({
 
 interface SummaryItemProps {
   label: string
-  tone?: 'score' | 'passed' | 'failed' | 'neutral'
+  tone?: 'score' | 'passed' | 'failed' | 'neutral' | 'review'
   value: string | number
 }
 
@@ -339,6 +436,7 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
 function RuleResultItem({ result }: { result: RuleResult }) {
   const presentation = getResultPresentation(result.status)
   const severityPresentation = getSeverityPresentation(result.severity)
+  const coveragePresentation = toRuleCoveragePresentation(result)
   const correctionGuidance =
     result.status === 'FAILED'
       ? result.solution?.trim() || getCorrectionGuidance(result)
@@ -354,6 +452,7 @@ function RuleResultItem({ result }: { result: RuleResult }) {
     hasEvidence,
     hasExpected,
     hasMessage,
+    hasCoverageNote: coveragePresentation !== null,
     status: result.status,
   })
 
@@ -368,12 +467,23 @@ function RuleResultItem({ result }: { result: RuleResult }) {
         <h3>{result.ruleName || 'Kural sonucu'}</h3>
         <div className="analysis-report__result-meta">
           <SeverityBadge presentation={severityPresentation} />
+          {coveragePresentation ? (
+            <span className="analysis-report__coverage-badge">
+              {coveragePresentation.label}
+            </span>
+          ) : null}
           <span className="analysis-report__status">
             <span aria-hidden="true">{presentation.symbol}</span>
             {presentation.label}
           </span>
         </div>
       </div>
+
+      {coveragePresentation ? (
+        <p className="analysis-report__coverage-summary">
+          {coveragePresentation.summary}
+        </p>
+      ) : null}
 
       {hasDetails ? (
         <details
@@ -404,6 +514,12 @@ function RuleResultItem({ result }: { result: RuleResult }) {
               </dl>
             ) : null}
 
+            {coveragePresentation ? (
+              <p className="analysis-report__coverage-note">
+                {coveragePresentation.detail}
+              </p>
+            ) : null}
+
             {hasEvidence ? (
               <EvidenceList
                 evidence={evidence}
@@ -431,13 +547,14 @@ function RuleResultItem({ result }: { result: RuleResult }) {
 function shouldRenderDetails(options: {
   correctionGuidance: string | null
   hasActual: boolean
+  hasCoverageNote: boolean
   hasEvidence: boolean
   hasExpected: boolean
   hasMessage: boolean
   status: RuleResultStatus
 }): boolean {
   if (options.status === 'PASSED') {
-    return options.hasEvidence
+    return options.hasEvidence || options.hasCoverageNote
   }
 
   if (options.status === 'NOT_APPLICABLE') {
@@ -446,6 +563,7 @@ function shouldRenderDetails(options: {
 
   return (
     options.hasMessage ||
+    options.hasCoverageNote ||
     options.hasExpected ||
     options.hasActual ||
     options.correctionGuidance !== null ||

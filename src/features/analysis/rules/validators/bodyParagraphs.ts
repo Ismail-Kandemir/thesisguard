@@ -3,6 +3,7 @@ import type {
   Paragraph,
   StyleDefinition,
 } from "../../types";
+import { getDeclaredAcademicFigureCarrierParagraphIds } from "../objectApplicability";
 
 const BODY_EXCLUDED_HEADING_NAMES = new Set([
   "heading1",
@@ -36,9 +37,7 @@ export function getBodyParagraphs(
     document.captions.items.map((caption) => caption.paragraphId),
   );
 
-  const figureCarrierParagraphIds = new Set(
-    document.figures.items.map((figure) => figure.paragraphId),
-  );
+  const figureCarrierParagraphIds = getDeclaredAcademicFigureCarrierParagraphIds(document);
 
   return document.paragraphs.filter(
     (paragraph) =>

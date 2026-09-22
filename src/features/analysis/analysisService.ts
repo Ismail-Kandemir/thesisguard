@@ -1,8 +1,10 @@
 import { RuleEngine } from "./engine/RuleEngine";
+import { buildAnalysisDiagnostics } from "./diagnostics/academicObjectDiagnostics";
 import { parseDocumentXml } from "./parsers/documentXmlParser";
 import { normalizeDocumentNumbering } from "./parsers/documentNumberingNormalizer";
 import { parseNumberingXml } from "./parsers/numberingXmlParser";
 import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
+import { normalizeAcademicDocumentScopes } from "./parsers/academicDocumentScopeNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
@@ -72,23 +74,31 @@ export async function analyzeDocx(
     documentWithMarkedSectionHeadings,
     rules,
   );
+  const documentWithAcademicScopes = normalizeAcademicDocumentScopes(
+    documentWithHeadingOccurrences,
+    rules,
+  );
   const documentWithSectionHeadings: NormalizedDocument = {
-    ...documentWithHeadingOccurrences,
+    ...documentWithAcademicScopes,
     abbreviations: normalizeDocumentAbbreviations(
-      documentWithHeadingOccurrences,
+      documentWithAcademicScopes,
     ),
     objectReferences: normalizeDocumentObjectReferences(
-      documentWithHeadingOccurrences,
+      documentWithAcademicScopes,
     ),
   };
   const ruleEngine = new RuleEngine();
   const reportBuilder = new ReportBuilder();
   const results = ruleEngine.run(documentWithSectionHeadings, rules);
+  const diagnostics = buildAnalysisDiagnostics(
+    documentWithSectionHeadings.objectSemantics,
+  );
 
   return reportBuilder.build(
     results,
     createAcademicContext(ruleSets),
     createRuleSource(ruleSets),
+    diagnostics,
   );
 }
 

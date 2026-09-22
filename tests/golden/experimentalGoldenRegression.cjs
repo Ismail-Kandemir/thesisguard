@@ -427,6 +427,9 @@ async function runAnalysisFixture(filePath) {
     normalizeDocumentHeadings,
   } = require("../../src/features/analysis/parsers/documentHeadingsNormalizer.ts");
   const {
+    normalizeAcademicDocumentScopes,
+  } = require("../../src/features/analysis/parsers/academicDocumentScopeNormalizer.ts");
+  const {
     markRequiredSectionHeadings,
   } = require("../../src/features/analysis/rules/markRequiredSectionHeadings.ts");
   const { RuleSetSelector } = require("../../src/features/analysis/rules/RuleSetSelector.ts");
@@ -462,10 +465,11 @@ async function runAnalysisFixture(filePath) {
     rules,
   );
   const headed = normalizeDocumentHeadings(marked, rules);
+  const scoped = normalizeAcademicDocumentScopes(headed, rules);
   const document = {
-    ...headed,
-    abbreviations: normalizeDocumentAbbreviations(headed),
-    objectReferences: normalizeDocumentObjectReferences(headed),
+    ...scoped,
+    abbreviations: normalizeDocumentAbbreviations(scoped),
+    objectReferences: normalizeDocumentObjectReferences(scoped),
   };
   const results = new RuleEngine().run(document, rules);
   const report = new ReportBuilder().build(results);

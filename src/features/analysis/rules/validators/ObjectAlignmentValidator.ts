@@ -10,11 +10,17 @@ import type {
   ObjectAlignmentSource,
   RuleDefinition,
   RuleEvidence,
+  RuleEvaluationCoverage,
   RuleResult,
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import {
+  getDeclaredAcademicFigureOccurrences,
+  getFigurePhysicalAlignmentCoverage,
+  isFigurePhysicalAlignmentEvaluable,
+} from "../objectApplicability";
 
 type AlignableOccurrence = DocumentTableOccurrence | DocumentFigureOccurrence;
 
@@ -33,6 +39,9 @@ export class ObjectAlignmentValidator implements RuleValidator {
     assertRule(rule);
     const expected = getExpected(rule.expected);
     const items = getResolvedAlignments(document, expected.object);
+    const coverage = expected.object === "figure"
+      ? getFigurePhysicalAlignmentCoverage(document)
+      : undefined;
 
     if (items.length === 0) {
       return createResult(
@@ -40,7 +49,12 @@ export class ObjectAlignmentValidator implements RuleValidator {
         expected,
         "NOT_APPLICABLE",
         "Uygulanmadı",
-        `Belgede ${objectNameLower(expected.object)} bulunmadığı için ${objectNameLower(expected.object)} hizalama kontrolü uygulanmadı.`,
+        coverage && coverage.relevantCount > 0
+          ? "Bu kural için ilgili şekil bulundu ancak otomatik doğrulama yapılamadı."
+          : `Belgede ${objectNameLower(expected.object)} bulunmadığı için ${objectNameLower(expected.object)} hizalama kontrolü uygulanmadı.`,
+        undefined,
+        undefined,
+        coverage,
       );
     }
 
@@ -53,6 +67,9 @@ export class ObjectAlignmentValidator implements RuleValidator {
         "NOT_APPLICABLE",
         formatActual(items),
         `${objectName(expected.object)} yatay konumu güvenilir biçimde belirlenemediği için hizalama kontrolü uygulanmadı.`,
+        undefined,
+        undefined,
+        coverage,
       );
     }
 
@@ -66,7 +83,12 @@ export class ObjectAlignmentValidator implements RuleValidator {
         expected,
         "PASSED",
         formatActual(items),
-        `Belgedeki ${objectPlural(expected.object)} ortalanmış.`,
+        coverage?.status === "partial"
+          ? `Değerlendirilebilen ${objectPlural(expected.object)} ortalanmış.`
+          : `Belgedeki ${objectPlural(expected.object)} ortalanmış.`,
+        undefined,
+        undefined,
+        coverage,
       );
     }
 
@@ -87,6 +109,7 @@ export class ObjectAlignmentValidator implements RuleValidator {
         }),
       ),
       wrong.length + unknown.length,
+      coverage,
     );
   }
 }
@@ -155,14 +178,16 @@ function resolveFigureAlignments(
     document.documentDefaults,
   );
 
-  for (const figure of document.figures.items) {
+  const declaredFigures = getDeclaredAcademicFigureOccurrences(document);
+
+  for (const figure of declaredFigures) {
     drawingCountByParagraphId.set(
       figure.paragraphId,
       (drawingCountByParagraphId.get(figure.paragraphId) ?? 0) + 1,
     );
   }
 
-  return document.figures.items.map((figure, index) => {
+  return declaredFigures.filter(isFigurePhysicalAlignmentEvaluable).map((figure, index) => {
     const resolved = resolveFigureAlignment(
       figure,
       paragraphsById,
@@ -259,6 +284,7 @@ function createResult(
   message: string,
   evidence?: RuleEvidence[],
   evidenceTotal?: number,
+  coverage?: RuleEvaluationCoverage,
 ): RuleResult {
   return {
     ruleId: rule.id,
@@ -269,6 +295,7 @@ function createResult(
     expected: `${objectName(expected.object)} nesnesi: ${alignmentName(expected.alignment)}`,
     actual,
     message,
+    ...(coverage ? { coverage } : {}),
     ...(evidence && evidence.length > 0 ? { evidence } : {}),
     ...(evidenceTotal !== undefined ? { evidenceTotal } : {}),
   };
