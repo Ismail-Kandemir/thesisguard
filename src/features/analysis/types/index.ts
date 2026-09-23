@@ -784,6 +784,66 @@ export interface DocumentBibliography {
   unresolvedParagraphIds: string[];
 }
 
+export type ObjectListSectionContentStatus =
+  | "LIST_SECTION_MISSING"
+  | "LIST_SECTION_PRESENT_EMPTY"
+  | "LIST_SECTION_PRESENT_WITH_ENTRIES"
+  | "LIST_SECTION_PRESENT_UNRESOLVED";
+
+export type ObjectListAssociationStatus =
+  | "MATCHED"
+  | "MISSING_LIST_ENTRY"
+  | "ORPHAN_LIST_ENTRY"
+  | "AMBIGUOUS"
+  | "UNRESOLVED";
+
+export interface TableListEntryOccurrence {
+  id: string;
+  sectionOccurrenceId: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  rawText: string;
+  normalizedText: string;
+  label: "Tablo";
+  number: string;
+  title: string | null;
+  entryIndex: number;
+  confidence: "high" | "low";
+  evidence: string[];
+}
+
+export interface TableListTableAssociation {
+  tableId: string;
+  captionId: string | null;
+  number: string | null;
+  listEntryIds: string[];
+  status: ObjectListAssociationStatus;
+  evidence: string[];
+}
+
+export interface TableListEntryAssociation {
+  listEntryId: string;
+  tableIds: string[];
+  captionIds: string[];
+  number: string;
+  status: ObjectListAssociationStatus;
+  evidence: string[];
+}
+
+export interface DocumentTableList {
+  sectionOccurrenceId: string | null;
+  sectionIdentity: string | null;
+  sectionHeadingParagraphId: string | null;
+  sectionHeadingParagraphIndex: number | null;
+  sectionBoundary: AcademicSectionBoundary | null;
+  status: ObjectListSectionContentStatus;
+  entries: TableListEntryOccurrence[];
+  tableAssociations: TableListTableAssociation[];
+  entryAssociations: TableListEntryAssociation[];
+  unresolvedParagraphIds: string[];
+}
+
 export type AcademicSectionRecognitionStatus =
   | "declared"
   | "ambiguous"
@@ -888,6 +948,7 @@ export interface NormalizedDocument {
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
   bibliography?: DocumentBibliography;
+  tableList?: DocumentTableList;
   academicSections: DocumentAcademicSections;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];

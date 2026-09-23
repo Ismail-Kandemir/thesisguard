@@ -7,6 +7,7 @@ import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsN
 import { normalizeAcademicDocumentScopes } from "./parsers/academicDocumentScopeNormalizer";
 import { normalizeAcademicSections } from "./parsers/academicSectionsNormalizer";
 import { normalizeBibliographySemantics } from "./parsers/bibliographySemanticsNormalizer";
+import { normalizeTableListSemantics } from "./parsers/tableListSemanticsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { normalizePageNumberingSemantics } from "./parsers/pageNumberingSemantics";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
@@ -99,13 +100,17 @@ export async function analyzeDocx(
     documentWithAcademicSections,
     rules,
   );
+  const documentWithTableListSemantics = normalizeTableListSemantics(
+    documentWithBibliographySemantics,
+    rules,
+  );
   const documentWithSectionHeadings: NormalizedDocument = {
-    ...documentWithBibliographySemantics,
+    ...documentWithTableListSemantics,
     abbreviations: normalizeDocumentAbbreviations(
-      documentWithBibliographySemantics,
+      documentWithTableListSemantics,
     ),
     objectReferences: normalizeDocumentObjectReferences(
-      documentWithBibliographySemantics,
+      documentWithTableListSemantics,
     ),
   };
   const ruleEngine = new RuleEngine();
