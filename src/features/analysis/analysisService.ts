@@ -7,6 +7,7 @@ import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsN
 import { normalizeAcademicDocumentScopes } from "./parsers/academicDocumentScopeNormalizer";
 import { normalizeAcademicSections } from "./parsers/academicSectionsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
+import { normalizePageNumberingSemantics } from "./parsers/pageNumberingSemantics";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
 import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
@@ -30,7 +31,14 @@ import type {
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
   assertValidUploadFile(file);
 
-  const { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts } =
+  const {
+    documentXml,
+    documentRelationshipsXml,
+    stylesXml,
+    numberingXml,
+    themeXml,
+    headerFooterXmlParts,
+  } =
     await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
@@ -41,10 +49,13 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
     themeFonts: themeXml ? parseThemeFontsXml(themeXml) : null,
     numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
-    pageNumbering: {
-      ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
-      sections: normalizedDocument.pageNumbering.sections,
-    },
+    pageNumbering: normalizePageNumberingSemantics(
+      {
+        ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
+        sections: normalizedDocument.pageNumbering.sections,
+      },
+      documentRelationshipsXml,
+    ),
   };
 
   const documentWithNumbering = normalizeDocumentNumbering(documentWithFormatting);

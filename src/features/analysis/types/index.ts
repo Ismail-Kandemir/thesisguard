@@ -244,6 +244,7 @@ export interface DocxPackageInspection {
 
 export interface DocxAnalysisXmlParts {
   documentXml: string;
+  documentRelationshipsXml: string | null;
   stylesXml: string | null;
   numberingXml: string | null;
   themeXml: string | null;
@@ -438,16 +439,45 @@ export interface PageNumberField {
   structure: PageNumberFieldStructure;
 }
 
+export type HeaderFooterReferenceType = "default" | "first" | "even";
+
+export type HeaderFooterReferenceResolution =
+  | "explicit"
+  | "inherited"
+  | "unresolved";
+
+export interface PageNumberHeaderFooterReference {
+  location: HeaderFooterLocation;
+  type: HeaderFooterReferenceType;
+  relationshipId: string | null;
+  targetPath: string | null;
+  resolution: HeaderFooterReferenceResolution;
+  hasPageField: boolean;
+  pageFieldCount: number;
+  alignments: ParagraphAlignment[];
+}
+
 export interface PageNumbering {
   hasPageNumbers: boolean;
   fields: PageNumberField[];
   sections: PageNumberSection[];
 }
 
+export type PageNumberStartSemantics =
+  | "explicit-start"
+  | "continuation-or-inherited"
+  | "unresolved";
+
 export interface PageNumberSection {
+  index?: number;
+  startParagraphIndex?: number;
   endParagraphIndex: number;
+  source?: DocumentPageSectionSource;
   format: string | null;
   start: number | null;
+  startSemantics?: PageNumberStartSemantics;
+  headerFooterReferences?: PageNumberHeaderFooterReference[];
+  differentFirstPage?: boolean;
 }
 
 export type TableOfContentsFieldType = "TOC";

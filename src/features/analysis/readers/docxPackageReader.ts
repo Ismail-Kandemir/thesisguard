@@ -60,6 +60,9 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
   try {
     const zip = await JSZip.loadAsync(file);
     const documentXml = await readXmlPart(file, DOCUMENT_XML_PATH, zip);
+    const documentRelationshipsXml = zip.file(DOCUMENT_RELATIONSHIPS_PATH)
+      ? await readXmlPart(file, DOCUMENT_RELATIONSHIPS_PATH, zip)
+      : null;
     const stylesXml = zip.file(STYLES_XML_PATH)
       ? await readXmlPart(file, STYLES_XML_PATH, zip)
       : null;
@@ -69,7 +72,14 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
     const themeXml = await readThemeXmlPart(file, zip);
     const headerFooterXmlParts = await readHeaderFooterXmlParts(file, zip);
 
-    return { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts };
+    return {
+      documentXml,
+      documentRelationshipsXml,
+      stylesXml,
+      numberingXml,
+      themeXml,
+      headerFooterXmlParts,
+    };
   } catch (error) {
     throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
   }

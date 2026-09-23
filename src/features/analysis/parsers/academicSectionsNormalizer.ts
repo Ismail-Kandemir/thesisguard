@@ -99,10 +99,13 @@ function getSectionItemsFromRule(
     case "REQUIRED_SECTION":
     case "CONDITIONAL_REQUIRED_SECTION":
     case "SECTION_WORD_COUNT":
-    case "PAGE_NUMBER_SEQUENCE":
     case "ABBREVIATION_LIST_CONSISTENCY":
       return hasSectionExpected(expected)
         ? [{ section: expected.section, aliases: expected.aliases ?? [] }]
+        : [];
+    case "PAGE_NUMBER_SEQUENCE":
+      return hasTransitionSectionExpected(expected)
+        ? [{ section: expected.transitionSection, aliases: expected.aliases ?? [] }]
         : [];
     case "SECTION_KEYWORDS":
       return hasSectionOnlyExpected(expected) ? [{ section: expected.section, aliases: [] }] : [];
@@ -132,6 +135,19 @@ function hasSectionExpected(
   return (
     "section" in value &&
     typeof value.section === "string" &&
+    (!("aliases" in value) ||
+      value.aliases === undefined ||
+      (Array.isArray(value.aliases) &&
+        value.aliases.every((alias) => typeof alias === "string")))
+  );
+}
+
+function hasTransitionSectionExpected(
+  value: object,
+): value is { transitionSection: string; aliases?: string[] } {
+  return (
+    "transitionSection" in value &&
+    typeof value.transitionSection === "string" &&
     (!("aliases" in value) ||
       value.aliases === undefined ||
       (Array.isArray(value.aliases) &&

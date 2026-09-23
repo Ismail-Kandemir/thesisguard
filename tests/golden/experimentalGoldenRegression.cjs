@@ -415,6 +415,9 @@ async function runAnalysisFixture(filePath) {
     parseHeaderFooterPageNumbering,
   } = require("../../src/features/analysis/parsers/headerFooterXmlParser.ts");
   const {
+    normalizePageNumberingSemantics,
+  } = require("../../src/features/analysis/parsers/pageNumberingSemantics.ts");
+  const {
     normalizeDocumentNumbering,
   } = require("../../src/features/analysis/parsers/documentNumberingNormalizer.ts");
   const {
@@ -438,7 +441,14 @@ async function runAnalysisFixture(filePath) {
   const { ReportBuilder } = require("../../src/features/analysis/report/ReportBuilder.ts");
 
   const file = createNodeDocxReaderInput(filePath);
-  const { documentXml, stylesXml, numberingXml, themeXml, headerFooterXmlParts } =
+  const {
+    documentXml,
+    documentRelationshipsXml,
+    stylesXml,
+    numberingXml,
+    themeXml,
+    headerFooterXmlParts,
+  } =
     await readDocxAnalysisXmlParts(file);
   const parsed = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
@@ -448,10 +458,13 @@ async function runAnalysisFixture(filePath) {
     documentDefaults: parsedStyles?.documentDefaults ?? parsed.documentDefaults,
     themeFonts: themeXml ? parseThemeFontsXml(themeXml) : null,
     numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
-    pageNumbering: {
-      ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
-      sections: parsed.pageNumbering.sections,
-    },
+    pageNumbering: normalizePageNumberingSemantics(
+      {
+        ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
+        sections: parsed.pageNumbering.sections,
+      },
+      documentRelationshipsXml,
+    ),
   };
   const numbered = normalizeDocumentNumbering(formatted);
   const ruleSets = new RuleSetSelector().select(SELECTION);

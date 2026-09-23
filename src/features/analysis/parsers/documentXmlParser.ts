@@ -1,7 +1,10 @@
 import type {
   NormalizedDocument,
   DocumentPageSectionSource,
+  HeaderFooterLocation,
+  HeaderFooterReferenceType,
   PageMargins,
+  PageNumberHeaderFooterReference,
   Paragraph,
   ParagraphAlignment,
   ParagraphNumbering,
@@ -15,6 +18,7 @@ import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver
 import { isRunVisibleInCurrentDocument } from "./revisionVisibility";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
+const RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
 const TWIPS_PER_INCH = 1440;
 const CENTIMETERS_PER_INCH = 2.54;
 
@@ -242,6 +246,7 @@ function hasAncestor(element: Element, localName: string): boolean {
 
 interface ParsedSectionProperties {
   element: Element;
+  startParagraphIndex: number;
   endParagraphIndex: number;
   source: DocumentPageSectionSource;
 }
@@ -254,7 +259,7 @@ function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[
   }
 
   const paragraphs = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "p");
-  const sections: ParsedSectionProperties[] = paragraphs.flatMap((paragraph, paragraphIndex) => {
+  const sectionBreaks = paragraphs.flatMap((paragraph, paragraphIndex) => {
     const paragraphProperties = Array.from(paragraph.children).find(
       (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pPr",
     );
@@ -277,32 +282,88 @@ function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[
   );
 
   if (finalSectionProperties) {
-    sections.push({
+    sectionBreaks.push({
       element: finalSectionProperties,
       endParagraphIndex: Math.max(paragraphs.length - 1, 0),
       source: "body",
     });
   }
 
-  return sections;
+  let nextStartParagraphIndex = 0;
+
+  return sectionBreaks.map((section) => {
+    const parsed = {
+      ...section,
+      startParagraphIndex: nextStartParagraphIndex,
+    };
+
+    nextStartParagraphIndex = section.endParagraphIndex + 1;
+    return parsed;
+  });
 }
 
 function parsePageNumberSections(xmlDocument: Document) {
-  return parseSectionProperties(xmlDocument).map((section) =>
-    parsePageNumberSection(section.element, section.endParagraphIndex),
+  return parseSectionProperties(xmlDocument).map((section, index) =>
+    parsePageNumberSection(section, index),
   );
 }
 
-function parsePageNumberSection(sectionProperties: Element, endParagraphIndex: number) {
-  const pageNumberType = Array.from(sectionProperties.children).find(
+function parsePageNumberSection(section: ParsedSectionProperties, index: number) {
+  const pageNumberType = Array.from(section.element.children).find(
     (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pgNumType",
   );
+  const start = pageNumberType ? parseNumericWordAttribute(pageNumberType, "start") : null;
 
   return {
-    endParagraphIndex,
+    index,
+    startParagraphIndex: section.startParagraphIndex,
+    endParagraphIndex: section.endParagraphIndex,
+    source: section.source,
     format: pageNumberType ? getWordAttribute(pageNumberType, "fmt") : null,
-    start: pageNumberType ? parseNumericWordAttribute(pageNumberType, "start") : null,
+    start,
+    startSemantics: start === null ? "continuation-or-inherited" : "explicit-start",
+    headerFooterReferences: parseHeaderFooterReferences(section.element),
+    differentFirstPage: hasDirectChild(section.element, "titlePg"),
   };
+}
+
+function parseHeaderFooterReferences(
+  sectionProperties: Element,
+): PageNumberHeaderFooterReference[] {
+  return Array.from(sectionProperties.children)
+    .filter(
+      (child) =>
+        child.namespaceURI === WORD_NAMESPACE &&
+        (child.localName === "headerReference" || child.localName === "footerReference"),
+    )
+    .map((reference) => {
+      const location: HeaderFooterLocation =
+        reference.localName === "headerReference" ? "header" : "footer";
+      const type = parseHeaderFooterReferenceType(getWordAttribute(reference, "type"));
+
+      return {
+        location,
+        type,
+        relationshipId: getRelationshipAttribute(reference, "id"),
+        targetPath: null,
+        resolution: "explicit",
+        hasPageField: false,
+        pageFieldCount: 0,
+        alignments: [],
+      };
+    });
+}
+
+function parseHeaderFooterReferenceType(
+  value: string | null,
+): HeaderFooterReferenceType {
+  return value === "first" || value === "even" ? value : "default";
+}
+
+function hasDirectChild(element: Element, localName: string): boolean {
+  return Array.from(element.children).some(
+    (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === localName,
+  );
 }
 
 function parseDirectNumbering(paragraphElement: Element): ParagraphNumbering {
@@ -527,4 +588,8 @@ function getBodyDescendants(xmlDocument: Document, localName: string): Element[]
 
 function getWordAttribute(element: Element, localName: string): string | null {
   return element.getAttributeNS(WORD_NAMESPACE, localName);
+}
+
+function getRelationshipAttribute(element: Element, localName: string): string | null {
+  return element.getAttributeNS(RELATIONSHIP_NAMESPACE, localName);
 }

@@ -1,6 +1,5 @@
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import type {
-  DocumentSection,
+  AcademicSectionOccurrence,
   NormalizedDocument,
   PageNumberFormat,
   PageNumberSection,
@@ -10,9 +9,10 @@ import type {
   RuleResult,
   RuleResultStatus,
 } from "../../types";
+import { findAcademicSectionOccurrencesByNames } from "../academicSectionLookup";
 import {
+  createAcademicSectionEvidence,
   createDocumentFormatEvidence,
-  createSectionEvidence,
   MAX_RULE_EVIDENCE_ITEMS,
 } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
@@ -22,9 +22,11 @@ export class PageNumberSequenceValidator implements RuleValidator {
     assertPageNumberSequenceRule(rule);
     const expected = getExpected(rule.expected);
     const names = [expected.transitionSection, ...(expected.aliases ?? [])];
-    const occurrences = document.sections.filter((section) =>
-      sectionMatchesAnyExpectedName(section, names),
-    );
+    const occurrences = findAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      names,
+    ).filter((occurrence) => occurrence.status === "declared");
 
     if (occurrences.length === 0) {
       return createResult(
@@ -43,11 +45,11 @@ export class PageNumberSequenceValidator implements RuleValidator {
         "FAILED",
         "Geçiş bölümü birden fazla kez bulundu",
         `${expected.transitionSection} bölümü birden fazla kez bulunduğu için sayfa numarası geçişi güvenle belirlenemedi.`,
-        occurrences.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((section) =>
-          createSectionEvidence(section, {
+        occurrences.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((occurrence) =>
+          createAcademicSectionEvidence(occurrence, {
             actual: "Birden fazla geçiş bölümü bulundu",
             expected: "Tek geçiş bölümü",
-            sectionName: section.displayName,
+            sectionName: occurrence.displayHeadingText,
           }),
         ),
         occurrences.length,
@@ -100,7 +102,9 @@ export class PageNumberSequenceValidator implements RuleValidator {
     const fromMatches =
       from.length > 0 && from.every((section) => section.effectiveFormat === expected.fromFormat);
     const restartMatches =
-      expected.restartAt === undefined || transition.start === expected.restartAt;
+      expected.restartAt === undefined ||
+      (hasExplicitStart(transition) &&
+        transition.start === expected.restartAt);
     const passed = beforeMatches && fromMatches && restartMatches;
     const evidence = passed
       ? []
@@ -137,7 +141,7 @@ function resolveEffectiveFormats(
   let inheritedFormat: string | null = null;
 
   return sections.map((section) => {
-    const effectiveFormat = section.format ?? (section.start !== null ? "decimal" : inheritedFormat);
+    const effectiveFormat = section.format ?? inheritedFormat;
 
     if (effectiveFormat !== null) {
       inheritedFormat = effectiveFormat;
@@ -149,11 +153,16 @@ function resolveEffectiveFormats(
 
 function findContainingSectionIndex(
   sections: readonly EffectivePageNumberSection[],
-  transitionSection: Readonly<DocumentSection>,
+  transitionSection: Readonly<AcademicSectionOccurrence>,
 ): number {
   return sections.findIndex(
-    (section) => section.endParagraphIndex >= transitionSection.paragraphIndex,
+    (section) => section.endParagraphIndex >= transitionSection.headingParagraphIndex,
   );
+}
+
+function hasExplicitStart(section: Readonly<PageNumberSection>): boolean {
+  return section.startSemantics === "explicit-start" ||
+    (section.startSemantics === undefined && section.start !== null);
 }
 
 function assertPageNumberSequenceRule(

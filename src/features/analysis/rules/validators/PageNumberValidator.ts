@@ -1,6 +1,7 @@
 import type {
   HeaderFooterLocation,
   NormalizedDocument,
+  PageNumberHeaderFooterReference,
   PageNumberField,
   PageNumberRuleExpected,
   ParagraphAlignment,
@@ -17,7 +18,10 @@ export class PageNumberValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertPageNumberRule(rule);
     const expected = getPageNumberExpected(rule.expected);
-    const fields = document.pageNumbering.fields;
+    const referencedPageFields = getReferencedPageFieldEvidence(document);
+    const fields = referencedPageFields.length > 0 || hasSectionReferences(document)
+      ? referencedPageFields
+      : document.pageNumbering.fields;
 
     if (fields.length === 0) {
       return createResult(
@@ -62,8 +66,8 @@ export class PageNumberValidator implements RuleValidator {
     }
 
     if (expected.alignment) {
-      const matchingField = fieldsAtExpectedLocation.find(
-        (field) => field.alignment === expected.alignment,
+      const matchingField = fieldsAtExpectedLocation.find((field) =>
+        field.alignment === expected.alignment,
       );
 
       if (!matchingField) {
@@ -132,6 +136,50 @@ function isHeaderFooterLocation(value: unknown): value is HeaderFooterLocation {
 
 function isPageNumberAlignment(value: unknown): value is PageNumberAlignment {
   return value === "left" || value === "center" || value === "right";
+}
+
+function hasSectionReferences(document: Readonly<NormalizedDocument>): boolean {
+  return document.pageNumbering.sections.some(
+    (section) => (section.headerFooterReferences ?? []).length > 0,
+  );
+}
+
+function getReferencedPageFieldEvidence(
+  document: Readonly<NormalizedDocument>,
+): PageNumberField[] {
+  const fields: PageNumberField[] = [];
+
+  for (const section of document.pageNumbering.sections) {
+    for (const reference of section.headerFooterReferences ?? []) {
+      if (!reference.hasPageField) {
+        continue;
+      }
+
+      fields.push(...referenceToFields(reference));
+    }
+  }
+
+  return fields;
+}
+
+function referenceToFields(
+  reference: Readonly<PageNumberHeaderFooterReference>,
+): PageNumberField[] {
+  const alignments = reference.alignments.length > 0 ? reference.alignments : [null];
+  const count = Math.max(reference.pageFieldCount, 1);
+  const fields: PageNumberField[] = [];
+
+  for (let index = 0; index < count; index += 1) {
+    fields.push({
+      sourcePath: reference.targetPath ?? "unresolved",
+      location: reference.location,
+      alignment: alignments[Math.min(index, alignments.length - 1)] ?? null,
+      fieldType: "PAGE",
+      structure: "instrText",
+    });
+  }
+
+  return fields;
 }
 
 function createResult(
