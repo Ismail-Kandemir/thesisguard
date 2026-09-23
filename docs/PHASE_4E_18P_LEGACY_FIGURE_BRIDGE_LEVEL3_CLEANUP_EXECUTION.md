@@ -8,6 +8,8 @@ Final decision: **OPTION B - LEVEL 3 COMPLETE WITH HISTORICAL TEST REFERENCES**.
 
 The production legacy figure bridge is removed. Academic figure identity, figure structural evidence, anchor coverage, diagnostics, and front-matter behavior now flow through the semantic model only.
 
+This document is the current authority for production figure bridge retirement. LEVEL 3 is complete for the production architecture described here.
+
 ## 2. Starting checkpoint
 
 | Check | Result |

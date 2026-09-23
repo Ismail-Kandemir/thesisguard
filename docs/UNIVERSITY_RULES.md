@@ -508,11 +508,10 @@ Teknolojisi Lisans kural setinde \`CONDITIONAL_REQUIRED_SECTION\` olarak
 
 modellenir. Tablolar Listesi koşulu normalize edilmiş DOCX body
 
-\`word/document.xml\` içindeki gerçek \`w:tbl\` varlığına, Şekiller
-Listesi koşulu
-
-ise gerçek \`w:drawing\` varlığına dayanır. Metindeki \`Tablo\` veya
-\`Şekil\`
+\`word/document.xml\` içindeki gerçek \`w:tbl\` varlığına dayanır.
+Şekiller Listesi koşulu ise generic \`w:drawing\` varlığına değil,
+semantic modelde \`declared\` academic figure resolution bulunmasına
+dayanır. Metindeki \`Tablo\` veya \`Şekil\`
 
 ifadeleri tek başına koşul oluşturmaz.
 

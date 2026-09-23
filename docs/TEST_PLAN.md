@@ -45,7 +45,7 @@ numbering, all table object/caption/reference/list rules, all figure
 object/caption/reference/list rules, and `Simgeler ve Kısaltmalar Listesi`.
 
 Fixture facts are also asserted where the production model exposes them:
-tables, figures, abbreviations, `DNA`, Heading2/Heading3 occurrences,
+tables, semantic figure facts, abbreviations, `DNA`, Heading2/Heading3 occurrences,
 `Tablolar Listesi`, `Şekiller Listesi`, and
 `Simgeler ve Kısaltmalar Listesi`.
 
@@ -1653,25 +1653,27 @@ sonucu 2 olur.
 Metinde "Tablo 1" yazması Normal text OOXML tablo yapısı
 olmadığı için table sayılmaz.
 
-Hiç görsel yok `figures.count` 0 ve
-`figures.hasFigures` false olur.
+Hiç semantic declared figure yok Şekiller Listesi koşulu
+tetiklenmez.
 
-Bir drawing image Body içindeki tek `w:drawing` için
-`figures.count` 1 ve
-`figures.hasFigures` true olur.
+Generic drawing image Caption semantic ve association olmadan
+academic figure sayılmaz.
 
-Birden fazla image Body içindeki her `w:drawing` ayrı
-sayılır.
+Caption ile declared figure Body içindeki semantic representation,
+caption occurrence, association ve academic resolution üzerinden
+figure presence üretir.
 
-Metinde "Şekil 1" yazması Normal text OOXML drawing yapısı
+Birden fazla declared figure Her academic resolution kendi declared
+figure identity'siyle değerlendirilir.
+
+Metinde "Şekil 1" yazması Normal text OOXML drawing/representation
 olmadığı için figure sayılmaz.
 
-Table + figure aynı belgede `tables` ve `figures` alanları
-birbirinden bağımsız doğru sayıları
-döner.
+Table + figure aynı belgede `tables` ve semantic figure facts
+birbirinden bağımsız değerlendirilir.
 
-Header/footer image body count'a Header/footer XML içindeki image,
-dahil değil `figures.count` değerini artırmaz.
+Header/footer image body semantics'e dahil değildir ve figure listesi
+koşulunu tetiklemez.
 
 Malformed drawing parser'ı Eksik veya beklenmeyen drawing
 düşürmüyor relationship yapısı analiz akışını
@@ -1704,17 +1706,17 @@ no-op/pass döner ve actual
 no-op/pass döner ve actual
 `Uygulanmadı` olur.
 
-`hasFigures=true` + section var Condition true olur; bölüm bulunduğu
+Semantic declared figure var + section var Condition true olur; bölüm bulunduğu
 için validator pass döner.
 
-`hasFigures=true` + section yok Condition true olur; bölüm bulunmadığı
+Semantic declared figure var + section yok Condition true olur; bölüm bulunmadığı
 için validator fail döner.
 
-`hasFigures=false` + section yok Condition false olur; validator
+Semantic declared figure yok + section yok Condition false olur; validator
 no-op/pass döner ve actual
 `Uygulanmadı` olur.
 
-`hasFigures=false` + section var Condition false olur; validator
+Semantic declared figure yok + section var Condition false olur; validator
 no-op/pass döner ve actual
 `Uygulanmadı` olur.
 
@@ -1782,15 +1784,15 @@ Yalnız "Tablo 1" text Gerçek `w:tbl` olmadığı için
 condition tetiklenmez ve kural
 `Uygulanmadı` döner.
 
-Figure yok + liste yok `hasFigures=false`; Şekiller
+Figure yok + liste yok Semantic declared figure yoktur; Şekiller
 Listesi kuralı `Uygulanmadı`
 no-op/pass döner.
 
-Figure var + Şekiller Listesi var Şekiller Listesi kuralı pass döner.
+Declared figure var + Şekiller Listesi var Şekiller Listesi kuralı pass döner.
 
-Figure var + Şekiller Listesi yok Şekiller Listesi kuralı fail döner.
+Declared figure var + Şekiller Listesi yok Şekiller Listesi kuralı fail döner.
 
-Yalnız "Şekil 1" text Gerçek `w:drawing` olmadığı için
+Yalnız "Şekil 1" text Semantic declared figure olmadığı için
 condition tetiklenmez ve kural
 `Uygulanmadı` döner.
 
@@ -1800,10 +1802,10 @@ var
 Table + figure var, iki liste de İki conditional rule da fail döner.
 yok
 
-Table var/listesi var + figure yok Tablolar Listesi pass, Şekiller
+Table var/listesi var + declared figure yok Tablolar Listesi pass, Şekiller
 Listesi `Uygulanmadı` döner.
 
-Figure var/listesi var + table yok Şekiller Listesi pass, Tablolar
+Declared figure var/listesi var + table yok Şekiller Listesi pass, Tablolar
 Listesi `Uygulanmadı` döner.
 
 Experimental seçimi Çözülmüş rule listesinde iki
@@ -2672,20 +2674,19 @@ kalır.
 
 Table `Tablo 1’de...` Caption değildir.
 
-Figure Figure + following caption Caption `after`
-ilişkilendirilir.
+Figure Figure representation + following caption Association `after`
+olarak üretilir.
 
-Figure Figure + preceding caption Caption `before` olarak
-normalize edilir.
+Figure Figure representation + preceding caption Association `before`
+olarak üretilir.
 
-Figure Figure + caption yok Position `none`.
+Figure Figure representation + caption yok Association `missing`.
 
-Figure Birden fazla figure Her drawing ayrı
-occurrence olarak
-sayılır.
+Figure Birden fazla representation Her semantic representation ayrı
+fact olarak korunur.
 
 Figure Aynı paragraph'ta çoklu Caption paylaşılmaz;
-drawing + tek caption occurrence'lar
+representation + tek caption occurrence'lar
 `ambiguous`.
 
 Figure Anchored drawing Görsel konum tahmin
@@ -2697,8 +2698,8 @@ kullanılabilir.
 
 Figure İki caption adayı `ambiguous`.
 
-Figure Nesnesiz `Şekil 1. Başlık` Orphan caption;
-`hasFigures=false`.
+Figure Nesnesiz `Şekil 1. Başlık` Orphan caption; semantic declared
+figure presence üretmez.
 
 Figure `Şekil 2 incelendiğinde...` Caption değildir.
 
@@ -2729,11 +2730,11 @@ Regression `tables.count` / `hasTables` Tüm `w:tbl`, nested
 dahil önceki sonuç
 korunur.
 
-Regression `figures.count` / Her `w:drawing` önceki
-`hasFigures` gibi sayılır.
+Regression semantic figure facts Generic `w:drawing` academic figure
+identity üretmez; declared figure identity semantic resolution'dan gelir.
 
-Regression Tablolar/Şekiller Listesi Aynı facts kullanıldığı
-conditional için sonuç değişmez.
+Regression Tablolar/Şekiller Listesi Tablolar table facts'i, Şekiller
+Listesi semantic declared figure presence'ı kullanır.
 
 Regression Section/TOC/numbering/page Caption parser bu
 sequence modelleri değiştirmez.

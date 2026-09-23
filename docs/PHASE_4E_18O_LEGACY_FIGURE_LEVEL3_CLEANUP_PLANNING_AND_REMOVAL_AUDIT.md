@@ -8,6 +8,8 @@ Final decision: **OPTION B - LEVEL 3 CLEANUP READY WITH TEST MIGRATION**.
 
 Production academic figure identity and the migrated figure validators no longer require `DocumentFigureOccurrence`, `DocumentFigures`, `NormalizedDocument.figures`, or `document.figures.items`. However, the legacy figure parser/type surface is still produced, historical tests and audits still inspect it, and `ObjectCaptionFormatValidator` still contains an inactive non-pilot figure compatibility branch that can read `document.figures.items`.
 
+Post-18P superseded note: this sentence records the 18O checkpoint before cleanup execution. Phase 4E-18P subsequently removed the legacy parser/type/plumbing surfaces and the inactive figure caption-format compatibility branch. In the current production architecture, the legacy figure bridge is absent.
+
 ## 2. Starting checkpoint
 
 Verified before the audit:
@@ -215,3 +217,13 @@ Decision: **OPTION B - LEVEL 3 CLEANUP READY WITH TEST MIGRATION**.
 Remaining blocker: migrate/remove legacy test/audit introspection and the inactive non-pilot figure caption-format compatibility branch before deleting parser/type/plumbing surfaces.
 
 Recommended next phase: **Phase 4E-18P - Legacy Figure Bridge LEVEL 3 Cleanup Execution**.
+
+## 17. Post-18P current-state note
+
+The remaining blocker above was historical to 18O. Phase 4E-18P completed the recommended execution phase:
+
+- `DocumentFigureOccurrence`, `DocumentFigures`, `NormalizedDocument.figures`, `document.figures`, and `parseFigures()` were removed from production source.
+- Figure caption-format no longer has a legacy figure fallback.
+- Historical tests/audits were migrated or converted to static absence guards where appropriate.
+
+Current authority for figure bridge retirement is `docs/PHASE_4E_18P_LEGACY_FIGURE_BRIDGE_LEVEL3_CLEANUP_EXECUTION.md`.

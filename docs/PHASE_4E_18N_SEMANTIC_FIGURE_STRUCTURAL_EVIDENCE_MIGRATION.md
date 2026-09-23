@@ -17,6 +17,8 @@ OOXML
 -> figure validators
 ```
 
+Post-18P superseded note: the retained legacy figure surfaces described in this 18N report were intentionally still present during 18N. They were subsequently removed in Phase 4E-18P. Current production architecture no longer exposes `DocumentFigureOccurrence`, `DocumentFigures`, `NormalizedDocument.figures`, `document.figures`, or `parseFigures()`.
+
 ## 2. Starting checkpoint
 
 Verified before implementation:
@@ -279,3 +281,7 @@ Remaining cleanup can focus on removing or retiring legacy figure surfaces and m
 Recommended next phase: **Phase 4E-18O - Legacy Figure Bridge LEVEL 3 Cleanup Planning and Removal Audit**.
 
 The next phase should decide exact deletion scope for `DocumentFigureOccurrence`, `DocumentFigures`, legacy `parseFigures()`, and compatibility/test-only surfaces without changing table semantics, score arithmetic, diagnostics, or rule metadata.
+
+## 27. Post-18P current-state note
+
+The "retained for now" and "next phase should decide" wording above is historical 18N wording. Phase 4E-18O performed that planning audit, and Phase 4E-18P executed the cleanup. Current production source has no legacy figure bridge readers or writers; figure semantics now flow through object representations, caption occurrences, associations, academic resolutions, applicability helpers, validators, diagnostics, and evidence.

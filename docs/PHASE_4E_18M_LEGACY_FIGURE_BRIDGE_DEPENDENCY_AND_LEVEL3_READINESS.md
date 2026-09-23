@@ -8,6 +8,8 @@ Final decision: **OPTION B - LEVEL 3 READY WITH PREREQUISITE MIGRATION**.
 
 Academic figure identity is no longer legacy-dependent, but production validators still depend on `DocumentFigureOccurrence` / `document.figures.items` for structural evidence, physical alignment fields, object evidence IDs, and anchored coverage candidate counting. A safe LEVEL 3 cleanup first needs a narrow structural evidence migration from legacy figure occurrences to semantic object representations or an equivalent semantic structural evidence model.
 
+Post-18P superseded note: this document records the historical state at the end of Phase 4E-18M. Phase 4E-18N migrated figure structural evidence to the semantic model, Phase 4E-18O proved LEVEL 3 cleanup readiness, and Phase 4E-18P completed LEVEL 3 cleanup. In the current production architecture, `DocumentFigureOccurrence`, `DocumentFigures`, `NormalizedDocument.figures`, `document.figures`, and `parseFigures()` no longer exist.
+
 ## 2. Starting checkpoint
 
 Verified before audit:
@@ -346,3 +348,13 @@ Reason: production academic identity no longer depends on legacy figure presence
 Recommended next phase: **Phase 4E-18N - Semantic Figure Structural Evidence Migration**.
 
 Goal: migrate figure validator structural evidence, physical alignment, caption-position evidence, and anchor coverage candidate counting from `DocumentFigureOccurrence` to semantic representation/association facts without changing score arithmetic, rule metadata, table semantics, or diagnostics.
+
+## 25. Post-18P current-state note
+
+The LEVEL 2 result and LEVEL 3 readiness decision above are historical 18M findings, not the current repository state. They were superseded by:
+
+- `docs/PHASE_4E_18N_SEMANTIC_FIGURE_STRUCTURAL_EVIDENCE_MIGRATION.md`: production figure structural evidence migrated to semantic `ObjectRepresentationOccurrence` / `ObjectCaptionAssociation` facts.
+- `docs/PHASE_4E_18O_LEGACY_FIGURE_LEVEL3_CLEANUP_PLANNING_AND_REMOVAL_AUDIT.md`: LEVEL 3 cleanup readiness proven after test/audit migration planning.
+- `docs/PHASE_4E_18P_LEGACY_FIGURE_BRIDGE_LEVEL3_CLEANUP_EXECUTION.md`: LEVEL 3 cleanup executed and production legacy figure bridge removed.
+
+Current source of truth after 18P: academic figure identity, figure structural evidence, anchor coverage, diagnostics, and front-matter scope are semantic. The legacy figure bridge is absent from production source.
