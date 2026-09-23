@@ -13,6 +13,7 @@ import { ObjectAlignmentValidator } from "./validators/ObjectAlignmentValidator"
 import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlacementValidator";
 import { ObjectCaptionFormatValidator } from "./validators/ObjectCaptionFormatValidator";
 import { ObjectInTextReferenceValidator } from "./validators/ObjectInTextReferenceValidator";
+import { BibliographyReferencesValidator } from "./validators/BibliographyReferencesValidator";
 import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
 import { SectionOrderValidator } from "./validators/SectionOrderValidator";
 import { SectionKeywordsValidator } from "./validators/SectionKeywordsValidator";
@@ -139,7 +140,7 @@ export class ValidatorRegistry {
       FOOD_TECHNOLOGY_TABLE_OF_CONTENTS_RULE_ID,
       new RequiredSectionValidator(),
     ],
-    [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new RequiredSectionValidator()],
+    [FOOD_TECHNOLOGY_REFERENCES_RULE_ID, new BibliographyReferencesValidator()],
     [FOOD_TECHNOLOGY_SUMMARY_TR_RULE_ID, new RequiredSectionValidator()],
     [FOOD_TECHNOLOGY_SUMMARY_EN_RULE_ID, new RequiredSectionValidator()],
     [

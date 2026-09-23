@@ -739,6 +739,51 @@ export interface AcademicTermEntry {
   parsingEvidence: string[];
 }
 
+export type BibliographyEntryBoundaryStatus =
+  | "DEFINITE_ENTRY"
+  | "POSSIBLE_CONTINUATION"
+  | "UNRESOLVED";
+
+export interface BibliographyEntryFormattingFacts {
+  paragraphStyleId: string | null;
+  alignment: ParagraphAlignment | null;
+  lineSpacing: number | null;
+  paragraphFormatting: ParagraphFormatting;
+}
+
+export interface BibliographyEntryOccurrence {
+  id: string;
+  sectionOccurrenceId: string;
+  paragraphIds: string[];
+  paragraphIndexes: number[];
+  blockStart: number | null;
+  blockEnd: number | null;
+  visibleText: string;
+  normalizedText: string;
+  entryIndex: number;
+  boundaryStatus: BibliographyEntryBoundaryStatus;
+  confidence: "high" | "low";
+  formatting: BibliographyEntryFormattingFacts;
+  evidence: string[];
+}
+
+export type BibliographySectionContentStatus =
+  | "SECTION_MISSING"
+  | "SECTION_PRESENT_EMPTY"
+  | "SECTION_PRESENT_WITH_ENTRIES"
+  | "SECTION_PRESENT_UNRESOLVED_CONTENT";
+
+export interface DocumentBibliography {
+  sectionOccurrenceId: string | null;
+  sectionIdentity: string | null;
+  sectionHeadingParagraphId: string | null;
+  sectionHeadingParagraphIndex: number | null;
+  sectionBoundary: AcademicSectionBoundary | null;
+  status: BibliographySectionContentStatus;
+  entries: BibliographyEntryOccurrence[];
+  unresolvedParagraphIds: string[];
+}
+
 export type AcademicSectionRecognitionStatus =
   | "declared"
   | "ambiguous"
@@ -842,6 +887,7 @@ export interface NormalizedDocument {
   academicScopes: AcademicDocumentScopes;
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
+  bibliography?: DocumentBibliography;
   academicSections: DocumentAcademicSections;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];
