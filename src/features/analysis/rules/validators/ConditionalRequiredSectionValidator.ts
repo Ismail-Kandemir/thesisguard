@@ -1,9 +1,9 @@
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import {
   evaluateDocumentCondition,
   getDocumentFactValue,
   isSupportedDocumentFact,
 } from "../documentFactEvaluator";
+import { findDeclaredAcademicSectionOccurrencesByNames } from "../academicSectionLookup";
 import type {
   ConditionalRequiredSectionFact,
   ConditionalRequiredSectionRuleExpected,
@@ -129,9 +129,26 @@ function hasExpectedSection(
 ): boolean {
   const expectedNames = [expected.section, ...(expected.aliases ?? [])];
 
-  return document.sections.some((section) =>
-    sectionMatchesAnyExpectedName(section, expectedNames),
-  );
+  return findDeclaredAcademicSectionOccurrencesByNames(
+    document,
+    [
+      {
+        id: "conditional-required-section.lookup",
+        type: "CONDITIONAL_REQUIRED_SECTION",
+        title: expected.section,
+        description: "",
+        category: "structure",
+        expected,
+        severity: "error",
+        score: 0,
+        message: "",
+        solution: "",
+        enabled: true,
+        version: "lookup",
+      },
+    ],
+    expectedNames,
+  ).length > 0;
 }
 
 function createResult(

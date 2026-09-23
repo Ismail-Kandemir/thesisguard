@@ -690,6 +690,79 @@ export interface DocumentAbbreviations {
   hasAbbreviations: boolean;
 }
 
+export type AcademicTermEntryKind = "abbreviation" | "symbol";
+
+export type AcademicTermEntryParseStatus = "valid" | "malformed";
+
+export interface AcademicTermEntry {
+  kind: AcademicTermEntryKind;
+  term: string;
+  normalizedTerm: string;
+  definition: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  sourceSectionId: string;
+  sourceSectionIdentity: string | null;
+  confidence: "high" | "low";
+  status: AcademicTermEntryParseStatus;
+  parsingEvidence: string[];
+}
+
+export type AcademicSectionRecognitionStatus =
+  | "declared"
+  | "ambiguous"
+  | "unresolved";
+
+export type AcademicSectionConfidence =
+  | "high"
+  | "ambiguous"
+  | "unresolved";
+
+export type AcademicSectionRecognitionEvidence =
+  | "rule-expected-section"
+  | "rule-alias"
+  | "standalone-heading-text"
+  | "manual-numbering-prefix"
+  | "automatic-numbering"
+  | "heading-style"
+  | "toc-excluded"
+  | "caption-excluded"
+  | "textbox-excluded"
+  | "table-cell-excluded";
+
+export interface AcademicSectionBoundary {
+  startParagraphIndex: number;
+  endParagraphIndex: number;
+  startBlockIndex: number | null;
+  endBlockIndex: number | null;
+}
+
+export interface AcademicSectionOccurrence {
+  id: string;
+  identity: string | null;
+  canonicalName: string | null;
+  candidateIdentities: string[];
+  status: AcademicSectionRecognitionStatus;
+  confidence: AcademicSectionConfidence;
+  headingParagraphId: string;
+  headingParagraphIndex: number;
+  blockIndex: number | null;
+  normalizedHeadingText: string;
+  displayHeadingText: string;
+  headingLevel: number | null;
+  numberingLevel: number | null;
+  numberingSource: HeadingNumberingSource;
+  visibleNumberingLabel: string | null;
+  recognitionEvidence: AcademicSectionRecognitionEvidence[];
+  boundary: AcademicSectionBoundary;
+  scope: AcademicScopeAssignment | null;
+}
+
+export interface DocumentAcademicSections {
+  occurrences: AcademicSectionOccurrence[];
+}
+
 export interface DocumentSection {
   normalizedName: string;
   displayName: string;
@@ -739,6 +812,7 @@ export interface NormalizedDocument {
   academicScopes: AcademicDocumentScopes;
   objectReferences: DocumentObjectReferences;
   abbreviations: DocumentAbbreviations;
+  academicSections: DocumentAcademicSections;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];
   themeFonts?: DocumentThemeFonts | null;

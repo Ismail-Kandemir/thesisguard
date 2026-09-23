@@ -1,8 +1,10 @@
-import { sectionMatchesExpectedName } from "../../parsers/sectionNameMatcher";
-import { getSectionContentParagraphs } from "../sectionContent";
+import {
+  findAcademicSectionOccurrencesByNames,
+  findDeclaredAcademicSectionOccurrencesByNames,
+} from "../academicSectionLookup";
+import { getAcademicSectionContentParagraphs } from "../sectionContent";
 import { parseSectionKeywordLines } from "../sectionKeywordsParser";
 import type {
-  DocumentSection,
   NormalizedDocument,
   Paragraph,
   RuleDefinition,
@@ -12,8 +14,8 @@ import type {
   SectionKeywordsRuleExpected,
 } from "../../types";
 import {
+  createAcademicSectionEvidence,
   createParagraphEvidence,
-  createSectionEvidence,
   MAX_RULE_EVIDENCE_ITEMS,
 } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
@@ -22,7 +24,37 @@ export class SectionKeywordsValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertSectionKeywordsRule(rule);
     const expected = getExpected(rule.expected);
-    const occurrences = findSectionOccurrences(document.sections, expected.section);
+    const matchingOccurrences = findAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      [expected.section],
+    );
+    const ambiguousOccurrences = matchingOccurrences.filter(
+      (occurrence) => occurrence.status === "ambiguous",
+    );
+    const occurrences = findDeclaredAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      [expected.section],
+    );
+
+    if (ambiguousOccurrences.length > 0) {
+      return createResult(
+        rule,
+        expected,
+        "FAILED",
+        "Güvenle doğrulanamadı",
+        `${expected.section} bölümü belirsiz eşleşme nedeniyle anahtar kelimeler için güvenle doğrulanamadı.`,
+        ambiguousOccurrences.map((occurrence) =>
+          createAcademicSectionEvidence(occurrence, {
+            actual: "Belirsiz bölüm eşleşmesi",
+            expected: "Tek güvenilir bölüm",
+            sectionName: occurrence.displayHeadingText,
+          }),
+        ),
+        ambiguousOccurrences.length,
+      );
+    }
 
     if (occurrences.length === 0) {
       return createResult(
@@ -42,18 +74,18 @@ export class SectionKeywordsValidator implements RuleValidator {
         "Güvenle doğrulanamadı",
         `${expected.section} bölümü birden fazla kez bulunduğu için anahtar kelimeler güvenle doğrulanamadı.`,
         occurrences.map((occurrence) =>
-          createSectionEvidence(occurrence, {
+          createAcademicSectionEvidence(occurrence, {
             actual: "Birden fazla bölüm bulundu",
             expected: "Tek bölüm",
-            sectionName: occurrence.displayName,
+            sectionName: occurrence.displayHeadingText,
           }),
         ),
         occurrences.length,
       );
     }
 
-    const section = occurrences[0];
-    const paragraphs = getSectionContentParagraphs(document, section);
+    const occurrence = occurrences[0];
+    const paragraphs = getAcademicSectionContentParagraphs(document, occurrence);
     const lines = parseSectionKeywordLines(
       paragraphs,
       expected.labels,
@@ -69,10 +101,10 @@ export class SectionKeywordsValidator implements RuleValidator {
         "Bulunamadı",
         `${primaryLabel} satırı bulunamadı.`,
         [
-          createSectionEvidence(section, {
+          createAcademicSectionEvidence(occurrence, {
             actual: "Tespit edilmedi",
             expected: `${expected.min}-${expected.max} anahtar kelime`,
-            sectionName: section.displayName,
+            sectionName: occurrence.displayHeadingText,
           }),
         ],
         1,
@@ -219,13 +251,6 @@ function isNonEmptyStringArray(value: unknown): value is string[] {
 
 function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0;
-}
-
-function findSectionOccurrences(
-  sections: readonly DocumentSection[],
-  sectionName: string,
-): DocumentSection[] {
-  return sections.filter((section) => sectionMatchesExpectedName(section, sectionName));
 }
 
 function createKeywordLineEvidence(

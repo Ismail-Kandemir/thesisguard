@@ -63,6 +63,8 @@ export interface SectionRuleEvidence {
   sectionName: string;
   paragraphId?: string;
   paragraphIndex?: number;
+  blockIndex?: number | null;
+  confidence?: string;
   expected?: RuleResultValue;
   actual?: RuleResultValue;
   unit?: string;

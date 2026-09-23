@@ -1,4 +1,5 @@
 import type {
+  AcademicSectionOccurrence,
   CaptionRuleEvidence,
   DocumentFormatRuleEvidence,
   DocumentCaption,
@@ -136,6 +137,31 @@ export function createSectionEvidence(
     sectionName: values.sectionName ?? section.displayName,
     paragraphId: section.paragraphId,
     paragraphIndex: section.paragraphIndex,
+    ...("expected" in values ? { expected: values.expected } : {}),
+    ...("actual" in values ? { actual: values.actual } : {}),
+    ...(values.unit ? { unit: values.unit } : {}),
+  };
+}
+
+export function createAcademicSectionEvidence(
+  occurrence: Readonly<AcademicSectionOccurrence>,
+  values: Readonly<{
+    actual?: RuleResultValue;
+    expected?: RuleResultValue;
+    sectionName?: string;
+    unit?: string;
+  }> = {},
+): SectionRuleEvidence {
+  return {
+    kind: "section",
+    sectionName:
+      values.sectionName ??
+      occurrence.canonicalName ??
+      occurrence.displayHeadingText,
+    paragraphId: occurrence.headingParagraphId,
+    paragraphIndex: occurrence.headingParagraphIndex,
+    ...(occurrence.blockIndex !== null ? { blockIndex: occurrence.blockIndex } : {}),
+    confidence: occurrence.confidence,
     ...("expected" in values ? { expected: values.expected } : {}),
     ...("actual" in values ? { actual: values.actual } : {}),
     ...(values.unit ? { unit: values.unit } : {}),

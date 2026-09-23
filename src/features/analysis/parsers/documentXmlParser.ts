@@ -78,6 +78,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       count: 0,
       hasAbbreviations: false,
     },
+    academicSections: { occurrences: [] },
     numberingDefinitions: [],
     sections: parseDocumentSections(paragraphs),
     headings: [],

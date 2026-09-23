@@ -1,7 +1,8 @@
 import type { DocumentSection } from "../types";
 import { normalizeSectionName } from "./documentSectionsParser";
 
-const MANUAL_NUMBER_PREFIX_PATTERN = /^\s*((?:\d+\.){1,3})\s+(.+?)\s*$/u;
+const MANUAL_NUMBER_PREFIX_PATTERN =
+  /^\s*(\d+(?:\.\d+){0,2}\.?)\s+(.+?)\s*$/u;
 
 export interface ManualNumberPrefix {
   label: string;
@@ -17,10 +18,11 @@ export function parseManualNumberPrefix(value: string): ManualNumberPrefix | nul
   }
 
   const label = match[1];
+  const numberingParts = label.split(".").filter(Boolean);
 
   return {
     label,
-    level: label.split(".").filter(Boolean).length - 1,
+    level: numberingParts.length - 1,
     remainder: match[2],
   };
 }

@@ -4,8 +4,11 @@ import type {
   RuleDefinition,
   RuleResult,
 } from "../../types";
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
-import { createMissingSectionEvidence } from "../ruleEvidence";
+import { findAcademicSectionOccurrencesByNames } from "../academicSectionLookup";
+import {
+  createAcademicSectionEvidence,
+  createMissingSectionEvidence,
+} from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class RequiredSectionValidator implements RuleValidator {
@@ -13,9 +16,19 @@ export class RequiredSectionValidator implements RuleValidator {
     assertRequiredSectionRule(rule);
     const expected = getRequiredSectionExpected(rule.expected);
     const expectedNames = [expected.section, ...(expected.aliases ?? [])];
-    const hasSection = document.sections.some((section) =>
-      sectionMatchesAnyExpectedName(section, expectedNames),
+    const matchingOccurrences = findAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      expectedNames,
     );
+    const declaredOccurrences = matchingOccurrences.filter(
+      (occurrence) => occurrence.status === "declared",
+    );
+    const ambiguousOccurrences = matchingOccurrences.filter(
+      (occurrence) => occurrence.status === "ambiguous",
+    );
+    const hasSection = declaredOccurrences.length > 0;
+    const hasAmbiguousSection = !hasSection && ambiguousOccurrences.length > 0;
     const passed = !expected.required || hasSection;
 
     return {
@@ -27,22 +40,36 @@ export class RequiredSectionValidator implements RuleValidator {
       expected: expected.required
         ? `${expected.section} bölümü bulunmalı`
         : `${expected.section} bölümü zorunlu değil`,
-      actual: hasSection ? "Bulundu" : "Tespit edilmedi",
+      actual: hasSection
+        ? "Bulundu"
+        : hasAmbiguousSection
+          ? "Belirsiz"
+          : "Tespit edilmedi",
       message: passed
         ? hasSection
           ? `${expected.section} bölümü bulundu.`
           : `${expected.section} bölümü zorunlu değil.`
-        : `${expected.section} bölümü tespit edilemedi.`,
+        : hasAmbiguousSection
+          ? `${expected.section} bölümü belirsiz eşleşme nedeniyle güvenle doğrulanamadı.`
+          : `${expected.section} bölümü tespit edilemedi.`,
       ...(passed
         ? {}
         : {
-            evidence: [
-              createMissingSectionEvidence(expected.section, {
-                actual: "Tespit edilmedi",
-                expected: "Bölüm bulunmalı",
-              }),
-            ],
-            evidenceTotal: 1,
+            evidence: hasAmbiguousSection
+              ? ambiguousOccurrences.map((occurrence) =>
+                  createAcademicSectionEvidence(occurrence, {
+                    actual: occurrence.displayHeadingText,
+                    expected: expected.section,
+                    sectionName: expected.section,
+                  }),
+                )
+              : [
+                  createMissingSectionEvidence(expected.section, {
+                    actual: "Tespit edilmedi",
+                    expected: "Bölüm bulunmalı",
+                  }),
+                ],
+            evidenceTotal: hasAmbiguousSection ? ambiguousOccurrences.length : 1,
           }),
     };
   }

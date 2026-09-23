@@ -5,6 +5,7 @@ import { normalizeDocumentNumbering } from "./parsers/documentNumberingNormalize
 import { parseNumberingXml } from "./parsers/numberingXmlParser";
 import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
 import { normalizeAcademicDocumentScopes } from "./parsers/academicDocumentScopeNormalizer";
+import { normalizeAcademicSections } from "./parsers/academicSectionsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
@@ -78,13 +79,17 @@ export async function analyzeDocx(
     documentWithHeadingOccurrences,
     rules,
   );
+  const documentWithAcademicSections = normalizeAcademicSections(
+    documentWithAcademicScopes,
+    rules,
+  );
   const documentWithSectionHeadings: NormalizedDocument = {
-    ...documentWithAcademicScopes,
+    ...documentWithAcademicSections,
     abbreviations: normalizeDocumentAbbreviations(
-      documentWithAcademicScopes,
+      documentWithAcademicSections,
     ),
     objectReferences: normalizeDocumentObjectReferences(
-      documentWithAcademicScopes,
+      documentWithAcademicSections,
     ),
   };
   const ruleEngine = new RuleEngine();

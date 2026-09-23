@@ -1,8 +1,11 @@
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
-import { getSectionContentParagraphs } from "../sectionContent";
+import {
+  findAcademicSectionOccurrencesByNames,
+  findDeclaredAcademicSectionOccurrencesByNames,
+} from "../academicSectionLookup";
+import { getAcademicSectionContentParagraphs } from "../sectionContent";
 import { countWords } from "../wordCount";
 import type {
-  DocumentSection,
+  AcademicSectionOccurrence,
   NormalizedDocument,
   RuleDefinition,
   RuleEvidence,
@@ -10,14 +13,45 @@ import type {
   RuleResultStatus,
   SectionWordCountRuleExpected,
 } from "../../types";
-import { createSectionEvidence } from "../ruleEvidence";
+import { createAcademicSectionEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
 
 export class SectionWordCountValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertSectionWordCountRule(rule);
     const expected = getSectionWordCountExpected(rule.expected);
-    const occurrences = findSectionOccurrences(document.sections, expected);
+    const expectedNames = [expected.section, ...(expected.aliases ?? [])];
+    const matchingOccurrences = findAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      expectedNames,
+    );
+    const ambiguousOccurrences = matchingOccurrences.filter(
+      (occurrence) => occurrence.status === "ambiguous",
+    );
+    const occurrences = findDeclaredAcademicSectionOccurrencesByNames(
+      document,
+      [rule],
+      expectedNames,
+    );
+
+    if (ambiguousOccurrences.length > 0) {
+      return createResult(
+        rule,
+        expected,
+        "FAILED",
+        "Güvenle hesaplanamadı",
+        `${expected.section} bölümü belirsiz eşleşme nedeniyle kelime sayısı için güvenle hesaplanamadı.`,
+        ambiguousOccurrences.map((occurrence) =>
+          createAcademicSectionEvidence(occurrence, {
+            actual: "Belirsiz bölüm eşleşmesi",
+            expected: "Tek güvenilir bölüm",
+            sectionName: occurrence.displayHeadingText,
+          }),
+        ),
+        ambiguousOccurrences.length,
+      );
+    }
 
     if (occurrences.length === 0) {
       return createResult(
@@ -37,17 +71,18 @@ export class SectionWordCountValidator implements RuleValidator {
         "Güvenle hesaplanamadı",
         `${expected.section} bölümü birden fazla kez bulunduğu için kelime sayısı güvenle hesaplanamadı.`,
         occurrences.map((occurrence) =>
-          createSectionEvidence(occurrence, {
+          createAcademicSectionEvidence(occurrence, {
             actual: "Birden fazla bölüm bulundu",
             expected: "Tek bölüm",
-            sectionName: occurrence.displayName,
+            sectionName: occurrence.displayHeadingText,
           }),
         ),
         occurrences.length,
       );
     }
 
-    const paragraphs = getSectionContentParagraphs(document, occurrences[0]);
+    const occurrence = occurrences[0];
+    const paragraphs = getAcademicSectionContentParagraphs(document, occurrence);
     const wordCount = countWords(paragraphs.map((paragraph) => paragraph.text));
     const passed =
       (expected.min === undefined || wordCount >= expected.min) &&
@@ -62,10 +97,9 @@ export class SectionWordCountValidator implements RuleValidator {
       passed
         ? undefined
         : [
-            createSectionEvidence(occurrences[0], {
+            createSemanticSectionEvidence(occurrence, {
               actual: wordCount,
               expected: formatExpected(expected),
-              sectionName: occurrences[0].displayName,
               unit: "kelime",
             }),
           ],
@@ -123,15 +157,14 @@ function isNonNegativeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isInteger(value) && value >= 0;
 }
 
-function findSectionOccurrences(
-  sections: readonly DocumentSection[],
-  expected: SectionWordCountRuleExpected,
-): DocumentSection[] {
-  const expectedNames = [expected.section, ...(expected.aliases ?? [])];
-
-  return sections.filter((section) =>
-    sectionMatchesAnyExpectedName(section, expectedNames),
-  );
+function createSemanticSectionEvidence(
+  occurrence: Readonly<AcademicSectionOccurrence>,
+  values: Parameters<typeof createAcademicSectionEvidence>[1],
+): RuleEvidence {
+  return createAcademicSectionEvidence(occurrence, {
+    ...values,
+    sectionName: occurrence.displayHeadingText,
+  });
 }
 
 function createResult(

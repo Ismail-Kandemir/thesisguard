@@ -1,6 +1,5 @@
-import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher";
 import type {
-  DocumentSection,
+  AcademicSectionOccurrence,
   NormalizedDocument,
   RuleEvidence,
   RuleDefinition,
@@ -8,28 +7,56 @@ import type {
   SectionOrderItem,
   SectionOrderRuleExpected,
 } from "../../types";
+import { findAcademicSectionOccurrencesByNames } from "../academicSectionLookup";
+import {
+  createAcademicSectionEvidence,
+  MAX_RULE_EVIDENCE_ITEMS,
+} from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
-import { createSectionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 
 interface LocatedSection {
   item: SectionOrderItem;
-  occurrence: DocumentSection;
+  occurrence: AcademicSectionOccurrence;
 }
 
 export class SectionOrderValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertSectionOrderRule(rule);
     const expected = getSectionOrderExpected(rule.expected);
+    const ambiguousOccurrence = expected.sections
+      .flatMap((item) =>
+        findAcademicSectionOccurrencesByNames(document, [rule], getNames(item)),
+      )
+      .find((occurrence) => occurrence.status === "ambiguous");
+
+    if (ambiguousOccurrence) {
+      return createResult(
+        rule,
+        expected,
+        false,
+        "Belirsiz bölüm eşleşmesi",
+        `${ambiguousOccurrence.displayHeadingText} başlığı belirsiz eşleşme nedeniyle bölüm sırasında kullanılamadı.`,
+        [
+          createAcademicSectionEvidence(ambiguousOccurrence, {
+            actual: ambiguousOccurrence.displayHeadingText,
+            expected: ambiguousOccurrence.candidateIdentities.join(", "),
+          }),
+        ],
+        1,
+      );
+    }
+
     const locatedSections = expected.sections
-      .map((item) => locateSection(item, document.sections))
+      .map((item) => locateSection(item, document, rule))
       .filter((section): section is LocatedSection => section !== null);
     const duplicate = findDuplicateExpectedSection(
       expected.sections,
-      document.sections,
+      document,
+      rule,
     );
 
     if (duplicate) {
-      const duplicateOccurrences = findDuplicateOccurrences(duplicate, document.sections);
+      const duplicateOccurrences = findDuplicateOccurrences(duplicate, document, rule);
       return createResult(
         rule,
         expected,
@@ -37,8 +64,8 @@ export class SectionOrderValidator implements RuleValidator {
         formatActual(locatedSections),
         `${duplicate.section} bölümü belgede birden fazla kez bulundu; bölüm sırası güvenle doğrulanamadı.`,
         duplicateOccurrences.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((section) =>
-          createSectionEvidence(section, {
-            actual: section.displayName,
+          createAcademicSectionEvidence(section, {
+            actual: section.displayHeadingText,
             expected: duplicate.section,
             sectionName: duplicate.section,
           }),
@@ -58,8 +85,8 @@ export class SectionOrderValidator implements RuleValidator {
         formatActual(locatedSections),
         `${before.item.section} bölümü, ${after.item.section} bölümünden sonra bulundu.`,
         [before, after].map((section) =>
-          createSectionEvidence(section.occurrence, {
-            actual: section.occurrence.displayName,
+          createAcademicSectionEvidence(section.occurrence, {
+            actual: section.occurrence.displayHeadingText,
             expected: section.item.section,
             sectionName: section.item.section,
           }),
@@ -129,33 +156,32 @@ function getNames(item: SectionOrderItem): string[] {
 
 function locateSection(
   item: SectionOrderItem,
-  sections: readonly DocumentSection[],
+  document: Readonly<NormalizedDocument>,
+  rule: RuleDefinition,
 ): LocatedSection | null {
-  const names = getNames(item);
-  const occurrence = sections.find((section) =>
-    sectionMatchesAnyExpectedName(section, names),
-  );
+  const occurrence = findDuplicateOccurrences(item, document, rule)[0];
   return occurrence ? { item, occurrence } : null;
 }
 
 function findDuplicateExpectedSection(
   items: readonly SectionOrderItem[],
-  sections: readonly DocumentSection[],
+  document: Readonly<NormalizedDocument>,
+  rule: RuleDefinition,
 ): SectionOrderItem | null {
   return (
-    items.find((item) => {
-      const names = getNames(item);
-      return sections.filter((section) => sectionMatchesAnyExpectedName(section, names)).length > 1;
-    }) ?? null
+    items.find((item) => findDuplicateOccurrences(item, document, rule).length > 1) ??
+    null
   );
 }
 
 function findDuplicateOccurrences(
   item: SectionOrderItem,
-  sections: readonly DocumentSection[],
-): DocumentSection[] {
-  const names = getNames(item);
-  return sections.filter((section) => sectionMatchesAnyExpectedName(section, names));
+  document: Readonly<NormalizedDocument>,
+  rule: RuleDefinition,
+): AcademicSectionOccurrence[] {
+  return findAcademicSectionOccurrencesByNames(document, [rule], getNames(item)).filter(
+    (occurrence) => occurrence.status === "declared",
+  );
 }
 
 function findMisplacedPair(
@@ -165,7 +191,10 @@ function findMisplacedPair(
     const before = sections[index - 1];
     const after = sections[index];
 
-    if (before.occurrence.paragraphIndex > after.occurrence.paragraphIndex) {
+    if (
+      before.occurrence.headingParagraphIndex >
+      after.occurrence.headingParagraphIndex
+    ) {
       return [before, after];
     }
   }
@@ -201,9 +230,10 @@ function formatActual(sections: readonly LocatedSection[]): string {
     ? [...sections]
         .sort(
           (first, second) =>
-            first.occurrence.paragraphIndex - second.occurrence.paragraphIndex,
+            first.occurrence.headingParagraphIndex -
+            second.occurrence.headingParagraphIndex,
         )
-        .map((section) => section.occurrence.displayName)
+        .map((section) => section.occurrence.displayHeadingText)
         .join(" → ")
     : "Beklenen bölümlerden hiçbiri tespit edilmedi";
 }
