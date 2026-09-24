@@ -15,9 +15,41 @@ const RELATIONSHIPS_NAMESPACE = "http://schemas.openxmlformats.org/package/2006/
 const HEADER_XML_PATTERN = /^word\/header[\w-]*\.xml$/;
 const FOOTER_XML_PATTERN = /^word\/footer[\w-]*\.xml$/;
 
+export const DOCX_PACKAGE_LIMITS = {
+  maxPartCount: 750,
+  maxPartSizeBytes: 12 * 1024 * 1024,
+  maxTotalUncompressedSizeBytes: 80 * 1024 * 1024,
+} as const;
+
+export type DocxPackageErrorCode =
+  | "DOCX_MALFORMED_PACKAGE"
+  | "DOCX_MISSING_DOCUMENT_XML"
+  | "DOCX_INVALID_XML"
+  | "DOCX_EXCESSIVE_PART_COUNT"
+  | "DOCX_EXCESSIVE_PART_SIZE"
+  | "DOCX_EXCESSIVE_TOTAL_SIZE";
+
+export class DocxPackageError extends Error {
+  constructor(
+    readonly code: DocxPackageErrorCode,
+    message: string,
+    options?: ErrorOptions,
+  ) {
+    super(message, options);
+    this.name = "DocxPackageError";
+  }
+}
+
+type ZipObjectWithSizeMetadata = JSZip.JSZipObject & {
+  _data?: {
+    uncompressedSize?: number;
+  };
+};
+
 export async function inspectDocxPackage(file: File): Promise<DocxPackageInspection> {
   try {
     const zip = await JSZip.loadAsync(file);
+    assertSafeDocxPackage(zip);
     const packageFiles = Object.values(zip.files).filter((entry) => !entry.dir);
     const fileNames = packageFiles.map((entry) => entry.name);
 
@@ -26,7 +58,10 @@ export async function inspectDocxPackage(file: File): Promise<DocxPackageInspect
     const hasNumberingXml = zip.file(NUMBERING_XML_PATH) !== null;
 
     if (!hasDocumentXml) {
-      throw new Error("DOCX paketinde word/document.xml bulunamadi.");
+      throw new DocxPackageError(
+        "DOCX_MISSING_DOCUMENT_XML",
+        "DOCX paketinde word/document.xml bulunamadi.",
+      );
     }
 
     await readXmlPart(file, DOCUMENT_XML_PATH, zip);
@@ -42,23 +77,25 @@ export async function inspectDocxPackage(file: File): Promise<DocxPackageInspect
       totalFileCount: packageFiles.length,
     };
   } catch (error) {
-    throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
+    throw createDocxPackageReadError(error);
   }
 }
 
 export async function readDocxDocumentXml(file: File): Promise<string> {
   try {
     const zip = await JSZip.loadAsync(file);
+    assertSafeDocxPackage(zip);
 
     return await readXmlPart(file, DOCUMENT_XML_PATH, zip);
   } catch (error) {
-    throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
+    throw createDocxPackageReadError(error);
   }
 }
 
 export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysisXmlParts> {
   try {
     const zip = await JSZip.loadAsync(file);
+    assertSafeDocxPackage(zip);
     const documentXml = await readXmlPart(file, DOCUMENT_XML_PATH, zip);
     const documentRelationshipsXml = zip.file(DOCUMENT_RELATIONSHIPS_PATH)
       ? await readXmlPart(file, DOCUMENT_RELATIONSHIPS_PATH, zip)
@@ -81,8 +118,54 @@ export async function readDocxAnalysisXmlParts(file: File): Promise<DocxAnalysis
       headerFooterXmlParts,
     };
   } catch (error) {
-    throw new Error(createDocxInspectionErrorMessage(error), { cause: error });
+    throw createDocxPackageReadError(error);
   }
+}
+
+function assertSafeDocxPackage(zip: JSZip): void {
+  const packageFiles = Object.values(zip.files).filter((entry) => !entry.dir);
+
+  if (packageFiles.length > DOCX_PACKAGE_LIMITS.maxPartCount) {
+    throw new DocxPackageError(
+      "DOCX_EXCESSIVE_PART_COUNT",
+      `DOCX paketinde cok fazla parca var (${packageFiles.length}).`,
+    );
+  }
+
+  let totalUncompressedSizeBytes = 0;
+
+  for (const entry of packageFiles) {
+    const uncompressedSize = getUncompressedEntrySize(entry);
+
+    if (uncompressedSize > DOCX_PACKAGE_LIMITS.maxPartSizeBytes) {
+      throw new DocxPackageError(
+        "DOCX_EXCESSIVE_PART_SIZE",
+        `${entry.name} parcasi guvenli sinirdan buyuk.`,
+      );
+    }
+
+    totalUncompressedSizeBytes += uncompressedSize;
+
+    if (totalUncompressedSizeBytes > DOCX_PACKAGE_LIMITS.maxTotalUncompressedSizeBytes) {
+      throw new DocxPackageError(
+        "DOCX_EXCESSIVE_TOTAL_SIZE",
+        "DOCX paketinin acilmis boyutu guvenli siniri asiyor.",
+      );
+    }
+  }
+}
+
+function getUncompressedEntrySize(entry: JSZip.JSZipObject): number {
+  const size = (entry as ZipObjectWithSizeMetadata)._data?.uncompressedSize;
+
+  if (!Number.isFinite(size)) {
+    throw new DocxPackageError(
+      "DOCX_MALFORMED_PACKAGE",
+      `${entry.name} parcasi boyut bilgisi okunamadi.`,
+    );
+  }
+
+  return size;
 }
 
 async function readThemeXmlPart(file: File, zip: JSZip): Promise<string | null> {
@@ -160,23 +243,37 @@ async function readXmlPart(file: File, partPath: string, zip: JSZip): Promise<st
   const xmlFile = zip.file(partPath);
 
   if (!xmlFile) {
-    throw new Error(`${partPath} okunamadi.`);
+    throw new DocxPackageError("DOCX_MISSING_DOCUMENT_XML", `${partPath} okunamadi.`);
   }
 
   const xmlContent = await xmlFile.async("text");
   const xmlDocument = new DOMParser().parseFromString(xmlContent, "application/xml");
 
   if (xmlDocument.querySelector("parsererror")) {
-    throw new Error(`${file.name} icindeki ${partPath} gecerli XML degil.`);
+    throw new DocxPackageError(
+      "DOCX_INVALID_XML",
+      `${file.name} icindeki ${partPath} gecerli XML degil.`,
+    );
   }
 
   return xmlContent;
 }
 
-function createDocxInspectionErrorMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return `DOCX paketi okunamadi: ${error.message}`;
+function createDocxPackageReadError(error: unknown): DocxPackageError {
+  if (error instanceof DocxPackageError) {
+    return error;
   }
 
-  return "DOCX paketi okunamadi: Bilinmeyen bir hata olustu.";
+  if (error instanceof Error) {
+    return new DocxPackageError(
+      "DOCX_MALFORMED_PACKAGE",
+      `DOCX paketi okunamadi: ${error.message}`,
+      { cause: error },
+    );
+  }
+
+  return new DocxPackageError(
+    "DOCX_MALFORMED_PACKAGE",
+    "DOCX paketi okunamadi: Bilinmeyen bir hata olustu.",
+  );
 }

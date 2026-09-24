@@ -4,6 +4,7 @@ import {
   ACADEMIC_CATALOG,
   type AcademicCatalogEntry,
 } from '../features/analysis/catalog/AcademicCatalog'
+import { DocxPackageError } from '../features/analysis/readers/docxPackageReader'
 import type {
   AcademicSelection,
   AnalysisReport,
@@ -338,6 +339,10 @@ function createReadinessItems(state: ReadinessState): ReadinessItem[] {
 function createUserFriendlyAnalysisErrorMessage(error: unknown): string {
   if (error instanceof UploadFileValidationError) {
     return error.message
+  }
+
+  if (error instanceof DocxPackageError) {
+    return 'DOCX dosyası güvenli şekilde okunamadı. Dosya bozuk, beklenenden büyük veya geçerli bir DOCX paketi olmayabilir.'
   }
 
   if (!(error instanceof Error)) {
