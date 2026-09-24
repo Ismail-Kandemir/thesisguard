@@ -12,6 +12,7 @@ import type {
   SectionOrderItem,
 } from "../../types";
 import { createHeadingParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import { fontFamiliesEqual } from "../fontFamilyComparison";
 import type { RuleValidator } from "./RuleValidator";
 
 interface LocatedHeading {
@@ -48,6 +49,7 @@ export class HeadingLevelFormatValidator implements RuleValidator {
     const resolver = new EffectiveFormattingResolver(
       document.styles,
       document.documentDefaults,
+      document.themeFonts,
     );
     const issues = locatedHeadings.flatMap((locatedHeading) =>
       validateParagraphFormatting(locatedHeading, expected, resolver),
@@ -245,7 +247,7 @@ function compareFormatting(
 ): string[] {
   const problems: string[] = [];
 
-  if (expected.fontFamily !== undefined && actual.fontFamily !== expected.fontFamily) {
+  if (expected.fontFamily !== undefined && !fontFamiliesEqual(actual.fontFamily, expected.fontFamily)) {
     problems.push(
       `Yazı tipi ${actual.fontFamily ?? "belirlenemedi"} bulundu; ${expected.fontFamily} bekleniyor.`,
     );
