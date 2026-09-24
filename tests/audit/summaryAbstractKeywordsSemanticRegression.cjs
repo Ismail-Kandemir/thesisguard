@@ -35,6 +35,7 @@ function main() {
   assertSplitRunKeywordLine();
   assertEmptySummaryDetectable();
   assertCrossSectionKeywordOwnership();
+  assertEnglishKeywordLabelNormalization();
   assertKeywordCountConstraints();
   assertKeywordFalsePositives();
   assertDuplicateSummarySafety();
@@ -176,6 +177,36 @@ function assertCrossSectionKeywordOwnership() {
 
   assertEqual(new SectionKeywordsValidator().validate(document, keywordRule("Özet", ["Anahtar Kelimeler"])).status, "PASSED", "TR keywords owned by summary");
   assertEqual(new SectionKeywordsValidator().validate(document, keywordRule("Abstract", ["Keyword"])).status, "PASSED", "EN keywords owned by abstract");
+}
+
+function assertEnglishKeywordLabelNormalization() {
+  const englishRule = keywordRule("Abstract", ["Keyword", "Keywords"]);
+  const singular = semanticDocumentFromXml(
+    heading("Abstract") + paragraph("Keyword: food, quality, analysis, safety, storage"),
+    rules(),
+  );
+  const plural = semanticDocumentFromXml(
+    heading("Abstract") + paragraph("Keywords: food, quality, analysis, safety"),
+    rules(),
+  );
+  const randomLabel = semanticDocumentFromXml(
+    heading("Abstract") + paragraph("Key words: food, quality, analysis"),
+    rules(),
+  );
+  const below = semanticDocumentFromXml(
+    heading("Abstract") + paragraph("Keywords: food, quality"),
+    rules(),
+  );
+  const above = semanticDocumentFromXml(
+    heading("Abstract") + paragraph("Keywords: a, b, c, d, e, f"),
+    rules(),
+  );
+
+  assertEqual(new SectionKeywordsValidator().validate(singular, englishRule).status, "PASSED", "singular Keyword label passes");
+  assertEqual(new SectionKeywordsValidator().validate(plural, englishRule).status, "PASSED", "plural Keywords label passes");
+  assertEqual(new SectionKeywordsValidator().validate(randomLabel, englishRule).status, "FAILED", "random English keyword label fails");
+  assertEqual(new SectionKeywordsValidator().validate(below, englishRule).status, "FAILED", "plural Keywords below min fails");
+  assertEqual(new SectionKeywordsValidator().validate(above, englishRule).status, "FAILED", "plural Keywords above max fails");
 }
 
 function assertKeywordCountConstraints() {

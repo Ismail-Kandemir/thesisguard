@@ -641,7 +641,7 @@
       "category": "structure",
       "expected": {
         "section": "Abstract",
-        "labels": ["Keyword"],
+        "labels": ["Keyword", "Keywords"],
         "min": 3,
         "max": 5,
         "separators": [","],
