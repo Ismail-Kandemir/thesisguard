@@ -33,9 +33,7 @@ export class EffectiveFormattingResolver {
     const characterStyleChain = run.styleId
       ? this.inheritanceResolver.resolve(run.styleId)
       : [];
-    const paragraphStyleChain = paragraphStyleId
-      ? this.inheritanceResolver.resolve(paragraphStyleId)
-      : [];
+    const paragraphStyleChain = this.resolveParagraphStyleChain(paragraphStyleId);
     const resolveStyleValue = <TValue>(
       selectValue: (style: StyleDefinition) => TValue | null,
     ): TValue | null =>
@@ -78,9 +76,7 @@ export class EffectiveFormattingResolver {
     paragraphStyleId: string | null,
     paragraphAlignment: ParagraphAlignment | null,
   ): ParagraphAlignment | null {
-    const styleChain = paragraphStyleId
-      ? this.inheritanceResolver.resolve(paragraphStyleId)
-      : [];
+    const styleChain = this.resolveParagraphStyleChain(paragraphStyleId);
 
     return (
       paragraphAlignment ??
@@ -93,9 +89,7 @@ export class EffectiveFormattingResolver {
     paragraphStyleId: string | null,
     paragraphLineSpacing: number | null,
   ): number | null {
-    const styleChain = paragraphStyleId
-      ? this.inheritanceResolver.resolve(paragraphStyleId)
-      : [];
+    const styleChain = this.resolveParagraphStyleChain(paragraphStyleId);
 
     return (
       paragraphLineSpacing ??
@@ -108,9 +102,7 @@ export class EffectiveFormattingResolver {
     paragraphStyleId: string | null,
     direct: ParagraphFormatting,
   ): ParagraphFormatting {
-    const styleChain = paragraphStyleId
-      ? this.inheritanceResolver.resolve(paragraphStyleId)
-      : [];
+    const styleChain = this.resolveParagraphStyleChain(paragraphStyleId);
     const resolve = <TValue>(
       directValue: TValue | null,
       select: (formatting: ParagraphFormatting) => TValue | null,
@@ -137,6 +129,14 @@ export class EffectiveFormattingResolver {
         afterLines: resolve(direct.spacing.afterLines, (value) => value.spacing.afterLines),
       },
     };
+  }
+
+  private resolveParagraphStyleChain(
+    paragraphStyleId: string | null,
+  ): StyleInheritanceEntry[] {
+    const effectiveStyleId = paragraphStyleId ?? this.documentDefaults.defaultParagraphStyleId;
+
+    return effectiveStyleId ? this.inheritanceResolver.resolve(effectiveStyleId) : [];
   }
 
   private resolveFontFamily(

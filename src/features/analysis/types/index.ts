@@ -361,6 +361,7 @@ export interface ParagraphNumbering {
 }
 
 export interface DocumentDefaults {
+  defaultParagraphStyleId: string | null;
   fontFamily: string | null;
   fontFamilyReference?: RunFontFamilyReference | null;
   fontSize: number | null;

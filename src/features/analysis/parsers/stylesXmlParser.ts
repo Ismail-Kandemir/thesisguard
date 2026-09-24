@@ -36,8 +36,23 @@ export function parseStylesXml(stylesXml: string): ParsedStylesXml {
 
   return {
     styles: parseStyles(xmlDocument),
-    documentDefaults: parseDocumentDefaults(xmlDocument),
+    documentDefaults: {
+      ...parseDocumentDefaults(xmlDocument),
+      defaultParagraphStyleId: parseDefaultParagraphStyleId(xmlDocument),
+    },
   };
+}
+
+function parseDefaultParagraphStyleId(xmlDocument: Document): string | null {
+  const defaultParagraphStyle = Array.from(
+    xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "style"),
+  ).find(
+    (styleElement) =>
+      getWordAttribute(styleElement, "type") === "paragraph" &&
+      getWordAttribute(styleElement, "default") === "1",
+  );
+
+  return defaultParagraphStyle ? getWordAttribute(defaultParagraphStyle, "styleId") : null;
 }
 
 function parseDocumentDefaults(xmlDocument: Document): DocumentDefaults {
@@ -58,6 +73,7 @@ function parseDocumentDefaults(xmlDocument: Document): DocumentDefaults {
     : null;
 
   return {
+    defaultParagraphStyleId: null,
     fontFamily: parseFont(runProperties),
     fontFamilyReference: parseRunFontFamilyReference(runProperties),
     fontSize: parseFontSize(runProperties),

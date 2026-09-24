@@ -40,6 +40,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     paragraphs,
     styles: [],
     documentDefaults: {
+      defaultParagraphStyleId: null,
       fontFamily: null,
       fontSize: null,
       bold: null,
