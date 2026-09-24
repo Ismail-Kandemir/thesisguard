@@ -27,6 +27,7 @@ type ResultFilter = 'all' | RuleResultStatus
 
 interface AnalysisReportViewProps {
   analysisReport: AnalysisReport
+  onChooseAnotherFile?: () => void
   onNewAnalysis: () => void
 }
 
@@ -92,6 +93,7 @@ const severityDisplayOrder: readonly RuleSeverity[] = ['error', 'warning', 'info
 
 export function AnalysisReportView({
   analysisReport,
+  onChooseAnotherFile,
   onNewAnalysis,
 }: AnalysisReportViewProps) {
   const [activeFilter, setActiveFilter] = useState<ResultFilter>('all')
@@ -117,7 +119,14 @@ export function AnalysisReportView({
           <h1>Analiz Raporu</h1>
           <p>Tezinizin kural uyumluluğunu ve düzeltilmesi gereken alanları inceleyin.</p>
         </div>
-        <Button onClick={onNewAnalysis}>Yeni Analiz</Button>
+        <div className="analysis-report__header-actions">
+          {onChooseAnotherFile ? (
+            <Button onClick={onChooseAnotherFile} variant="secondary">
+              Başka Dosya Seç
+            </Button>
+          ) : null}
+          <Button onClick={onNewAnalysis}>Yeni Analiz</Button>
+        </div>
       </header>
 
       <ReportSummary analysisReport={analysisReport} />

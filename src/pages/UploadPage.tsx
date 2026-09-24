@@ -51,6 +51,16 @@ export function UploadPage() {
   )
   const studyTypes = thesisTypeEntry?.studyTypes ?? []
   const disabledReason = getDisabledReason(selectedFile, academicSelection)
+  const readinessItems = createReadinessItems({
+    academicSelection,
+    hasSelectedFile: selectedFile !== null,
+    hasStudyTypes: studyTypes.length > 0,
+    organizationId,
+    studyTypeId,
+    thesisTypeId,
+    unitId,
+    universityId,
+  })
 
   function handleFileSelect(file: File) {
     const validation = validateUploadFile(file)
@@ -100,16 +110,28 @@ export function UploadPage() {
     }
   }
 
+  function handleChooseAnotherFile() {
+    setAnalysisReport(null)
+    setSelectedFile(null)
+    setIsAnalyzing(false)
+    setErrorMessage('')
+  }
+
+  function handleFullReset() {
+    handleChooseAnotherFile()
+    setUniversityId('')
+    setOrganizationId('')
+    setUnitId('')
+    setThesisTypeId('')
+    setStudyTypeId('')
+  }
+
   if (analysisReport) {
     return (
       <ReportPage
         analysisReport={analysisReport}
-        onNewAnalysis={() => {
-          setAnalysisReport(null)
-          setSelectedFile(null)
-          setIsAnalyzing(false)
-          setErrorMessage('')
-        }}
+        onChooseAnotherFile={handleChooseAnotherFile}
+        onNewAnalysis={handleFullReset}
       />
     )
   }
@@ -232,27 +254,85 @@ export function UploadPage() {
           ) : null}
         </section>
 
+        <ReadinessChecklist items={readinessItems} />
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
         {selectedFile ? <FileInfo selectedFile={selectedFile} /> : null}
         <p className="upload-page__privacy-note">
           Dosyanız tarayıcınızda analiz edilir.
         </p>
-        <p className="upload-page__analysis-hint" aria-live="polite">
-          {isAnalyzing ? 'Belge analiz ediliyor. Lütfen bekleyin.' : disabledReason}
-        </p>
+        {errorMessage ? <AnalysisErrorMessage /> : null}
         {isAnalyzing ? (
           <p className="upload-page__analysis-status" role="status">
-            Analiz sonuçları hazırlanıyor...
+            Belge inceleniyor. Sonuçlar hazır olunca rapor ekranı açılacak.
           </p>
         ) : null}
         <UploadActions
           disabled={!selectedFile || !academicSelection}
+          disabledReason={disabledReason}
           isAnalyzing={isAnalyzing}
           onAnalyze={handleAnalyzeClick}
         />
       </Card>
     </Container>
   )
+}
+
+interface ReadinessState {
+  academicSelection: AcademicSelection | null
+  hasSelectedFile: boolean
+  hasStudyTypes: boolean
+  organizationId: string
+  studyTypeId: string
+  thesisTypeId: string
+  unitId: string
+  universityId: string
+}
+
+interface ReadinessItem {
+  done: boolean
+  label: string
+}
+
+function ReadinessChecklist({ items }: { items: readonly ReadinessItem[] }) {
+  return (
+    <section className="upload-page__readiness" aria-labelledby="upload-readiness-heading">
+      <h2 id="upload-readiness-heading">Analiz için gerekenler</h2>
+      <ul>
+        {items.map((item) => (
+          <li
+            className={item.done ? 'upload-page__readiness-item--done' : ''}
+            key={item.label}
+          >
+            <span aria-hidden="true">{item.done ? '✓' : '•'}</span>
+            {item.label}
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+function AnalysisErrorMessage() {
+  return (
+    <p className="upload-page__error-recovery" role="alert">
+      Dosyayı tekrar seçebilir veya düzenlenmiş DOCX sürümünü yükleyip analizi yeniden başlatabilirsiniz.
+    </p>
+  )
+}
+
+function createReadinessItems(state: ReadinessState): ReadinessItem[] {
+  return [
+    { done: Boolean(state.universityId), label: 'Üniversite seçildi' },
+    { done: Boolean(state.organizationId), label: 'Fakülte veya enstitü seçildi' },
+    { done: Boolean(state.unitId), label: 'Bölüm veya program seçildi' },
+    { done: Boolean(state.thesisTypeId), label: 'Tez türü seçildi' },
+    {
+      done: !state.hasStudyTypes || Boolean(state.studyTypeId),
+      label: 'Çalışma türü seçildi',
+    },
+    { done: state.hasSelectedFile, label: 'DOCX dosyası yüklendi' },
+    { done: state.academicSelection !== null && state.hasSelectedFile, label: 'Analize hazır' },
+  ]
 }
 
 function createUserFriendlyAnalysisErrorMessage(error: unknown): string {

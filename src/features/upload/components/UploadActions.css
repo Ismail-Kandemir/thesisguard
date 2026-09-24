@@ -1,9 +1,22 @@
 .upload-actions {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.upload-actions__disabled-reason {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
 }
 
 @media (max-width: 480px) {
+  .upload-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
   .upload-actions .button {
     width: 100%;
   }

@@ -7,10 +7,15 @@ import './ReportPage.css'
 
 interface ReportPageProps {
   analysisReport?: AnalysisReport
+  onChooseAnotherFile?: () => void
   onNewAnalysis?: () => void
 }
 
-export function ReportPage({ analysisReport, onNewAnalysis }: ReportPageProps) {
+export function ReportPage({
+  analysisReport,
+  onChooseAnotherFile,
+  onNewAnalysis,
+}: ReportPageProps) {
   const navigate = useNavigate()
 
   function handleNewAnalysis() {
@@ -37,6 +42,7 @@ export function ReportPage({ analysisReport, onNewAnalysis }: ReportPageProps) {
     <Container className="report-page">
       <AnalysisReportView
         analysisReport={analysisReport}
+        onChooseAnotherFile={onChooseAnotherFile}
         onNewAnalysis={handleNewAnalysis}
       />
     </Container>

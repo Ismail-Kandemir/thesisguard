@@ -35,6 +35,14 @@
   gap: 6px;
 }
 
+.analysis-report__header-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
 .analysis-report__header p,
 .analysis-report__results-header p,
 .analysis-report__trust-note p,
@@ -784,6 +792,7 @@
     flex-direction: column;
   }
 
+  .analysis-report__header-actions,
   .analysis-report__header .button {
     width: 100%;
   }
