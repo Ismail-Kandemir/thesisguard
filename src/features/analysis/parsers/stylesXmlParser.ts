@@ -1,5 +1,7 @@
 import type {
   DocumentDefaults,
+  LineSpacingRule,
+  LineSpacingValue,
   NumberingReference,
   ObjectAlignment,
   ParagraphAlignment,
@@ -16,7 +18,7 @@ interface StyleProperties {
   bold: boolean | null;
   italic: boolean | null;
   underline: boolean | null;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
   alignment: ParagraphAlignment | null;
   tableAlignment: ObjectAlignment | null;
   paragraphFormatting: ReturnType<typeof parseParagraphFormatting>;
@@ -228,12 +230,31 @@ function parseUnderline(runProperties: Element | null): boolean | null {
   return value !== "none" && parseToggleValue(value);
 }
 
-function parseSpacing(paragraphProperties: Element | null): number | null {
+function parseSpacing(paragraphProperties: Element | null): LineSpacingValue | null {
   const spacingElement = paragraphProperties
     ? getFirstDescendant(paragraphProperties, "spacing")
     : null;
+  const value = spacingElement ? parseNumericAttribute(spacingElement, "line") : null;
 
-  return spacingElement ? parseNumericAttribute(spacingElement, "line") : null;
+  return value === null
+    ? null
+    : { value, rule: parseLineSpacingRule(spacingElement) };
+}
+
+function parseLineSpacingRule(spacingElement: Element | null): LineSpacingRule {
+  const value = spacingElement ? getWordAttribute(spacingElement, "lineRule") : null;
+
+  switch (value) {
+    case null:
+    case "auto":
+      return "auto";
+    case "exact":
+      return "exact";
+    case "atLeast":
+      return "atLeast";
+    default:
+      return "unknown";
+  }
 }
 
 function parseAlignment(paragraphProperties: Element | null): ParagraphAlignment | null {

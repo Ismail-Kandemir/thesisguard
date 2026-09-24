@@ -328,7 +328,7 @@ export interface StyleDefinition {
   bold: boolean | null;
   italic: boolean | null;
   underline: boolean | null;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
   paragraphFormatting: ParagraphFormatting;
   alignment: ParagraphAlignment | null;
   tableAlignment: ObjectAlignment | null;
@@ -368,7 +368,7 @@ export interface DocumentDefaults {
   bold: boolean | null;
   italic: boolean | null;
   underline: boolean | null;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
   alignment: ParagraphAlignment | null;
   paragraphFormatting: ParagraphFormatting;
 }
@@ -406,7 +406,18 @@ export interface EffectiveFormatting {
   bold: boolean;
   italic: boolean;
   underline: boolean;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
+}
+
+export type LineSpacingRule =
+  | "auto"
+  | "exact"
+  | "atLeast"
+  | "unknown";
+
+export interface LineSpacingValue {
+  value: number;
+  rule: LineSpacingRule;
 }
 
 export interface Paragraph {
@@ -415,7 +426,7 @@ export interface Paragraph {
   runs: Run[];
   contentScope: ParagraphContentScope;
   alignment: ParagraphAlignment | null;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
   paragraphFormatting: ParagraphFormatting;
   styleId: string | null;
   numbering: ParagraphNumbering;
@@ -765,7 +776,7 @@ export type BibliographyEntryBoundaryStatus =
 export interface BibliographyEntryFormattingFacts {
   paragraphStyleId: string | null;
   alignment: ParagraphAlignment | null;
-  lineSpacing: number | null;
+  lineSpacing: LineSpacingValue | null;
   paragraphFormatting: ParagraphFormatting;
 }
 

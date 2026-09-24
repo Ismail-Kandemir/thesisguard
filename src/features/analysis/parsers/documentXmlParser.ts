@@ -3,6 +3,8 @@ import type {
   DocumentPageSectionSource,
   HeaderFooterLocation,
   HeaderFooterReferenceType,
+  LineSpacingRule,
+  LineSpacingValue,
   PageMargins,
   PageNumberHeaderFooterReference,
   Paragraph,
@@ -530,13 +532,32 @@ function parseAlignment(paragraphElement: Element): ParagraphAlignment | null {
   }
 }
 
-function parseLineSpacing(paragraphElement: Element): number | null {
+function parseLineSpacing(paragraphElement: Element): LineSpacingValue | null {
   const paragraphProperties = getFirstDescendant(paragraphElement, "pPr");
   const spacingElement = paragraphProperties
     ? getFirstDescendant(paragraphProperties, "spacing")
     : null;
+  const value = spacingElement ? parseNumericWordAttribute(spacingElement, "line") : null;
 
-  return spacingElement ? parseNumericWordAttribute(spacingElement, "line") : null;
+  return value === null
+    ? null
+    : { value, rule: parseLineSpacingRule(spacingElement) };
+}
+
+function parseLineSpacingRule(spacingElement: Element | null): LineSpacingRule {
+  const value = spacingElement ? getWordAttribute(spacingElement, "lineRule") : null;
+
+  switch (value) {
+    case null:
+    case "auto":
+      return "auto";
+    case "exact":
+      return "exact";
+    case "atLeast":
+      return "atLeast";
+    default:
+      return "unknown";
+  }
 }
 
 function parseNumericWordAttribute(element: Element, localName: string): number | null {

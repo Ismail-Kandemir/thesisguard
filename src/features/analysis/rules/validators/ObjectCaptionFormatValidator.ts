@@ -2,6 +2,7 @@ import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingRe
 import type {
   CaptionKind,
   DocumentCaption,
+  LineSpacingValue,
   NormalizedDocument,
   ObjectCaptionFormatRuleExpected,
   Paragraph,
@@ -11,15 +12,19 @@ import type {
   RuleResult,
   RuleResultStatus,
 } from "../../types";
-import type { RuleValidator } from "./RuleValidator";
 import { createCaptionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
-
-const OOXML_UNITS_PER_LINE = 240;
+import {
+  formatLineSpacingValue,
+  formatUnsupportedLineSpacingRules,
+  toComparableLineMultiple,
+} from "../lineSpacingSemantics";
+import type { RuleValidator } from "./RuleValidator";
 
 interface CaptionFormatting {
   caption: DocumentCaption;
   alignment: ParagraphAlignment | null;
   lineSpacing: number | null;
+  rawLineSpacing: LineSpacingValue | null;
 }
 
 export class ObjectCaptionFormatValidator implements RuleValidator {
@@ -43,6 +48,11 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
     const wrong = formatting.filter(
       (item) => item.alignment !== expected.alignment || item.lineSpacing !== expected.lineSpacing,
     );
+    const unsupportedLineSpacing = wrong
+      .map((item) => item.rawLineSpacing)
+      .filter((value): value is LineSpacingValue =>
+        value !== null && toComparableLineMultiple(value) === null,
+      );
     const status: RuleResultStatus = wrong.length === 0 ? "PASSED" : "FAILED";
 
     return createResult(
@@ -52,7 +62,7 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
       formatActual(formatting),
       status === "PASSED"
         ? `${objectName(expected.object)} başlıklarının biçimi uygun.`
-        : createFailureMessage(expected.object, formatting.length, wrong),
+        : createFailureMessage(expected.object, formatting.length, wrong, unsupportedLineSpacing),
       status === "FAILED"
         ? wrong.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((item) =>
             createCaptionEvidence(item.caption, {
@@ -156,11 +166,15 @@ function resolveFormatting(
     paragraph.styleId,
     paragraph.lineSpacing,
   );
+  const comparableLineSpacing = lineSpacing === null
+    ? null
+    : toComparableLineMultiple(lineSpacing);
 
   return {
     caption,
     alignment: resolver.resolveParagraphAlignment(paragraph.styleId, paragraph.alignment),
-    lineSpacing: lineSpacing === null ? null : lineSpacing / OOXML_UNITS_PER_LINE,
+    lineSpacing: comparableLineSpacing,
+    rawLineSpacing: lineSpacing,
   };
 }
 
@@ -215,7 +229,7 @@ function createResult(
 
 function formatActual(items: readonly CaptionFormatting[]): string {
   return items.map((item) =>
-    `${item.caption.label} ${item.caption.number}: ${item.alignment ? alignmentName(item.alignment) : "Hizalama tespit edilemedi"}, ${item.lineSpacing ?? "Satır aralığı tespit edilemedi"} satır`,
+    `${item.caption.label} ${item.caption.number}: ${item.alignment ? alignmentName(item.alignment) : "Hizalama tespit edilemedi"}, ${formatLineSpacingValue(item.rawLineSpacing)}`,
   ).join("; ");
 }
 
@@ -223,7 +237,12 @@ function createFailureMessage(
   object: CaptionKind,
   total: number,
   wrong: readonly CaptionFormatting[],
+  unsupportedLineSpacing: readonly LineSpacingValue[],
 ): string {
+  if (unsupportedLineSpacing.length > 0) {
+    return `${objectName(object)} başlığı satır aralığı statik OOXML'den güvenle doğrulanamadı. Karşılaştırılamayan lineRule: ${formatUnsupportedLineSpacingRules(unsupportedLineSpacing)}. Bulunan: ${formatActual(wrong)}.`;
+  }
+
   if (total === 1) {
     return `${objectName(object)} başlığı sola yaslı ve tek satır aralığında olmalıdır. Bulunan: ${formatActual(wrong)}.`;
   }

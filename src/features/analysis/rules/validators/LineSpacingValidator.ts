@@ -4,14 +4,18 @@ import type {
   RuleDefinition,
   RuleExpectedValue,
   RuleResult,
+  LineSpacingValue,
   Run,
 } from "../../types";
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import { getBodyParagraphs } from "./bodyParagraphs";
 import type { RuleValidator } from "./RuleValidator";
 import { createParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
-
-const OOXML_UNITS_PER_LINE = 240;
+import {
+  formatLineSpacingValue,
+  formatUnsupportedLineSpacingRules,
+  toComparableLineMultiple,
+} from "../lineSpacingSemantics";
 
 const EMPTY_RUN: Run = {
   text: "",
@@ -24,7 +28,8 @@ const EMPTY_RUN: Run = {
 };
 
 interface LineSpacingObservation {
-  actual: number;
+  actual: number | null;
+  raw: LineSpacingValue;
   paragraph: Paragraph;
   paragraphIndex: number;
 }
@@ -33,15 +38,19 @@ export class LineSpacingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expectedLineSpacing = getExpectedLineSpacing(rule.expected);
     const observations = getLineSpacingObservations(document);
-    const actualLineSpacings = observations.map((observation) => observation.actual);
+    const comparableLineSpacings = observations.flatMap((observation) =>
+      observation.actual === null ? [] : [observation.actual],
+    );
+    const unsupported = observations.filter((observation) => observation.actual === null);
 
     const passed =
-      actualLineSpacings.length > 0 &&
-      actualLineSpacings.every(
+      observations.length > 0 &&
+      unsupported.length === 0 &&
+      comparableLineSpacings.every(
         (lineSpacing) => lineSpacing === expectedLineSpacing,
       );
     const failures = observations.filter(
-      (observation) => observation.actual !== expectedLineSpacing,
+      (observation) => observation.actual === null || observation.actual !== expectedLineSpacing,
     );
 
     const result: RuleResult = {
@@ -51,10 +60,14 @@ export class LineSpacingValidator implements RuleValidator {
       passed,
       severity: rule.severity,
       expected: expectedLineSpacing,
-      actual: formatActualLineSpacings(actualLineSpacings),
+      actual: formatActualLineSpacings(observations),
       message: passed
         ? `${rule.title} kurali basarili.`
-        : createFailureMessage(expectedLineSpacing, actualLineSpacings),
+        : createFailureMessage(
+            expectedLineSpacing,
+            observations,
+            unsupported.map((observation) => observation.raw),
+          ),
     };
 
     return passed || failures.length === 0
@@ -112,37 +125,42 @@ function getLineSpacingObservations(document: NormalizedDocument): LineSpacingOb
       if (lineSpacing === null) {
         return [];
       }
+      const comparable = toComparableLineMultiple(lineSpacing);
 
       return [{
-        actual: convertOoxmlSpacingToLines(lineSpacing),
+        actual: comparable,
+        raw: lineSpacing,
         paragraph,
         paragraphIndex: document.paragraphs.indexOf(paragraph),
       }];
     });
 }
 
-function convertOoxmlSpacingToLines(lineSpacing: number): number {
-  return lineSpacing / OOXML_UNITS_PER_LINE;
-}
-
 function formatActualLineSpacings(
-  lineSpacings: number[],
+  observations: readonly LineSpacingObservation[],
 ): string | null {
-  if (lineSpacings.length === 0) {
+  if (observations.length === 0) {
     return null;
   }
 
-  return Array.from(new Set(lineSpacings)).join(", ");
+  return Array.from(
+    new Set(observations.map((observation) => formatLineSpacingValue(observation.raw))),
+  ).join(", ");
 }
 
 function createFailureMessage(
   expectedLineSpacing: number,
-  actualLineSpacings: number[],
+  observations: readonly LineSpacingObservation[],
+  unsupportedValues: readonly LineSpacingValue[],
 ): string {
-  const actual = formatActualLineSpacings(actualLineSpacings);
+  const actual = formatActualLineSpacings(observations);
 
   if (!actual) {
     return "Satir araligi uygun degil. Belgede bu ozellik tespit edilemedi.";
+  }
+
+  if (unsupportedValues.length > 0) {
+    return `Satir araligi statik OOXML'den ${expectedLineSpacing} satir olarak guvenle dogrulanamadi. Karsilastirilamayan lineRule: ${formatUnsupportedLineSpacingRules(unsupportedValues)}.`;
   }
 
   return `Satir araligi uygun degil. Beklenen: ${expectedLineSpacing} satir, Bulunan: ${actual} satir.`;

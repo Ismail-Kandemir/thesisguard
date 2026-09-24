@@ -174,7 +174,8 @@ function assertFormattingFactsCaptured() {
   const formatting = document.bibliography.entries[0].formatting;
 
   assertEqual(formatting.alignment, "justify", "formatting alignment captured");
-  assertEqual(formatting.lineSpacing, 240, "formatting line spacing captured");
+  assertEqual(formatting.lineSpacing.value, 240, "formatting line spacing value captured");
+  assertEqual(formatting.lineSpacing.rule, "auto", "formatting line spacing missing lineRule defaults to auto");
   assertEqual(formatting.paragraphFormatting.indentation.leftTwips, 720, "left indent captured");
   assertEqual(formatting.paragraphFormatting.indentation.hangingTwips, 360, "hanging indent captured");
 }

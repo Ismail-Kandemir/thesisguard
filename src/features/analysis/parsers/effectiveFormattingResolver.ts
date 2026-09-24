@@ -2,6 +2,7 @@ import type {
   DocumentThemeFonts,
   DocumentDefaults,
   EffectiveFormatting,
+  LineSpacingValue,
   ParagraphAlignment,
   ParagraphFormatting,
   Run,
@@ -28,7 +29,7 @@ export class EffectiveFormattingResolver {
   resolveRun(
     run: Run,
     paragraphStyleId: string | null,
-    paragraphLineSpacing: number | null = null,
+    paragraphLineSpacing: LineSpacingValue | null = null,
   ): EffectiveFormatting {
     const characterStyleChain = run.styleId
       ? this.inheritanceResolver.resolve(run.styleId)
@@ -87,8 +88,8 @@ export class EffectiveFormattingResolver {
 
   resolveParagraphLineSpacing(
     paragraphStyleId: string | null,
-    paragraphLineSpacing: number | null,
-  ): number | null {
+    paragraphLineSpacing: LineSpacingValue | null,
+  ): LineSpacingValue | null {
     const styleChain = this.resolveParagraphStyleChain(paragraphStyleId);
 
     return (

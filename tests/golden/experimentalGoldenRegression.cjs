@@ -1435,7 +1435,7 @@ function createNegativeDocument(options = {}) {
         }]
       : [],
     alignment: overrides.alignment ?? "justify",
-    lineSpacing: overrides.lineSpacing ?? 360,
+    lineSpacing: createLineSpacing(overrides.lineSpacing ?? 360),
     paragraphFormatting: overrides.paragraphFormatting ?? goodIndent,
     styleId: overrides.styleId ?? "Normal",
     numbering: overrides.numbering ?? { source: "none", numId: null, level: null, visibleLabel: null },
@@ -1446,7 +1446,7 @@ function createNegativeDocument(options = {}) {
   });
   const bodyParagraph = paragraph("body", "Örneklerin değerlendirilmesinde DNA analizi kullanılmıştır.", {
     alignment: options.bodyAlignment ?? "justify",
-    lineSpacing: options.bodyLineSpacing ?? 360,
+    lineSpacing: createLineSpacing(options.bodyLineSpacing ?? 360),
     runFontFamily: options.bodyRunFontFamily ?? null,
     runFontSize: options.bodyRunFontSize ?? null,
     paragraphFormatting: {
@@ -1483,7 +1483,7 @@ function createNegativeDocument(options = {}) {
       bold: false,
       italic: false,
       underline: false,
-      lineSpacing: 360,
+      lineSpacing: createLineSpacing(360),
       alignment: "justify",
       paragraphFormatting: goodIndent,
     },
@@ -1661,12 +1661,20 @@ function createStyle(id, name) {
     bold: true,
     italic: null,
     underline: null,
-    lineSpacing: 360,
+    lineSpacing: createLineSpacing(360),
     paragraphFormatting: createEmptyFormatting(),
     alignment: "left",
     tableAlignment: null,
     numbering: null,
   };
+}
+
+function createLineSpacing(value) {
+  if (value === null || typeof value === "object") {
+    return value;
+  }
+
+  return { value, rule: "auto" };
 }
 
 function createEmptyDocument() {
