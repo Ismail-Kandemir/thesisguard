@@ -813,6 +813,22 @@ export interface TableListEntryOccurrence {
   evidence: string[];
 }
 
+export interface FigureListEntryOccurrence {
+  id: string;
+  sectionOccurrenceId: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  rawText: string;
+  normalizedText: string;
+  label: "Şekil";
+  number: string;
+  title: string | null;
+  entryIndex: number;
+  confidence: "high" | "low";
+  evidence: string[];
+}
+
 export interface TableListTableAssociation {
   tableId: string;
   captionId: string | null;
@@ -831,6 +847,24 @@ export interface TableListEntryAssociation {
   evidence: string[];
 }
 
+export interface FigureListFigureAssociation {
+  objectId: string;
+  captionId: string | null;
+  number: string | null;
+  listEntryIds: string[];
+  status: ObjectListAssociationStatus;
+  evidence: string[];
+}
+
+export interface FigureListEntryAssociation {
+  listEntryId: string;
+  objectIds: string[];
+  captionIds: string[];
+  number: string;
+  status: ObjectListAssociationStatus;
+  evidence: string[];
+}
+
 export interface DocumentTableList {
   sectionOccurrenceId: string | null;
   sectionIdentity: string | null;
@@ -841,6 +875,19 @@ export interface DocumentTableList {
   entries: TableListEntryOccurrence[];
   tableAssociations: TableListTableAssociation[];
   entryAssociations: TableListEntryAssociation[];
+  unresolvedParagraphIds: string[];
+}
+
+export interface DocumentFigureList {
+  sectionOccurrenceId: string | null;
+  sectionIdentity: string | null;
+  sectionHeadingParagraphId: string | null;
+  sectionHeadingParagraphIndex: number | null;
+  sectionBoundary: AcademicSectionBoundary | null;
+  status: ObjectListSectionContentStatus;
+  entries: FigureListEntryOccurrence[];
+  figureAssociations: FigureListFigureAssociation[];
+  entryAssociations: FigureListEntryAssociation[];
   unresolvedParagraphIds: string[];
 }
 
@@ -949,6 +996,7 @@ export interface NormalizedDocument {
   abbreviations: DocumentAbbreviations;
   bibliography?: DocumentBibliography;
   tableList?: DocumentTableList;
+  figureList?: DocumentFigureList;
   academicSections: DocumentAcademicSections;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];

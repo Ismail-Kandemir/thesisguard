@@ -2,6 +2,9 @@ const fs = require("fs");
 const path = require("path");
 const JSZip = require("jszip");
 const { runAnalysisFixture } = require("../golden/experimentalGoldenRegression.cjs");
+const {
+  getDeclaredAcademicFigures,
+} = require("../../src/features/analysis/rules/objectApplicability.ts");
 
 const FIXTURE_DIR = path.join(
   process.cwd(),
@@ -183,6 +186,7 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
   const objectRepresentations = document.objectSemantics.representations.map((representation) => ({
     id: representation.id,
     kind: representation.kind,
+    scope: representation.scope,
     paragraphId: representation.paragraphId,
     paragraphIndex: representation.paragraphIndex,
     blockIndex: representation.blockIndex,
@@ -194,6 +198,15 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
     (representation) =>
       representation.kind === "textbox" &&
       representation.paragraphIndex === outerCarrierParagraph?.index,
+  );
+  const textboxOwnedRepresentationIds = new Set(
+    textboxOwnedRepresentations.map((representation) => representation.id),
+  );
+  const textboxOwnedResolutions = document.objectSemantics.resolutions.filter((resolution) =>
+    textboxOwnedRepresentationIds.has(resolution.objectId),
+  );
+  const declaredAcademicFigureIds = new Set(
+    getDeclaredAcademicFigures(document).map((figure) => figure.representation.id),
   );
   const pictureRepresentations = objectRepresentations.filter((representation) => representation.kind === "picture");
   const matchingSections = document.sections
@@ -215,6 +228,7 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
     objectRepresentations,
     pictureRepresentationCount: pictureRepresentations.length,
     textboxOwnedRepresentations,
+    textboxOwnedResolutions,
     matchingSections,
     report: {
       total: report.totalRules,
@@ -251,7 +265,15 @@ async function inspectRuntime(fixturePath, textboxText, expected) {
   assertEqual(innerTextboxParagraphs[0].runs.length, 1, `${fixturePath} textbox run count`);
   assertEqual(innerTextboxParagraphs[0].runs[0].text, textboxText, `${fixturePath} textbox run text`);
   assertEqual(pictureRepresentations.length, 1, `${fixturePath} picture representation count`);
-  assertEqual(textboxOwnedRepresentations.length, 0, `${fixturePath} textbox-owned representation count`);
+  assertEqual(textboxOwnedRepresentations.length, 1, `${fixturePath} textbox-owned representation count`);
+  assertEqual(textboxOwnedRepresentations[0].kind, "textbox", `${fixturePath} textbox representation kind`);
+  assertEqual(textboxOwnedResolutions.length, 1, `${fixturePath} textbox-owned resolution count`);
+  assertEqual(textboxOwnedResolutions[0].status, "excluded", `${fixturePath} textbox-owned resolution status`);
+  assertEqual(textboxOwnedResolutions[0].academicType, null, `${fixturePath} textbox-owned academic type`);
+  assert(
+    !declaredAcademicFigureIds.has(textboxOwnedRepresentations[0].id),
+    `${fixturePath} textbox representation must not be a declared academic figure`,
+  );
   assert(
     pictureRepresentations.some((representation) => representation.alignment === "center"),
     `${fixturePath} normal picture representation detection`,
