@@ -99,6 +99,7 @@ function runVisualChecks(scenarios: readonly BrowserScenario[]): BrowserHarnessR
 
   assertNoPageOverflow(failures)
   assertScenarioLayout(failures, scenarios)
+  assertFixFirstSection(failures)
   assertCoverageStates(failures)
   assertDiagnostics(failures)
   assertFilters(failures)
@@ -114,6 +115,34 @@ function runVisualChecks(scenarios: readonly BrowserScenario[]): BrowserHarnessR
       width: window.innerWidth,
     },
   }
+}
+
+function assertFixFirstSection(failures: string[]): void {
+  const partialFail = getScenarioElement('partial-fail')
+  const partialPass = getScenarioElement('partial-pass')
+  const fixFirst = partialFail?.querySelector('.analysis-report__fix-first')
+
+  assert(Boolean(fixFirst), failures, 'Fix-first section renders for failed reports.')
+  assert(
+    textOf(fixFirst).includes('Oncelikli Duzeltmeler'),
+    failures,
+    'Fix-first section has student-facing heading.',
+  )
+  assert(
+    (fixFirst?.querySelectorAll('.analysis-report__fix-first-item').length ?? 0) > 0,
+    failures,
+    'Fix-first section lists failed rules.',
+  )
+  assert(
+    textOf(fixFirst).includes('Detaya git'),
+    failures,
+    'Fix-first items expose detail navigation.',
+  )
+  assert(
+    textOf(partialPass).includes('Basarisiz kural bulunamadi'),
+    failures,
+    'Passing reports get a compact no-failures fix-first state.',
+  )
 }
 
 async function runKeyboardInteractionChecks(): Promise<string[]> {

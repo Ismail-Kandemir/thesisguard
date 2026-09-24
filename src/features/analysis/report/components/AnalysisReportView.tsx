@@ -95,8 +95,20 @@ export function AnalysisReportView({
   onNewAnalysis,
 }: AnalysisReportViewProps) {
   const [activeFilter, setActiveFilter] = useState<ResultFilter>('all')
+  const [expandedRuleId, setExpandedRuleId] = useState<string | null>(null)
   const filterOptions = createFilterOptions(analysisReport)
   const visibleResults = getVisibleResults(analysisReport.results, activeFilter)
+
+  function handleOpenResult(ruleId: string) {
+    setActiveFilter('all')
+    setExpandedRuleId(ruleId)
+    window.requestAnimationFrame(() => {
+      document.getElementById(createRuleResultElementId(ruleId))?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+      })
+    })
+  }
 
   return (
     <div className="analysis-report">
@@ -109,6 +121,10 @@ export function AnalysisReportView({
       </header>
 
       <ReportSummary analysisReport={analysisReport} />
+      <FixFirstSection
+        results={analysisReport.results}
+        onOpenResult={handleOpenResult}
+      />
       <ScoreTrustNote analysisReport={analysisReport} />
       <DiagnosticReviewSection diagnostics={analysisReport.diagnostics} />
       <SeverityLegend results={analysisReport.results} />
@@ -128,9 +144,82 @@ export function AnalysisReportView({
           />
         </div>
 
-        <RuleResultList activeFilter={activeFilter} results={visibleResults} />
+        <RuleResultList
+          activeFilter={activeFilter}
+          expandedRuleId={expandedRuleId}
+          results={visibleResults}
+        />
       </section>
     </div>
+  )
+}
+
+function FixFirstSection({
+  onOpenResult,
+  results,
+}: {
+  onOpenResult: (ruleId: string) => void
+  results: readonly RuleResult[]
+}) {
+  const failedResults = getFailedResultsForFixFirst(results)
+
+  if (failedResults.length === 0) {
+    return (
+      <section className="analysis-report__fix-first" aria-labelledby="fix-first-heading">
+        <div className="analysis-report__fix-first-header">
+          <div>
+            <h2 id="fix-first-heading">Öncelikli Düzeltmeler</h2>
+            <p>Başarısız kural bulunamadı. Tam sonuçları aşağıda inceleyebilirsiniz.</p>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  const pageNumberFailed = failedResults.some((result) =>
+    result.ruleId === 'comu.applied-sciences.food-technology.bachelor.page-number'
+  )
+
+  return (
+    <section className="analysis-report__fix-first" aria-labelledby="fix-first-heading">
+      <div className="analysis-report__fix-first-header">
+        <div>
+          <h2 id="fix-first-heading">Öncelikli Düzeltmeler</h2>
+          <p>
+            Başarısız kontroller önem düzeyi ve kategori bilgisine göre listelenir.
+          </p>
+        </div>
+        <span>{failedResults.length} düzeltme</span>
+      </div>
+
+      {pageNumberFailed ? (
+        <p className="analysis-report__page-number-note">
+          Sayfa numarası konumu için Word’de alt bilgi alanını elle kontrol edin; fiziksel
+          yerleşim otomatik analizde tam olarak doğrulanamayabilir.
+        </p>
+      ) : null}
+
+      <ol className="analysis-report__fix-first-list">
+        {failedResults.map((result) => (
+          <li key={result.ruleId}>
+            <button
+              className="analysis-report__fix-first-item"
+              onClick={() => onOpenResult(result.ruleId)}
+              type="button"
+            >
+              <span className="analysis-report__fix-first-main">
+                <span>{result.ruleName || 'Kural sonucu'}</span>
+                <small>{getCategoryLabel(result.category ?? 'uncategorized')}</small>
+              </span>
+              <span className="analysis-report__fix-first-meta">
+                <SeverityBadge presentation={getSeverityPresentation(result.severity)} />
+                <span>Detaya git</span>
+              </span>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </section>
   )
 }
 
@@ -401,10 +490,15 @@ function ReportFilters({
 
 interface RuleResultListProps {
   activeFilter: ResultFilter
+  expandedRuleId: string | null
   results: readonly RuleResult[]
 }
 
-function RuleResultList({ activeFilter, results }: RuleResultListProps) {
+function RuleResultList({
+  activeFilter,
+  expandedRuleId,
+  results,
+}: RuleResultListProps) {
   if (results.length === 0) {
     return (
       <Card className="analysis-report__empty-filter" role="status">
@@ -424,7 +518,11 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
 
           <div className="analysis-report__category-results">
             {group.results.map((result) => (
-              <RuleResultItem key={result.ruleId} result={result} />
+              <RuleResultItem
+                expandedRuleId={expandedRuleId}
+                key={result.ruleId}
+                result={result}
+              />
             ))}
           </div>
         </section>
@@ -433,7 +531,13 @@ function RuleResultList({ activeFilter, results }: RuleResultListProps) {
   )
 }
 
-function RuleResultItem({ result }: { result: RuleResult }) {
+function RuleResultItem({
+  expandedRuleId,
+  result,
+}: {
+  expandedRuleId: string | null
+  result: RuleResult
+}) {
   const presentation = getResultPresentation(result.status)
   const severityPresentation = getSeverityPresentation(result.severity)
   const coveragePresentation = toRuleCoveragePresentation(result)
@@ -462,6 +566,7 @@ function RuleResultItem({ result }: { result: RuleResult }) {
         'analysis-report__result-card',
         `analysis-report__result-card--${presentation.className}`,
       ].join(' ')}
+      id={createRuleResultElementId(result.ruleId)}
     >
       <div className="analysis-report__result-title">
         <h3>{result.ruleName || 'Kural sonucu'}</h3>
@@ -488,7 +593,7 @@ function RuleResultItem({ result }: { result: RuleResult }) {
       {hasDetails ? (
         <details
           className="analysis-report__details-panel"
-          open={result.status === 'FAILED'}
+          open={result.status === 'FAILED' || expandedRuleId === result.ruleId}
         >
           <summary>Detaylar</summary>
 
@@ -801,6 +906,30 @@ function getVisibleResults(
         (first, second) => getStatusOrder(first.status) - getStatusOrder(second.status),
       )
     : [...filteredResults]
+}
+
+function getFailedResultsForFixFirst(results: readonly RuleResult[]): RuleResult[] {
+  return results
+    .filter((result) => result.status === 'FAILED')
+    .sort((first, second) => {
+      const severityDifference =
+        getSeverityOrder(first.severity) - getSeverityOrder(second.severity)
+
+      if (severityDifference !== 0) {
+        return severityDifference
+      }
+
+      return getCategoryLabel(first.category ?? 'uncategorized')
+        .localeCompare(getCategoryLabel(second.category ?? 'uncategorized'), 'tr-TR')
+    })
+}
+
+function getSeverityOrder(severity: RuleSeverity): number {
+  return severityDisplayOrder.indexOf(severity)
+}
+
+function createRuleResultElementId(ruleId: string): string {
+  return `rule-result-${ruleId.replace(/[^a-zA-Z0-9_-]/g, '-')}`
 }
 
 function groupRuleResultsByCategory(
