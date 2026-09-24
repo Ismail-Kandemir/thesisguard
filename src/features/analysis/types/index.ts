@@ -175,6 +175,22 @@ export interface RuleOverride {
   ruleId: string;
 }
 
+export type RuleValidationCoverageStatus =
+  | "COMPLETE"
+  | "PARTIAL"
+  | "SHALLOW"
+  | "MISSING";
+
+export type RuleValidationTrustStatus =
+  | "HIGH"
+  | "MEDIUM"
+  | "LOW";
+
+export interface RuleValidationMetadata {
+  coverage: RuleValidationCoverageStatus;
+  trust: RuleValidationTrustStatus;
+}
+
 export type UniversityGeneralRuleId =
   `${string}.${string}.general.${string}`;
 
@@ -227,6 +243,7 @@ export interface RuleDefinition {
   score: number;
   message: string;
   solution: string;
+  validation?: RuleValidationMetadata;
   enabled: boolean;
   version: string;
 }

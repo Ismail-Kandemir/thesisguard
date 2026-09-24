@@ -3,6 +3,7 @@ import type {
   RuleExpectedValue,
   UniversityRuleSet,
 } from "../types";
+import { getRuleValidationMetadata } from "./ruleValidationMetadata";
 
 type VisitState = "visiting" | "visited";
 
@@ -155,6 +156,7 @@ function resolveRules(orderedRuleSets: readonly UniversityRuleSet[]): RuleDefini
 function cloneRule(rule: RuleDefinition): RuleDefinition {
   return {
     ...rule,
+    validation: getRuleValidationMetadata(rule.id),
     expected: cloneExpected(rule.expected),
     scope: rule.scope ? { ...rule.scope } : undefined,
     overrides: rule.overrides?.map((override) => ({ ...override })),
