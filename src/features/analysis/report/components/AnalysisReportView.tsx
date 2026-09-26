@@ -122,10 +122,10 @@ export function AnalysisReportView({
         <div className="analysis-report__header-actions">
           {onChooseAnotherFile ? (
             <Button onClick={onChooseAnotherFile} variant="secondary">
-              Başka Dosya Seç
+              Düzeltilmiş DOCX Yükle
             </Button>
           ) : null}
-          <Button onClick={onNewAnalysis}>Yeni Analiz</Button>
+          <Button onClick={onNewAnalysis}>Seçimleri Sıfırla</Button>
         </div>
       </header>
 
@@ -195,7 +195,8 @@ function FixFirstSection({
         <div>
           <h2 id="fix-first-heading">Öncelikli Düzeltmeler</h2>
           <p>
-            Başarısız kontroller önem düzeyi ve kategori bilgisine göre listelenir.
+            Kritik hatalar önce gösterilir; ardından diğer başarısız kontroller
+            kategori sırasıyla listelenir.
           </p>
         </div>
         <span>{failedResults.length} düzeltme</span>

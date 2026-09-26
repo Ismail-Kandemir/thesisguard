@@ -65,6 +65,12 @@
   font-size: 14px;
 }
 
+.upload-page__scope-note {
+  margin: 0;
+  color: #4b5563;
+  font-size: 14px;
+}
+
 .upload-page__readiness {
   display: grid;
   gap: 10px;
@@ -135,6 +141,9 @@
 }
 
 .upload-page__analysis-status {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin: 0;
   padding: 12px 14px;
   border: 1px solid #bfdbfe;
@@ -143,6 +152,28 @@
   color: #1e3a8a;
   font-size: 14px;
   font-weight: 600;
+}
+
+.upload-page__analysis-spinner {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+  border: 3px solid #bfdbfe;
+  border-top-color: #1d4ed8;
+  border-radius: 999px;
+  animation: upload-page-spin 0.8s linear infinite;
+}
+
+@keyframes upload-page-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .upload-page__analysis-spinner {
+    animation: none;
+  }
 }
 
 @media (max-width: 640px) {

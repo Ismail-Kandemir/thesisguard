@@ -119,7 +119,7 @@ function runVisualChecks(scenarios: readonly BrowserScenario[]): BrowserHarnessR
 
 function assertFixFirstSection(failures: string[]): void {
   const partialFail = getScenarioElement('partial-fail')
-  const partialPass = getScenarioElement('partial-pass')
+  const golden = getScenarioElement('golden')
   const fixFirst = partialFail?.querySelector('.analysis-report__fix-first')
 
   assert(Boolean(fixFirst), failures, 'Fix-first section renders for failed reports.')
@@ -139,7 +139,7 @@ function assertFixFirstSection(failures: string[]): void {
     'Fix-first items expose detail navigation.',
   )
   assert(
-    textOf(partialPass).includes('Basarisiz kural bulunamadi'),
+    textOf(golden).includes('Basarisiz kural bulunamadi'),
     failures,
     'Passing reports get a compact no-failures fix-first state.',
   )

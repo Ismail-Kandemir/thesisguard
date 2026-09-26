@@ -255,6 +255,9 @@ export function UploadPage() {
           ) : null}
         </section>
 
+        <p className="upload-page__scope-note">
+          Şu anda yalnız listelenen programlar desteklenmektedir.
+        </p>
         <ReadinessChecklist items={readinessItems} />
         <UploadDropzone errorMessage={errorMessage} onFileSelect={handleFileSelect} />
         {selectedFile ? <FileInfo selectedFile={selectedFile} /> : null}
@@ -263,9 +266,17 @@ export function UploadPage() {
         </p>
         {errorMessage ? <AnalysisErrorMessage /> : null}
         {isAnalyzing ? (
-          <p className="upload-page__analysis-status" role="status">
-            Belge inceleniyor. Sonuçlar hazır olunca rapor ekranı açılacak.
-          </p>
+          <div
+            aria-live="polite"
+            className="upload-page__analysis-status"
+            role="status"
+          >
+            <span aria-hidden="true" className="upload-page__analysis-spinner" />
+            <span>
+              Belge inceleniyor. Lütfen bu pencereyi kapatmayın; sonuçlar hazır
+              olunca rapor ekranı açılacak.
+            </span>
+          </div>
         ) : null}
         <UploadActions
           disabled={!selectedFile || !academicSelection}
@@ -315,8 +326,10 @@ function ReadinessChecklist({ items }: { items: readonly ReadinessItem[] }) {
 
 function AnalysisErrorMessage() {
   return (
-    <p className="upload-page__error-recovery" role="alert">
-      Dosyayı tekrar seçebilir veya düzenlenmiş DOCX sürümünü yükleyip analizi yeniden başlatabilirsiniz.
+    <p className="upload-page__error-recovery">
+      Dosyayı tekrar seçebilirsiniz. Bozuk veya geçersiz görünüyorsa dosyayı Word ya
+      da uyumlu bir kelime işlemcide açıp yeniden .docx olarak kaydedin, sonra tekrar
+      yükleyin.
     </p>
   )
 }

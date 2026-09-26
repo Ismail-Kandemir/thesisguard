@@ -32,7 +32,7 @@ export function ReportPage({
       <Container className="report-page">
         <Card className="report-page__empty-report">
           <p>Gösterilecek bir analiz raporu bulunamadı.</p>
-          <Button onClick={handleNewAnalysis}>Yeni Analiz</Button>
+          <Button onClick={handleNewAnalysis}>Seçimleri Sıfırla</Button>
         </Card>
       </Container>
     )
