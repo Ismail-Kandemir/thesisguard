@@ -42,6 +42,9 @@ function main() {
   assertFooterOwnershipAndFalsePositives();
   assertInheritedFooterHandling();
   assertRomanDecimalAcademicTransition();
+  assertSectionBreakTypeDoesNotAffectNumbering();
+  assertPostTransitionMissingFormatInheritsDecimal();
+  assertPreTransitionMissingFormatInheritsLowerRoman();
   assertMissingStartFailsRestart();
   assertMissingFormatDoesNotInventDecimal();
 
@@ -226,6 +229,71 @@ function assertRomanDecimalAcademicTransition() {
   assertEqual(result.status, "PASSED", "Roman to decimal transition passes");
 }
 
+function assertSectionBreakTypeDoesNotAffectNumbering() {
+  for (const sectionType of ["continuous", "nextPage", "oddPage", "evenPage"]) {
+    const document = semanticDocumentFromXml(
+      heading("Özet") +
+        paragraph("front") +
+        sectionBreakParagraph("front break", {
+          format: "lowerRoman",
+        }) +
+        heading("Giriş") +
+        paragraph("main") +
+        bodySectPr({
+          format: "decimal",
+          start: 1,
+          footerId: "rFooterMain",
+          sectionType,
+        }),
+      relationshipsXml([
+        relationship("rFooterMain", "footer2.xml", "footer"),
+      ]),
+      [footerPart("word/footer2.xml", simplePageField("center"))],
+    );
+    const result = new PageNumberSequenceValidator().validate(document, sequenceRule());
+
+    assertEqual(result.status, "PASSED", `${sectionType} section type does not affect numbering`);
+  }
+}
+
+function assertPostTransitionMissingFormatInheritsDecimal() {
+  const document = semanticDocumentFromXml(
+    heading("Özet") +
+      paragraph("front") +
+      sectionBreakParagraph("front break", { format: "lowerRoman" }) +
+      heading("Giriş") +
+      paragraph("main") +
+      sectionBreakParagraph("main break", { format: "decimal", start: 1 }) +
+      heading("Sonuç") +
+      paragraph("conclusion") +
+      bodySectPr({}),
+    relationshipsXml([]),
+    [],
+  );
+  const result = new PageNumberSequenceValidator().validate(document, sequenceRule());
+
+  assertEqual(result.status, "PASSED", "post-transition missing format inherits decimal");
+}
+
+function assertPreTransitionMissingFormatInheritsLowerRoman() {
+  const document = semanticDocumentFromXml(
+    heading("Özet") +
+      paragraph("front") +
+      sectionBreakParagraph("front break", { format: "lowerRoman" }) +
+      heading("Teşekkür") +
+      paragraph("acknowledgement") +
+      sectionBreakParagraph("acknowledgement break", {}) +
+      heading("Giriş") +
+      paragraph("main") +
+      bodySectPr({ format: "decimal", start: 1 }),
+    relationshipsXml([]),
+    [],
+  );
+  const result = new PageNumberSequenceValidator().validate(document, sequenceRule());
+
+  assertEqual(result.status, "PASSED", "pre-transition missing format inherits lowerRoman");
+}
+
 function assertMissingStartFailsRestart() {
   const document = semanticDocumentFromXml(
     heading("Özet") +
@@ -361,7 +429,7 @@ function bodySectPr(options) {
 }
 
 function sectPr(options) {
-  return `<w:sectPr>${options.titlePg ? "<w:titlePg/>" : ""}${options.footerId ? `<w:footerReference w:type="default" r:id="${options.footerId}"/>` : ""}${pgNumType(options)}</w:sectPr>`;
+  return `<w:sectPr>${options.titlePg ? "<w:titlePg/>" : ""}${options.sectionType ? `<w:type w:val="${options.sectionType}"/>` : ""}${options.footerId ? `<w:footerReference w:type="default" r:id="${options.footerId}"/>` : ""}${pgNumType(options)}</w:sectPr>`;
 }
 
 function pgNumType(options) {
