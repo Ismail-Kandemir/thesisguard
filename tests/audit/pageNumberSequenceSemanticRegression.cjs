@@ -8,6 +8,12 @@ const {
   normalizePageNumberingSemantics,
 } = require("../../src/features/analysis/parsers/pageNumberingSemantics.ts");
 const {
+  EffectiveFormattingResolver,
+} = require("../../src/features/analysis/parsers/effectiveFormattingResolver.ts");
+const {
+  parseStylesXml,
+} = require("../../src/features/analysis/parsers/stylesXmlParser.ts");
+const {
   normalizeAcademicSections,
 } = require("../../src/features/analysis/parsers/academicSectionsNormalizer.ts");
 const {
@@ -32,6 +38,7 @@ const {
 function main() {
   assertWordSectionReconstruction();
   assertPageFieldDetection();
+  assertHeaderFooterAlignmentInheritance();
   assertFooterOwnershipAndFalsePositives();
   assertInheritedFooterHandling();
   assertRomanDecimalAcademicTransition();
@@ -98,6 +105,47 @@ function assertPageFieldDetection() {
   assertEqual(numbering.fields.some((field) => field.sourcePath === "word/footer4.xml"), false, "plain PAGE text is not PAGE field");
 }
 
+function assertHeaderFooterAlignmentInheritance() {
+  const emptyResolver = createAlignmentResolver(stylesXml(""));
+  const direct = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-direct.xml", simplePageField("center")),
+  ], emptyResolver);
+  assertEqual(direct.fields[0].alignment, "center", "direct center alignment preserved");
+
+  const explicitStyle = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-style.xml", simplePageFieldWithStyle("FooterCenter")),
+  ], createAlignmentResolver(stylesXml(paragraphStyle("FooterCenter", "center"))));
+  assertEqual(explicitStyle.fields[0].alignment, "center", "explicit paragraph style center resolved");
+
+  const basedOnStyle = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-based-on.xml", simplePageFieldWithStyle("FooterDerived")),
+  ], createAlignmentResolver(stylesXml(
+    paragraphStyle("FooterBase", "center") +
+      paragraphStyle("FooterDerived", null, { basedOn: "FooterBase" }),
+  )));
+  assertEqual(basedOnStyle.fields[0].alignment, "center", "basedOn paragraph style center resolved");
+
+  const defaultStyle = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-default-style.xml", simplePageFieldWithoutAlignment()),
+  ], createAlignmentResolver(stylesXml(paragraphStyle("Normal", "center", { isDefault: true }))));
+  assertEqual(defaultStyle.fields[0].alignment, "center", "default paragraph style center resolved");
+
+  const documentDefaults = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-doc-defaults.xml", simplePageFieldWithoutAlignment()),
+  ], createAlignmentResolver(stylesXml("", docDefaultsAlignment("center"))));
+  assertEqual(documentDefaults.fields[0].alignment, "center", "docDefaults center resolved");
+
+  const override = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-override.xml", simplePageFieldWithStyle("FooterCenter", "right")),
+  ], createAlignmentResolver(stylesXml(paragraphStyle("FooterCenter", "center"))));
+  assertEqual(override.fields[0].alignment, "right", "direct alignment overrides style alignment");
+
+  const unresolved = parseHeaderFooterPageNumbering([
+    footerPart("word/footer-unresolved.xml", simplePageFieldWithoutAlignment()),
+  ], emptyResolver);
+  assertEqual(unresolved.fields[0].alignment, null, "unresolved alignment remains null");
+}
+
 function assertFooterOwnershipAndFalsePositives() {
   const document = semanticDocumentFromXml(
     heading("Giriş") +
@@ -131,7 +179,8 @@ function assertInheritedFooterHandling() {
     relationshipsXml([
       relationship("rFooterShared", "footer1.xml", "footer"),
     ]),
-    [footerPart("word/footer1.xml", simplePageField("center"))],
+    [footerPart("word/footer1.xml", simplePageFieldWithStyle("FooterCenter"))],
+    stylesXml(paragraphStyle("FooterCenter", "center")),
   );
   const inheritedReference = document.pageNumbering.sections[1].headerFooterReferences.find(
     (reference) => reference.location === "footer" && reference.type === "default",
@@ -139,6 +188,7 @@ function assertInheritedFooterHandling() {
 
   assertEqual(inheritedReference.resolution, "inherited", "footer reference inherited");
   assertEqual(inheritedReference.hasPageField, true, "inherited footer carries PAGE field");
+  assertEqual(inheritedReference.alignments.includes("center"), true, "inherited footer carries style-derived alignment");
   assertEqual(new PageNumberValidator().validate(document, pageNumberRule()).status, "PASSED", "inherited PAGE field satisfies presence");
 }
 
@@ -208,11 +258,12 @@ function assertMissingFormatDoesNotInventDecimal() {
   assertEqual(result.status, "FAILED", "missing format does not invent decimal");
 }
 
-function semanticDocumentFromXml(bodyXml, documentRelationshipsXml, headerFooterXmlParts) {
+function semanticDocumentFromXml(bodyXml, documentRelationshipsXml, headerFooterXmlParts, styles) {
   const parsed = parseDocumentXml(wrapDocumentXml(bodyXml));
+  const resolveParagraphAlignment = styles ? createAlignmentResolver(styles) : undefined;
   const pageNumbering = normalizePageNumberingSemantics(
     {
-      ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
+      ...parseHeaderFooterPageNumbering(headerFooterXmlParts, resolveParagraphAlignment),
       sections: parsed.pageNumbering.sections,
     },
     documentRelationshipsXml,
@@ -340,8 +391,45 @@ function footerPart(path, content) {
   };
 }
 
+function createAlignmentResolver(styles) {
+  const parsedStyles = parseStylesXml(styles);
+  const resolver = new EffectiveFormattingResolver(
+    parsedStyles.styles,
+    parsedStyles.documentDefaults,
+  );
+
+  return (paragraphStyleId, directAlignment) =>
+    resolver.resolveParagraphAlignment(paragraphStyleId, directAlignment);
+}
+
+function stylesXml(styles, docDefaults) {
+  return '<w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">' +
+    (docDefaults ?? "") +
+    styles +
+    "</w:styles>";
+}
+
+function paragraphStyle(styleId, alignment, options = {}) {
+  return `<w:style w:type="paragraph"${options.isDefault ? ' w:default="1"' : ""} w:styleId="${styleId}">` +
+    (options.basedOn ? `<w:basedOn w:val="${options.basedOn}"/>` : "") +
+    (alignment ? `<w:pPr><w:jc w:val="${alignment}"/></w:pPr>` : "") +
+    "</w:style>";
+}
+
+function docDefaultsAlignment(alignment) {
+  return `<w:docDefaults><w:pPrDefault><w:pPr><w:jc w:val="${alignment}"/></w:pPr></w:pPrDefault></w:docDefaults>`;
+}
+
 function simplePageField(alignment) {
   return `<w:p><w:pPr><w:jc w:val="${alignment}"/></w:pPr><w:fldSimple w:instr=" PAGE \\* MERGEFORMAT "><w:r><w:t>1</w:t></w:r></w:fldSimple></w:p>`;
+}
+
+function simplePageFieldWithStyle(styleId, alignment) {
+  return `<w:p><w:pPr><w:pStyle w:val="${styleId}"/>${alignment ? `<w:jc w:val="${alignment}"/>` : ""}</w:pPr><w:fldSimple w:instr=" PAGE \\* MERGEFORMAT "><w:r><w:t>1</w:t></w:r></w:fldSimple></w:p>`;
+}
+
+function simplePageFieldWithoutAlignment() {
+  return '<w:p><w:fldSimple w:instr=" PAGE \\* MERGEFORMAT "><w:r><w:t>1</w:t></w:r></w:fldSimple></w:p>';
 }
 
 function complexPageField(alignment) {

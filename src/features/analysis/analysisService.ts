@@ -11,6 +11,7 @@ import { normalizeFigureListSemantics } from "./parsers/figureListSemanticsNorma
 import { normalizeTableListSemantics } from "./parsers/tableListSemanticsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { normalizePageNumberingSemantics } from "./parsers/pageNumberingSemantics";
+import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
 import { parseStylesXml } from "./parsers/stylesXmlParser";
 import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
 import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
@@ -45,16 +46,32 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     await readDocxAnalysisXmlParts(file);
   const normalizedDocument = parseDocumentXml(documentXml);
   const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
+  const styles = parsedStyles?.styles ?? [];
+  const documentDefaults =
+    parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults;
+  const themeFonts = themeXml ? parseThemeFontsXml(themeXml) : null;
+  const formattingResolver = new EffectiveFormattingResolver(
+    styles,
+    documentDefaults,
+    themeFonts,
+  );
 
   const documentWithFormatting: NormalizedDocument = {
     ...normalizedDocument,
-    styles: parsedStyles?.styles ?? [],
-    documentDefaults: parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults,
-    themeFonts: themeXml ? parseThemeFontsXml(themeXml) : null,
+    styles,
+    documentDefaults,
+    themeFonts,
     numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
     pageNumbering: normalizePageNumberingSemantics(
       {
-        ...parseHeaderFooterPageNumbering(headerFooterXmlParts),
+        ...parseHeaderFooterPageNumbering(
+          headerFooterXmlParts,
+          (paragraphStyleId, directAlignment) =>
+            formattingResolver.resolveParagraphAlignment(
+              paragraphStyleId,
+              directAlignment,
+            ),
+        ),
         sections: normalizedDocument.pageNumbering.sections,
       },
       documentRelationshipsXml,
