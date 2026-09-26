@@ -15,6 +15,7 @@ const initialRegisterValues: RegisterFormValues = {
 export function RegisterPage() {
   const [values, setValues] = useState<RegisterFormValues>(initialRegisterValues)
   const [errors, setErrors] = useState<FormErrors<RegisterFormValues>>({})
+  const [statusMessage, setStatusMessage] = useState('')
 
   function updateField(field: keyof RegisterFormValues, value: string) {
     setValues((currentValues) => ({
@@ -30,7 +31,9 @@ export function RegisterPage() {
     setErrors(validationErrors)
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Register form submitted:', values)
+      setStatusMessage('Kayıt özelliği bu sürümde henüz aktif değildir.')
+    } else {
+      setStatusMessage('')
     }
   }
 
@@ -76,6 +79,11 @@ export function RegisterPage() {
           <div className="auth-form__actions">
             <Button type="submit">Kayıt Ol</Button>
           </div>
+          {statusMessage ? (
+            <p className="auth-form__status" role="status">
+              {statusMessage}
+            </p>
+          ) : null}
         </form>
       </Card>
     </Container>

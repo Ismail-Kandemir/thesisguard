@@ -8,11 +8,13 @@ import { LoginPage } from '../../pages/LoginPage'
 import { NotFoundPage } from '../../pages/NotFoundPage'
 import { RegisterPage } from '../../pages/RegisterPage'
 import { ReportPage } from '../../pages/ReportPage'
+import { RouteErrorPage } from '../../pages/RouteErrorPage'
 import { UploadPage } from '../../pages/UploadPage'
 
 export const router = createBrowserRouter([
   {
     element: <MainLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       {
         path: routePaths.home,

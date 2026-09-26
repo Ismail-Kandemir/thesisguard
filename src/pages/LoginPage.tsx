@@ -13,6 +13,7 @@ const initialLoginValues: LoginFormValues = {
 export function LoginPage() {
   const [values, setValues] = useState<LoginFormValues>(initialLoginValues)
   const [errors, setErrors] = useState<FormErrors<LoginFormValues>>({})
+  const [statusMessage, setStatusMessage] = useState('')
 
   function updateField(field: keyof LoginFormValues, value: string) {
     setValues((currentValues) => ({
@@ -28,7 +29,9 @@ export function LoginPage() {
     setErrors(validationErrors)
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Login form submitted:', values)
+      setStatusMessage('Giriş özelliği bu sürümde henüz aktif değildir.')
+    } else {
+      setStatusMessage('')
     }
   }
 
@@ -59,6 +62,11 @@ export function LoginPage() {
           <div className="auth-form__actions">
             <Button type="submit">Giriş Yap</Button>
           </div>
+          {statusMessage ? (
+            <p className="auth-form__status" role="status">
+              {statusMessage}
+            </p>
+          ) : null}
         </form>
       </Card>
     </Container>

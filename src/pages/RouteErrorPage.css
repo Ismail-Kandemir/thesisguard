@@ -1,0 +1,40 @@
+.route-error-page {
+  display: flex;
+  align-items: center;
+  min-height: 100vh;
+}
+
+.route-error-page__card {
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.route-error-page__card h1,
+.route-error-page__card p {
+  margin: 0;
+}
+
+.route-error-page__card h1 {
+  color: #111827;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.route-error-page__card p {
+  color: #4b5563;
+}
+
+@media (max-width: 480px) {
+  .route-error-page {
+    align-items: stretch;
+  }
+
+  .route-error-page__card {
+    max-width: none;
+  }
+}

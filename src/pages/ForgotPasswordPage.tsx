@@ -12,6 +12,7 @@ const initialForgotPasswordValues: ForgotPasswordFormValues = {
 export function ForgotPasswordPage() {
   const [values, setValues] = useState<ForgotPasswordFormValues>(initialForgotPasswordValues)
   const [errors, setErrors] = useState<FormErrors<ForgotPasswordFormValues>>({})
+  const [statusMessage, setStatusMessage] = useState('')
 
   function updateField(field: keyof ForgotPasswordFormValues, value: string) {
     setValues((currentValues) => ({
@@ -27,7 +28,9 @@ export function ForgotPasswordPage() {
     setErrors(validationErrors)
 
     if (Object.keys(validationErrors).length === 0) {
-      console.log('Forgot password form submitted:', values)
+      setStatusMessage('Şifre sıfırlama özelliği bu sürümde henüz aktif değildir.')
+    } else {
+      setStatusMessage('')
     }
   }
 
@@ -50,6 +53,11 @@ export function ForgotPasswordPage() {
           <div className="auth-form__actions">
             <Button type="submit">Şifre Sıfırla</Button>
           </div>
+          {statusMessage ? (
+            <p className="auth-form__status" role="status">
+              {statusMessage}
+            </p>
+          ) : null}
         </form>
       </Card>
     </Container>
