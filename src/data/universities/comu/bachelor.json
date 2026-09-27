@@ -16,7 +16,11 @@
       "message": "Yazı tipi beklenen tez formatı ile uyumlu değil.",
       "solution": "Ana metin yazı tipini Times New Roman olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.typography.font-size",
@@ -32,7 +36,11 @@
       "message": "Yazı boyutu beklenen tez formatı ile uyumlu değil.",
       "solution": "Ana metin yazı boyutunu 12 punto olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.heading.heading1",
@@ -52,7 +60,11 @@
       "message": "Heading 1 baslik stili beklenen tez formati ile uyumlu degil.",
       "solution": "Heading 1 stilini Times New Roman, 14 punto ve kalin olarak duzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.heading.heading2",
@@ -72,7 +84,11 @@
       "message": "Heading 2 baslik stili beklenen tez formati ile uyumlu degil.",
       "solution": "Heading 2 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.heading.heading3",
@@ -92,7 +108,11 @@
       "message": "Heading 3 baslik stili beklenen tez formati ile uyumlu degil.",
       "solution": "Heading 3 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.spacing.line-height",
@@ -108,7 +128,11 @@
       "message": "Satır aralığı beklenen tez formatı ile uyumlu değil.",
       "solution": "Ana metin satır aralığını 1,5 satır olarak ayarlayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.format.alignment",
@@ -121,7 +145,11 @@
       "message": "Paragraf hizalaması beklenen tez formatı ile uyumlu değil.",
       "solution": "Ana metin paragraflarını iki yana yaslı olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.margin.left",
@@ -137,7 +165,11 @@
       "message": "Sol kenar boşluğu beklenen tez formatı ile uyumlu değil.",
       "solution": "Sol kenar boşluğunu 3 cm olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.margin.right",
@@ -153,7 +185,11 @@
       "message": "Sağ kenar boşluğu beklenen tez formatı ile uyumlu değil.",
       "solution": "Sağ kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.margin.top",
@@ -169,7 +205,11 @@
       "message": "Üst kenar boşluğu beklenen tez formatı ile uyumlu değil.",
       "solution": "Üst kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.bachelor.margin.bottom",
@@ -185,7 +225,11 @@
       "message": "Alt kenar boşluğu beklenen tez formatı ile uyumlu değil.",
       "solution": "Alt kenar boşluğunu 2,5 cm olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     }
   ]
 }

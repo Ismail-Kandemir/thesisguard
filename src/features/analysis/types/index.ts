@@ -200,6 +200,12 @@ export interface RuleValidationMetadata {
   trust: RuleValidationTrustStatus;
 }
 
+export interface RuleValidationEvidenceMetadata {
+  coverage: RuleValidationCoverageStatus;
+  trust: RuleValidationTrustStatus;
+  note?: string;
+}
+
 export type UniversityGeneralRuleId =
   `${string}.${string}.general.${string}`;
 
@@ -252,6 +258,7 @@ export interface RuleDefinition {
   score: number;
   message: string;
   solution: string;
+  validationEvidence?: RuleValidationEvidenceMetadata;
   validation?: RuleValidationMetadata;
   enabled: boolean;
   version: string;

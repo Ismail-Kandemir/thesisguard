@@ -156,10 +156,13 @@ function resolveRules(orderedRuleSets: readonly UniversityRuleSet[]): RuleDefini
 function cloneRule(rule: RuleDefinition): RuleDefinition {
   return {
     ...rule,
-    validation: getRuleValidationMetadata(rule.id),
+    validation: getRuleValidationMetadata(rule),
     expected: cloneExpected(rule.expected),
     scope: rule.scope ? { ...rule.scope } : undefined,
     overrides: rule.overrides?.map((override) => ({ ...override })),
+    validationEvidence: rule.validationEvidence
+      ? { ...rule.validationEvidence }
+      : undefined,
   };
 }
 

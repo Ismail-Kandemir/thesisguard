@@ -1,15 +1,39 @@
 {
   "id": "comu.applied-sciences.food-technology.bachelor.experimental",
   "metadata": {
-    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
-    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
-    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
-    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
-    "studyType": { "id": "experimental", "name": "Deneysel Çalışma", "slug": "experimental" },
+    "university": {
+      "id": "comu",
+      "name": "Çanakkale Onsekiz Mart Üniversitesi",
+      "slug": "comu"
+    },
+    "faculty": {
+      "id": "applied-sciences",
+      "name": "Uygulamalı Bilimler Fakültesi",
+      "slug": "applied-sciences"
+    },
+    "department": {
+      "id": "food-technology",
+      "name": "Gıda Teknolojisi",
+      "slug": "food-technology"
+    },
+    "thesisType": {
+      "id": "bachelor",
+      "name": "Lisans",
+      "slug": "bachelor"
+    },
+    "studyType": {
+      "id": "experimental",
+      "name": "Deneysel Çalışma",
+      "slug": "experimental"
+    },
     "version": "1.0.0"
   },
   "extends": [
-    { "id": "comu.applied-sciences.food-technology.bachelor", "scopeLevel": "department", "version": "1.0.0" }
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor",
+      "scopeLevel": "department",
+      "version": "1.0.0"
+    }
   ],
   "rules": [
     {
@@ -32,7 +56,11 @@
       "message": "Genel Bilgiler ve Literatür Çalışması bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Genel Bilgiler ve Literatür Çalışması bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.experimental.material-method",
@@ -54,7 +82,11 @@
       "message": "Materyal ve Metot bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Materyal ve Metot bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.experimental.findings-discussion",
@@ -76,7 +108,11 @@
       "message": "Bulgular ve Tartışma bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Bulgular ve Tartışma bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.experimental.section-order",
@@ -91,19 +127,48 @@
       "category": "structure",
       "expected": {
         "sections": [
-          { "section": "İntihal (Aşırma) Beyan Sayfası" },
-          { "section": "Kabul ve Onay Sayfası", "aliases": ["Kabul ve Onay"] },
-          { "section": "Teşekkür" },
-          { "section": "Özet" },
-          { "section": "Abstract" },
-          { "section": "İçindekiler" },
-          { "section": "Giriş" },
-          { "section": "Genel Bilgiler ve Literatür Çalışması" },
-          { "section": "Materyal ve Metot" },
-          { "section": "Bulgular ve Tartışma" },
-          { "section": "Sonuç" },
-          { "section": "Kaynaklar" },
-          { "section": "Özgeçmiş" }
+          {
+            "section": "İntihal (Aşırma) Beyan Sayfası"
+          },
+          {
+            "section": "Kabul ve Onay Sayfası",
+            "aliases": [
+              "Kabul ve Onay"
+            ]
+          },
+          {
+            "section": "Teşekkür"
+          },
+          {
+            "section": "Özet"
+          },
+          {
+            "section": "Abstract"
+          },
+          {
+            "section": "İçindekiler"
+          },
+          {
+            "section": "Giriş"
+          },
+          {
+            "section": "Genel Bilgiler ve Literatür Çalışması"
+          },
+          {
+            "section": "Materyal ve Metot"
+          },
+          {
+            "section": "Bulgular ve Tartışma"
+          },
+          {
+            "section": "Sonuç"
+          },
+          {
+            "section": "Kaynaklar"
+          },
+          {
+            "section": "Özgeçmiş"
+          }
         ]
       },
       "severity": "error",
@@ -111,7 +176,11 @@
       "message": "Deneysel tez bölümleri kılavuzdaki relative sırayı izlemiyor.",
       "solution": "Tez bölümlerini raporda gösterilen beklenen deneysel çalışma sırasına göre yeniden düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.experimental.heading-numbering",
@@ -126,11 +195,26 @@
       "category": "structure",
       "expected": {
         "sections": [
-          { "section": "Giriş", "level": 0 },
-          { "section": "Genel Bilgiler ve Literatür Çalışması", "level": 0 },
-          { "section": "Materyal ve Metot", "level": 0 },
-          { "section": "Bulgular ve Tartışma", "level": 0 },
-          { "section": "Sonuç", "level": 0 }
+          {
+            "section": "Giriş",
+            "level": 0
+          },
+          {
+            "section": "Genel Bilgiler ve Literatür Çalışması",
+            "level": 0
+          },
+          {
+            "section": "Materyal ve Metot",
+            "level": 0
+          },
+          {
+            "section": "Bulgular ve Tartışma",
+            "level": 0
+          },
+          {
+            "section": "Sonuç",
+            "level": 0
+          }
         ]
       },
       "severity": "error",
@@ -138,7 +222,11 @@
       "message": "Deneysel tezin akademik ana bölümleri numaralandırılmalıdır.",
       "solution": "Giriş ile Sonuç arasındaki akademik ana bölüm başlıklarını ana bölüm düzeyinde numaralandırın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     }
   ]
 }

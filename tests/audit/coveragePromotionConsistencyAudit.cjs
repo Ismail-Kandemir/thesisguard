@@ -29,6 +29,11 @@ function main() {
   const trustCounts = countBy(rules, (rule) => metadata(rule).trust);
 
   assertEqual(rules.length, 46, "resolved rule count");
+  assertEqual(
+    rules.filter((rule) => rule.validationEvidence).length,
+    46,
+    "explicit validation evidence count",
+  );
   assertEqual(duplicateIds.length, 0, "duplicate rule ids");
   assertEqual(missingValidators.length, 0, "missing validators");
   assertCounts(coverageCounts, { COMPLETE: 45, PARTIAL: 1, SHALLOW: 0, MISSING: 0 }, "coverage");

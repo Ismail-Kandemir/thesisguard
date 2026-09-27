@@ -1,15 +1,39 @@
 {
   "id": "comu.applied-sciences.food-technology.bachelor.source-research",
   "metadata": {
-    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
-    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
-    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
-    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
-    "studyType": { "id": "source-research", "name": "Teorik / Kaynak Araştırması", "slug": "source-research" },
+    "university": {
+      "id": "comu",
+      "name": "Çanakkale Onsekiz Mart Üniversitesi",
+      "slug": "comu"
+    },
+    "faculty": {
+      "id": "applied-sciences",
+      "name": "Uygulamalı Bilimler Fakültesi",
+      "slug": "applied-sciences"
+    },
+    "department": {
+      "id": "food-technology",
+      "name": "Gıda Teknolojisi",
+      "slug": "food-technology"
+    },
+    "thesisType": {
+      "id": "bachelor",
+      "name": "Lisans",
+      "slug": "bachelor"
+    },
+    "studyType": {
+      "id": "source-research",
+      "name": "Teorik / Kaynak Araştırması",
+      "slug": "source-research"
+    },
     "version": "1.0.0"
   },
   "extends": [
-    { "id": "comu.applied-sciences.food-technology.bachelor", "scopeLevel": "department", "version": "1.0.0" }
+    {
+      "id": "comu.applied-sciences.food-technology.bachelor",
+      "scopeLevel": "department",
+      "version": "1.0.0"
+    }
   ],
   "rules": [
     {
@@ -32,7 +56,11 @@
       "message": "Genel Bilgiler bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Genel Bilgiler bölümü ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.source-research.section-order",
@@ -47,17 +75,42 @@
       "category": "structure",
       "expected": {
         "sections": [
-          { "section": "İntihal (Aşırma) Beyan Sayfası" },
-          { "section": "Kabul ve Onay Sayfası", "aliases": ["Kabul ve Onay"] },
-          { "section": "Teşekkür" },
-          { "section": "Özet" },
-          { "section": "Abstract" },
-          { "section": "İçindekiler" },
-          { "section": "Giriş" },
-          { "section": "Genel Bilgiler" },
-          { "section": "Sonuç" },
-          { "section": "Kaynaklar" },
-          { "section": "Özgeçmiş" }
+          {
+            "section": "İntihal (Aşırma) Beyan Sayfası"
+          },
+          {
+            "section": "Kabul ve Onay Sayfası",
+            "aliases": [
+              "Kabul ve Onay"
+            ]
+          },
+          {
+            "section": "Teşekkür"
+          },
+          {
+            "section": "Özet"
+          },
+          {
+            "section": "Abstract"
+          },
+          {
+            "section": "İçindekiler"
+          },
+          {
+            "section": "Giriş"
+          },
+          {
+            "section": "Genel Bilgiler"
+          },
+          {
+            "section": "Sonuç"
+          },
+          {
+            "section": "Kaynaklar"
+          },
+          {
+            "section": "Özgeçmiş"
+          }
         ]
       },
       "severity": "error",
@@ -65,7 +118,11 @@
       "message": "Teorik / kaynak araştırması tez bölümleri kılavuzdaki relative sırayı izlemiyor.",
       "solution": "Tez bölümlerini kılavuzdaki teorik / kaynak araştırması sırasına göre düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.source-research.heading-numbering",
@@ -80,9 +137,18 @@
       "category": "structure",
       "expected": {
         "sections": [
-          { "section": "Giriş", "level": 0 },
-          { "section": "Genel Bilgiler", "level": 0 },
-          { "section": "Sonuç", "level": 0 }
+          {
+            "section": "Giriş",
+            "level": 0
+          },
+          {
+            "section": "Genel Bilgiler",
+            "level": 0
+          },
+          {
+            "section": "Sonuç",
+            "level": 0
+          }
         ]
       },
       "severity": "error",
@@ -90,7 +156,11 @@
       "message": "Kaynak araştırması tezinin akademik ana bölümleri numaralandırılmalıdır.",
       "solution": "Giriş, Genel Bilgiler ve Sonuç başlıklarını ana bölüm düzeyinde numaralandırın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     }
   ]
 }

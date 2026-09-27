@@ -1,50 +1,102 @@
 {
   "id": "comu.applied-sciences.food-technology.bachelor",
   "metadata": {
-    "university": { "id": "comu", "name": "Çanakkale Onsekiz Mart Üniversitesi", "slug": "comu" },
-    "faculty": { "id": "applied-sciences", "name": "Uygulamalı Bilimler Fakültesi", "slug": "applied-sciences" },
-    "department": { "id": "food-technology", "name": "Gıda Teknolojisi", "slug": "food-technology" },
-    "thesisType": { "id": "bachelor", "name": "Lisans", "slug": "bachelor" },
-    "guide": { "title": "Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu" },
+    "university": {
+      "id": "comu",
+      "name": "Çanakkale Onsekiz Mart Üniversitesi",
+      "slug": "comu"
+    },
+    "faculty": {
+      "id": "applied-sciences",
+      "name": "Uygulamalı Bilimler Fakültesi",
+      "slug": "applied-sciences"
+    },
+    "department": {
+      "id": "food-technology",
+      "name": "Gıda Teknolojisi",
+      "slug": "food-technology"
+    },
+    "thesisType": {
+      "id": "bachelor",
+      "name": "Lisans",
+      "slug": "bachelor"
+    },
+    "guide": {
+      "title": "Gıda Teknolojisi Bitirme Tezi Hazırlama Kılavuzu"
+    },
     "version": "1.0.0"
   },
   "extends": [
-    { "id": "comu.bachelor", "scopeLevel": "university", "version": "1.0.0" }
+    {
+      "id": "comu.bachelor",
+      "scopeLevel": "university",
+      "version": "1.0.0"
+    }
   ],
   "rules": [
     {
       "id": "comu.applied-sciences.food-technology.bachelor.heading-alignment",
       "type": "HEADING_ALIGNMENT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Akademik Gövde Başlık Hizalaması",
       "description": "Ana ve alt akademik gövde başlıklarının sola yaslı olmasını doğrular.",
       "category": "heading",
-      "expected": { "levels": [0, 1, 2], "alignment": "left" },
+      "expected": {
+        "levels": [
+          0,
+          1,
+          2
+        ],
+        "alignment": "left"
+      },
       "severity": "error",
       "score": 10,
       "message": "Akademik gövde başlıkları sola yaslı olmalıdır.",
       "solution": "Akademik gövde başlığının paragraf hizalamasını sola yaslı olarak ayarlayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.paragraph-indentation",
       "type": "PARAGRAPH_INDENTATION",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Akademik Ana Gövde Paragraf İlk Satır Girintisi",
       "description": "Giriş ile Sonuç arasındaki akademik ana gövde paragraflarının ilk satırının 1,5 cm içeriden başlamasını doğrular.",
       "category": "spacing",
       "expected": {
         "firstLineCm": 1.5,
         "toleranceTwips": 1,
-        "sections": ["Giriş", "Genel Bilgiler", "Genel Bilgiler ve Literatür Çalışması", "Materyal ve Metot", "Bulgular ve Tartışma", "Sonuç"]
+        "sections": [
+          "Giriş",
+          "Genel Bilgiler",
+          "Genel Bilgiler ve Literatür Çalışması",
+          "Materyal ve Metot",
+          "Bulgular ve Tartışma",
+          "Sonuç"
+        ]
       },
       "severity": "error",
       "score": 10,
       "message": "Akademik ana gövde paragraf ilk satır girintisi 1,5 cm olmalıdır.",
       "solution": "Akademik ana gövde paragraflarının ilk satır girintisini 1,5 cm olarak ayarlayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.margin.top",
@@ -54,18 +106,27 @@
         "targetSlug": "food-technology"
       },
       "overrides": [
-        { "ruleId": "comu.bachelor.margin.top" }
+        {
+          "ruleId": "comu.bachelor.margin.top"
+        }
       ],
       "title": "Üst Kenar Boşluğu",
       "description": "Gıda Teknolojisi bitirme tezinde üst kenar boşluğunu tanımlar.",
       "category": "margin",
-      "expected": { "value": 3, "unit": "cm" },
+      "expected": {
+        "value": 3,
+        "unit": "cm"
+      },
       "severity": "error",
       "score": 10,
       "message": "Üst kenar boşluğu Gıda Teknolojisi tez formatı ile uyumlu değil.",
       "solution": "Üst kenar boşluğunu 3 cm olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.heading.heading1",
@@ -76,7 +137,9 @@
         "targetSlug": "food-technology"
       },
       "overrides": [
-        { "ruleId": "comu.bachelor.heading.heading1" }
+        {
+          "ruleId": "comu.bachelor.heading.heading1"
+        }
       ],
       "title": "Heading 1 Başlığı",
       "description": "Gıda Teknolojisi birinci seviye başlık stilinin tez formatına uygunluğunu tanımlar.",
@@ -92,7 +155,11 @@
       "message": "Heading 1 başlık stili Gıda Teknolojisi tez formatı ile uyumlu değil.",
       "solution": "Heading 1 stilini Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.body-level-0-heading-format",
@@ -108,12 +175,24 @@
       "expected": {
         "level": 0,
         "sections": [
-          { "section": "Giriş" },
-          { "section": "Genel Bilgiler ve Literatür Çalışması" },
-          { "section": "Materyal ve Metot" },
-          { "section": "Bulgular ve Tartışma" },
-          { "section": "Genel Bilgiler" },
-          { "section": "Sonuç" }
+          {
+            "section": "Giriş"
+          },
+          {
+            "section": "Genel Bilgiler ve Literatür Çalışması"
+          },
+          {
+            "section": "Materyal ve Metot"
+          },
+          {
+            "section": "Bulgular ve Tartışma"
+          },
+          {
+            "section": "Genel Bilgiler"
+          },
+          {
+            "section": "Sonuç"
+          }
         ],
         "fontFamily": "Times New Roman",
         "fontSize": 12,
@@ -124,7 +203,11 @@
       "message": "Akademik ana bölüm başlığı biçimi uygun değil.",
       "solution": "Akademik ana bölüm başlıklarını Times New Roman, 12 punto ve kalın olarak düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.page-number",
@@ -137,13 +220,21 @@
       "title": "Sayfa Numarası",
       "description": "Tez sayfalarında alt bilgi alanında ortalanmış sayfa numarası bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "required": true, "location": "footer", "alignment": "center" },
+      "expected": {
+        "required": true,
+        "location": "footer",
+        "alignment": "center"
+      },
       "severity": "error",
       "score": 10,
       "message": "Sayfa numarası zorunlu konum veya hizalama şartını karşılamıyor.",
       "solution": "Sayfa numarasını alt bilgi alanına ekleyin ve ortalayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-of-contents",
@@ -156,13 +247,20 @@
       "title": "İçindekiler Bölümü",
       "description": "Tezde İçindekiler bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "İçindekiler", "required": true },
+      "expected": {
+        "section": "İçindekiler",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "İçindekiler bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir İçindekiler bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.references",
@@ -175,13 +273,20 @@
       "title": "Kaynaklar Bölümü",
       "description": "Tezde Kaynaklar bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Kaynaklar", "required": true },
+      "expected": {
+        "section": "Kaynaklar",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Kaynaklar bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Kaynaklar bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-tr",
@@ -194,13 +299,20 @@
       "title": "Türkçe Özet Bölümü",
       "description": "Tezde Özet bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Özet", "required": true },
+      "expected": {
+        "section": "Özet",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Özet bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Özet bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-en",
@@ -213,13 +325,20 @@
       "title": "İngilizce Özet Bölümü",
       "description": "Tezde Abstract bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Abstract", "required": true },
+      "expected": {
+        "section": "Abstract",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Abstract bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Abstract bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.plagiarism-declaration",
@@ -232,13 +351,20 @@
       "title": "İntihal Beyan Sayfası",
       "description": "Tezde İntihal (Aşırma) Beyan Sayfası bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "İntihal (Aşırma) Beyan Sayfası", "required": true },
+      "expected": {
+        "section": "İntihal (Aşırma) Beyan Sayfası",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "İntihal (Aşırma) Beyan Sayfası tespit edilemedi.",
       "solution": "Teze bağımsız bir İntihal (Aşırma) Beyan Sayfası bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.page-number-sequence",
@@ -262,127 +388,219 @@
       "message": "Sayfa numarası biçimi veya Giriş bölümündeki geçiş uygun değil.",
       "solution": "Ön sayfaları küçük Romen rakamlarıyla numaralandırın; Giriş bölümünde Arap rakamlarına geçip numarayı 1'den başlatın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-object-alignment",
       "type": "OBJECT_ALIGNMENT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Tablo Nesne Hizalaması",
       "description": "Tabloların metin alanı içinde yatay olarak ortalanmasını doğrular.",
       "category": "format",
-      "expected": { "object": "table", "alignment": "center" },
+      "expected": {
+        "object": "table",
+        "alignment": "center"
+      },
       "severity": "error",
       "score": 10,
       "message": "Tablo nesnesi ortalanmış olmalıdır.",
       "solution": "Tabloyu metin alanı içinde yatay olarak ortalayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.figure-object-alignment",
       "type": "OBJECT_ALIGNMENT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Şekil Nesne Hizalaması",
       "description": "Güvenilir biçimde değerlendirilebilen şekillerin metin alanı içinde yatay olarak ortalanmasını doğrular.",
       "category": "format",
-      "expected": { "object": "figure", "alignment": "center" },
+      "expected": {
+        "object": "figure",
+        "alignment": "center"
+      },
       "severity": "error",
       "score": 10,
       "message": "Şekil nesnesi ortalanmış olmalıdır.",
       "solution": "Şekli taşıyan paragrafı yatay olarak ortalayın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-caption-placement",
       "type": "OBJECT_CAPTION_PLACEMENT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Tablo Başlığı Konumu",
       "description": "Tablo başlıklarının tabloların üstünde bulunmasını doğrular.",
       "category": "format",
-      "expected": { "object": "table", "position": "before" },
+      "expected": {
+        "object": "table",
+        "position": "before"
+      },
       "severity": "error",
       "score": 10,
       "message": "Tablo başlığı konumu uygun değil.",
       "solution": "Tablo başlığını ilgili tablonun üstüne yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.figure-caption-placement",
       "type": "OBJECT_CAPTION_PLACEMENT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Şekil Başlığı Konumu",
       "description": "Şekil başlıklarının şekillerin altında bulunmasını doğrular.",
       "category": "format",
-      "expected": { "object": "figure", "position": "after" },
+      "expected": {
+        "object": "figure",
+        "position": "after"
+      },
       "severity": "error",
       "score": 10,
       "message": "Şekil başlığı konumu uygun değil.",
       "solution": "Şekil başlığını ilgili şeklin altına yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-caption-format",
       "type": "OBJECT_CAPTION_FORMAT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Tablo Başlığı Biçimi",
       "description": "Tablo başlıklarının sola yaslı ve tek satır aralığında olmasını doğrular.",
       "category": "format",
-      "expected": { "object": "table", "alignment": "left", "lineSpacing": 1 },
+      "expected": {
+        "object": "table",
+        "alignment": "left",
+        "lineSpacing": 1
+      },
       "severity": "error",
       "score": 10,
       "message": "Tablo başlığı biçimi uygun değil.",
       "solution": "Tablo başlığını sola yaslı ve tek satır aralığında düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.figure-caption-format",
       "type": "OBJECT_CAPTION_FORMAT",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Şekil Başlığı Biçimi",
       "description": "Şekil başlıklarının sola yaslı ve tek satır aralığında olmasını doğrular.",
       "category": "format",
-      "expected": { "object": "figure", "alignment": "left", "lineSpacing": 1 },
+      "expected": {
+        "object": "figure",
+        "alignment": "left",
+        "lineSpacing": 1
+      },
       "severity": "error",
       "score": 10,
       "message": "Şekil başlığı biçimi uygun değil.",
       "solution": "Şekil başlığını sola yaslı ve tek satır aralığında düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.table-in-text-reference",
       "type": "OBJECT_IN_TEXT_REFERENCE",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Tablo Metin İçi Atfı",
       "description": "Güvenilir başlığı bulunan her tablo için metin içinde en az bir atıf bulunmasını doğrular.",
       "category": "citation",
-      "expected": { "object": "table" },
+      "expected": {
+        "object": "table"
+      },
       "severity": "error",
       "score": 10,
       "message": "Bazı tablolar için metin içi atıf bulunamadı.",
       "solution": "Her tabloya görünür tez metni içinde numarasıyla atıf yapın ve tablo numaralarını benzersiz kullanın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.figure-in-text-reference",
       "type": "OBJECT_IN_TEXT_REFERENCE",
-      "scope": { "level": "department", "targetId": "food-technology", "targetSlug": "food-technology" },
+      "scope": {
+        "level": "department",
+        "targetId": "food-technology",
+        "targetSlug": "food-technology"
+      },
       "title": "Şekil Metin İçi Atfı",
       "description": "Güvenilir başlığı bulunan her şekil için metin içinde en az bir atıf bulunmasını doğrular.",
       "category": "citation",
-      "expected": { "object": "figure" },
+      "expected": {
+        "object": "figure"
+      },
       "severity": "error",
       "score": 10,
       "message": "Bazı şekiller için metin içi atıf bulunamadı.",
       "solution": "Her şekle görünür tez metni içinde numarasıyla atıf yapın ve şekil numaralarını benzersiz kullanın.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.acceptance-approval",
@@ -397,7 +615,9 @@
       "category": "structure",
       "expected": {
         "section": "Kabul ve Onay Sayfası",
-        "aliases": ["Kabul ve Onay"],
+        "aliases": [
+          "Kabul ve Onay"
+        ],
         "required": true
       },
       "severity": "error",
@@ -405,7 +625,11 @@
       "message": "Kabul ve Onay Sayfası tespit edilemedi.",
       "solution": "Teze bağımsız bir Kabul ve Onay Sayfası bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.acknowledgements",
@@ -418,13 +642,20 @@
       "title": "Teşekkür Bölümü",
       "description": "Tezde Teşekkür bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Teşekkür", "required": true },
+      "expected": {
+        "section": "Teşekkür",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Teşekkür bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Teşekkür bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.introduction",
@@ -437,13 +668,20 @@
       "title": "Giriş Bölümü",
       "description": "Tezde Giriş bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Giriş", "required": true },
+      "expected": {
+        "section": "Giriş",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Giriş bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Giriş bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.conclusion",
@@ -456,13 +694,20 @@
       "title": "Sonuç Bölümü",
       "description": "Tezde Sonuç bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Sonuç", "required": true },
+      "expected": {
+        "section": "Sonuç",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Sonuç bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Sonuç bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.cv",
@@ -475,13 +720,20 @@
       "title": "Özgeçmiş Bölümü",
       "description": "Tezde Özgeçmiş bölümünün bulunmasını zorunlu kılar.",
       "category": "structure",
-      "expected": { "section": "Özgeçmiş", "required": true },
+      "expected": {
+        "section": "Özgeçmiş",
+        "required": true
+      },
       "severity": "error",
       "score": 10,
       "message": "Özgeçmiş bölümü tespit edilemedi.",
       "solution": "Teze bağımsız bir Özgeçmiş bölümü ekleyin ve bölüm sırasındaki uygun konuma yerleştirin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.list-of-tables",
@@ -506,7 +758,11 @@
       "message": "Tablo içeren tezde Tablolar Listesi bölümü bulunmalıdır.",
       "solution": "Tezde tablo kullanıldıysa Tablolar Listesi bölümünü ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.list-of-figures",
@@ -531,7 +787,11 @@
       "message": "Şekil içeren tezde Şekiller Listesi bölümü bulunmalıdır.",
       "solution": "Tezde şekil kullanıldıysa Şekiller Listesi bölümünü ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.list-of-abbreviations",
@@ -556,7 +816,11 @@
       "message": "Kısaltma içeren tezde Simgeler ve Kısaltmalar Listesi bölümü bulunmalıdır.",
       "solution": "Tezde kısaltma kullanıldıysa Simgeler ve Kısaltmalar Listesi bölümünü ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-word-count",
@@ -578,7 +842,11 @@
       "message": "Türkçe Özet bölümü 200 kelime sınırını aşıyor.",
       "solution": "Türkçe Özet içeriğini en fazla 200 kelime olacak şekilde düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-en-word-count",
@@ -600,7 +868,11 @@
       "message": "İngilizce Özet bölümü 200 kelime sınırını aşıyor.",
       "solution": "İngilizce Özet içeriğini en fazla 200 kelime olacak şekilde düzenleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-tr-keywords",
@@ -615,10 +887,14 @@
       "category": "structure",
       "expected": {
         "section": "Özet",
-        "labels": ["Anahtar Kelimeler"],
+        "labels": [
+          "Anahtar Kelimeler"
+        ],
         "min": 3,
         "max": 5,
-        "separators": [","],
+        "separators": [
+          ","
+        ],
         "placement": "section-end"
       },
       "severity": "error",
@@ -626,7 +902,11 @@
       "message": "Türkçe Özet anahtar kelime sayısı veya konumu uygun değil.",
       "solution": "Özet sonuna Anahtar Kelimeler: etiketiyle virgülle ayrılmış 3–5 anahtar kelime ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     },
     {
       "id": "comu.applied-sciences.food-technology.bachelor.summary-en-keywords",
@@ -641,10 +921,15 @@
       "category": "structure",
       "expected": {
         "section": "Abstract",
-        "labels": ["Keyword", "Keywords"],
+        "labels": [
+          "Keyword",
+          "Keywords"
+        ],
         "min": 3,
         "max": 5,
-        "separators": [","],
+        "separators": [
+          ","
+        ],
         "placement": "section-end"
       },
       "severity": "error",
@@ -652,7 +937,11 @@
       "message": "Abstract keyword sayısı veya konumu uygun değil.",
       "solution": "Abstract sonuna Keyword: etiketiyle virgülle ayrılmış 3–5 keyword ekleyin.",
       "enabled": true,
-      "version": "1.0.0"
+      "version": "1.0.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
     }
   ]
 }

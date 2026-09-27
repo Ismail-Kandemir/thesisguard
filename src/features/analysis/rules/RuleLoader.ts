@@ -382,6 +382,9 @@ function cloneRules(rules: readonly RuleDefinition[]): RuleDefinition[] {
     expected: cloneExpected(rule.expected),
     scope: rule.scope ? { ...rule.scope } : undefined,
     overrides: rule.overrides?.map((override) => ({ ...override })),
+    validationEvidence: rule.validationEvidence
+      ? { ...rule.validationEvidence }
+      : undefined,
   }));
 }
 
