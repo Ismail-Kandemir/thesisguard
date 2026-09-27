@@ -28,6 +28,7 @@ function main() {
     "comu.applied-sciences.food-technology.bachelor.experimental",
     "comu.applied-sciences.food-technology.bachelor.source-research",
     "comu.bachelor",
+    "comu.engineering.computer-engineering.bachelor",
   ], "production discovered rule set ids");
   assertDeepEqual(selectedIds, [
     "comu.applied-sciences.food-technology.bachelor",

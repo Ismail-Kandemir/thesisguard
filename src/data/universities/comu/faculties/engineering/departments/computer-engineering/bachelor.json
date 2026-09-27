@@ -1,0 +1,670 @@
+{
+  "id": "comu.engineering.computer-engineering.bachelor",
+  "metadata": {
+    "university": {
+      "id": "comu",
+      "name": "Çanakkale Onsekiz Mart Üniversitesi",
+      "slug": "comu"
+    },
+    "faculty": {
+      "id": "engineering",
+      "name": "Mühendislik Fakültesi",
+      "slug": "engineering"
+    },
+    "department": {
+      "id": "computer-engineering",
+      "name": "Bilgisayar Mühendisliği",
+      "slug": "computer-engineering"
+    },
+    "thesisType": {
+      "id": "bachelor",
+      "name": "Lisans",
+      "slug": "bachelor"
+    },
+    "guide": {
+      "title": "Bilgisayar Mühendisliği Bitirme Projesi Yazım Kuralları"
+    },
+    "version": "1.1.0"
+  },
+  "rules": [
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.typography.font-family",
+      "type": "FONT_FAMILY",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Yazı Tipi",
+      "description": "Bilgisayar Mühendisliği bitirme projesi metninde Times New Roman yazı tipinin kullanılmasını doğrular.",
+      "category": "typography",
+      "expected": "Times New Roman",
+      "severity": "error",
+      "score": 10,
+      "message": "Yazı tipi Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Ana metin yazı tipini Times New Roman olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.page-size",
+      "type": "PAGE_SIZE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Kağıt Standardı",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde A4 (210 x 297 mm) sayfa boyutunun kullanılmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "widthMm": 210,
+        "heightMm": 297,
+        "orientation": "portrait",
+        "toleranceMm": 0.5
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Kağıt standardı Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Belgenin sayfa boyutunu A4 (210 x 297 mm) ve portre yönlendirme olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.page-number-front-to-main",
+      "type": "PAGE_NUMBER_SEQUENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Sayfa Numarası Ön Bölümden Ana Metne Geçiş",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde ön bölümün küçük Romen, Giriş bölümünden Ekler bölümüne kadar ana metnin 1'den başlayan Arap rakamı ile numaralandırılmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "transitionSection": "Giriş",
+        "untilSection": "Ekler",
+        "beforeFormat": "lowerRoman",
+        "fromFormat": "decimal",
+        "restartAt": 1,
+        "beforePageNumber": {
+          "location": "footer",
+          "alignment": "center"
+        },
+        "fromPageNumber": {
+          "location": "footer",
+          "alignment": "right"
+        },
+        "beforeFirstPage": {
+          "hidden": true
+        }
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Ön bölümden ana metne sayfa numarası geçişi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "İç kapaktan ana metne kadar küçük Romen sayfa numarası kullanın; Giriş bölümünde Arap rakamlarına geçip numarayı 1'den başlatın.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML; footer/PAGE/alignment/titlePg semantics doğrulanır, rendered fiziksel sağ-alt/alt-orta yerleşim kanıtlanmaz."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.page-number-main-to-final",
+      "type": "PAGE_NUMBER_SEQUENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Sayfa Numarası Ana Metinden Son Bölüme Geçiş",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Ekler bölümünden itibaren 1'den başlayan büyük Romen sayfa numarası kullanılmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "transitionSection": "Ekler",
+        "aliases": [
+          "Ek"
+        ],
+        "beforeStartSection": "Giriş",
+        "beforeFormat": "decimal",
+        "fromFormat": "upperRoman",
+        "restartAt": 1,
+        "beforePageNumber": {
+          "location": "footer",
+          "alignment": "right"
+        },
+        "fromPageNumber": {
+          "location": "footer",
+          "alignment": "center"
+        },
+        "definesMainContentBoundary": false
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Ana metinden son bölüme sayfa numarası geçişi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Ekler bölümünden itibaren büyük Romen sayfa numarası kullanın ve numarayı 1'den başlatın.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML; final faz biçimi, restart, PAGE field ve determinable footer alignment doğrulanır, rendered fiziksel yerleşim kanıtlanmaz."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.typography.font-size",
+      "type": "FONT_SIZE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Yazı Boyutu",
+      "description": "Bilgisayar Mühendisliği bitirme projesi metninde 12 punto yazı boyutunun kullanılmasını doğrular.",
+      "category": "typography",
+      "expected": {
+        "value": 12,
+        "unit": "pt"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Yazı boyutu Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Ana metin yazı boyutunu 12 punto olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.format.alignment",
+      "type": "ALIGNMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Paragraf Hizalama",
+      "description": "Bilgisayar Mühendisliği bitirme projesi metnindeki paragrafların iki yana yaslı olmasını doğrular.",
+      "category": "format",
+      "expected": "justify",
+      "severity": "warning",
+      "score": 8,
+      "message": "Paragraf hizalaması Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Ana metin paragraflarını iki yana yaslı olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.spacing.line-height",
+      "type": "LINE_SPACING",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Satır Aralığı",
+      "description": "Bilgisayar Mühendisliği bitirme projesi metninde 1,5 satır aralığının kullanılmasını doğrular.",
+      "category": "spacing",
+      "expected": {
+        "value": 1.5,
+        "unit": "line"
+      },
+      "severity": "warning",
+      "score": 8,
+      "message": "Satır aralığı Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Ana metin satır aralığını 1,5 satır olarak ayarlayın.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.margin.left",
+      "type": "MARGIN_LEFT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Sol Kenar Boşluğu",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde sol kenar boşluğunun 4 cm olmasını doğrular.",
+      "category": "margin",
+      "expected": {
+        "value": 4,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Sol kenar boşluğu Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Sol kenar boşluğunu 4 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.margin.right",
+      "type": "MARGIN_RIGHT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Sağ Kenar Boşluğu",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde sağ kenar boşluğunun 2,5 cm olmasını doğrular.",
+      "category": "margin",
+      "expected": {
+        "value": 2.5,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Sağ kenar boşluğu Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Sağ kenar boşluğunu 2,5 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.margin.top",
+      "type": "MARGIN_TOP",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Üst Kenar Boşluğu",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde üst kenar boşluğunun 3 cm olmasını doğrular.",
+      "category": "margin",
+      "expected": {
+        "value": 3,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Üst kenar boşluğu Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Üst kenar boşluğunu 3 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.margin.bottom",
+      "type": "MARGIN_BOTTOM",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Alt Kenar Boşluğu",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde alt kenar boşluğunun 3 cm olmasını doğrular.",
+      "category": "margin",
+      "expected": {
+        "value": 3,
+        "unit": "cm"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Alt kenar boşluğu Bilgisayar Mühendisliği bitirme projesi formatı ile uyumlu değil.",
+      "solution": "Alt kenar boşluğunu 3 cm olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.paragraph-indentation",
+      "type": "PARAGRAPH_INDENTATION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Paragraf İlk Satır Girintisi",
+      "description": "Güvenilir biçimde tanınan akademik gövde bölümlerindeki paragrafların ilk satırının 1 cm içeriden başlamasını doğrular.",
+      "category": "spacing",
+      "expected": {
+        "firstLineCm": 1,
+        "toleranceTwips": 1,
+        "sections": [
+          "Sonuçlar"
+        ]
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Akademik gövde paragraf ilk satır girintisi 1 cm olmalıdır.",
+      "solution": "Akademik gövde paragraflarının ilk satır girintisini 1 cm olarak ayarlayın.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Mevcut validator yalnız tanımlı akademik section aralıklarında paragraf girintisi denetleyebilir."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.approval-page",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Onay Sayfası",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Onay Sayfası bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Onay Sayfası",
+        "aliases": [
+          "Kabul ve Onay Sayfası",
+          "Kabul ve Onay"
+        ],
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Onay Sayfası tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Onay Sayfası bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.acknowledgements",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Teşekkür Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Teşekkür bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Teşekkür",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Teşekkür bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Teşekkür bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.symbols-abbreviations",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Simgeler ve Kısaltmalar",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Simgeler ve Kısaltmalar bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Simgeler ve Kısaltmalar",
+        "aliases": [
+          "Simgeler ve Kısaltmalar Listesi"
+        ],
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Simgeler ve Kısaltmalar bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Simgeler ve Kısaltmalar bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.summary",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Özet Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Özet bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Özet",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Özet bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Özet bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.summary-word-count",
+      "type": "SECTION_WORD_COUNT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Özet Kelime Sayısı",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Özet bölümünün en fazla 300 kelime olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "section": "Özet",
+        "max": 300
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Özet bölümü 300 kelime sınırını aşıyor.",
+      "solution": "Özet bölümünü en fazla 300 kelime olacak şekilde düzenleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.table-of-contents",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İçindekiler Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde İçindekiler bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "İçindekiler",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İçindekiler bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir İçindekiler bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.list-of-figures",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Şekiller Listesi",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Şekiller Listesi bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Şekiller Listesi",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekiller Listesi bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Şekiller Listesi bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.list-of-tables",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Tablolar Listesi",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Tablolar Listesi bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Tablolar Listesi",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablolar Listesi bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Tablolar Listesi bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.conclusions",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Sonuçlar Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Sonuçlar bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Sonuçlar",
+        "aliases": [
+          "Sonuç"
+        ],
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Sonuçlar bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Sonuçlar bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.references",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Kaynaklar Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Kaynaklar bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Kaynaklar",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Kaynaklar bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Kaynaklar bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.appendices",
+      "type": "REQUIRED_SECTION",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Ekler Bölümü",
+      "description": "Bilgisayar Mühendisliği bitirme projesinde Ekler bölümünün bulunmasını zorunlu kılar.",
+      "category": "structure",
+      "expected": {
+        "section": "Ekler",
+        "required": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Ekler bölümü tespit edilemedi.",
+      "solution": "Bitirme projesine bağımsız bir Ekler bölümü ekleyin.",
+      "enabled": true,
+      "version": "1.1.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    }
+  ]
+}

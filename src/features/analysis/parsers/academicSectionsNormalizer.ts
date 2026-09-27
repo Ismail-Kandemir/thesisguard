@@ -105,7 +105,21 @@ function getSectionItemsFromRule(
         : [];
     case "PAGE_NUMBER_SEQUENCE":
       return hasTransitionSectionExpected(expected)
-        ? [{ section: expected.transitionSection, aliases: expected.aliases ?? [] }]
+        ? [
+            { section: expected.transitionSection, aliases: expected.aliases ?? [] },
+            ...(expected.beforeStartSection
+              ? [{
+                  section: expected.beforeStartSection,
+                  aliases: expected.beforeStartAliases ?? [],
+                }]
+              : []),
+            ...(expected.untilSection
+              ? [{
+                  section: expected.untilSection,
+                  aliases: expected.untilAliases ?? [],
+                }]
+              : []),
+          ]
         : [];
     case "SECTION_KEYWORDS":
       return hasSectionOnlyExpected(expected) ? [{ section: expected.section, aliases: [] }] : [];
@@ -142,16 +156,35 @@ function hasSectionExpected(
   );
 }
 
-function hasTransitionSectionExpected(
-  value: object,
-): value is { transitionSection: string; aliases?: string[] } {
+function hasTransitionSectionExpected(value: object): value is {
+  transitionSection: string;
+  aliases?: string[];
+  beforeStartSection?: string;
+  beforeStartAliases?: string[];
+  untilSection?: string;
+  untilAliases?: string[];
+} {
   return (
     "transitionSection" in value &&
     typeof value.transitionSection === "string" &&
     (!("aliases" in value) ||
       value.aliases === undefined ||
       (Array.isArray(value.aliases) &&
-        value.aliases.every((alias) => typeof alias === "string")))
+        value.aliases.every((alias) => typeof alias === "string"))) &&
+    (!("beforeStartSection" in value) ||
+      value.beforeStartSection === undefined ||
+      typeof value.beforeStartSection === "string") &&
+    (!("beforeStartAliases" in value) ||
+      value.beforeStartAliases === undefined ||
+      (Array.isArray(value.beforeStartAliases) &&
+        value.beforeStartAliases.every((alias) => typeof alias === "string"))) &&
+    (!("untilSection" in value) ||
+      value.untilSection === undefined ||
+      typeof value.untilSection === "string") &&
+    (!("untilAliases" in value) ||
+      value.untilAliases === undefined ||
+      (Array.isArray(value.untilAliases) &&
+        value.untilAliases.every((alias) => typeof alias === "string")))
   );
 }
 

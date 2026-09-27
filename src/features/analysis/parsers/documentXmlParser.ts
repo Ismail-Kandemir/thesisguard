@@ -6,6 +6,8 @@ import type {
   LineSpacingRule,
   LineSpacingValue,
   PageMargins,
+  PageOrientation,
+  PageSize,
   PageNumberHeaderFooterReference,
   Paragraph,
   ParagraphAlignment,
@@ -53,6 +55,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       paragraphFormatting: createEmptyParagraphFormatting(),
     },
     pageMargins: parsePageMargins(xmlDocument),
+    pageSize: parseDocumentPageSize(xmlDocument),
     pageSections: parsePageSections(xmlDocument),
     pageNumbering: {
       hasPageNumbers: false,
@@ -98,6 +101,12 @@ function parsePageMargins(xmlDocument: Document): PageMargins {
   return parsePageMarginsFromSectionProperties(sectionProperties);
 }
 
+function parseDocumentPageSize(xmlDocument: Document): PageSize | null {
+  const sectionProperties = parseSectionProperties(xmlDocument).at(-1)?.element ?? null;
+
+  return parsePageSizeFromSectionProperties(sectionProperties);
+}
+
 function parsePageSections(xmlDocument: Document) {
   const sections = parseSectionProperties(xmlDocument);
   let nextStartParagraphIndex = 0;
@@ -108,6 +117,7 @@ function parsePageSections(xmlDocument: Document) {
       startParagraphIndex: nextStartParagraphIndex,
       endParagraphIndex: section.endParagraphIndex,
       pageMargins: parsePageMarginsFromSectionProperties(section.element),
+      pageSize: parsePageSizeFromSectionProperties(section.element),
       source: section.source,
     };
 
@@ -252,6 +262,55 @@ interface ParsedSectionProperties {
   startParagraphIndex: number;
   endParagraphIndex: number;
   source: DocumentPageSectionSource;
+}
+
+function parsePageSizeFromSectionProperties(
+  sectionProperties: Element | null,
+): PageSize | null {
+  const pageSizeElement = sectionProperties
+    ? getFirstDescendant(sectionProperties, "pgSz")
+    : null;
+
+  if (!pageSizeElement) {
+    return null;
+  }
+
+  return {
+    widthMm: parseTwipsInMillimeters(pageSizeElement, "w"),
+    heightMm: parseTwipsInMillimeters(pageSizeElement, "h"),
+    orientation: parsePageOrientation(getWordAttribute(pageSizeElement, "orient")),
+  };
+}
+
+function parseTwipsInMillimeters(
+  element: Element,
+  attributeName: string,
+): number | null {
+  const twipsValue = getWordAttribute(element, attributeName);
+
+  if (twipsValue === null) {
+    return null;
+  }
+
+  const parsedTwips = Number(twipsValue);
+
+  if (!Number.isFinite(parsedTwips)) {
+    return null;
+  }
+
+  return roundToTwoDecimals((parsedTwips / TWIPS_PER_INCH) * 25.4);
+}
+
+function parsePageOrientation(value: string | null): PageOrientation | null {
+  if (value === null || value === "portrait") {
+    return "portrait";
+  }
+
+  if (value === "landscape") {
+    return "landscape";
+  }
+
+  return null;
 }
 
 function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[] {

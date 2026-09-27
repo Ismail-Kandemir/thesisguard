@@ -33,6 +33,7 @@ export type RuleType =
   | "MARGIN_TOP"
   | "PAGE_NUMBER"
   | "PAGE_NUMBER_SEQUENCE"
+  | "PAGE_SIZE"
   | "OBJECT_ALIGNMENT"
   | "OBJECT_CAPTION_PLACEMENT"
   | "OBJECT_CAPTION_FORMAT"
@@ -63,6 +64,15 @@ export interface PageNumberRuleExpected {
   required: boolean;
   location?: HeaderFooterLocation;
   alignment?: Exclude<ParagraphAlignment, "justify">;
+}
+
+export type PageOrientation = "portrait" | "landscape";
+
+export interface PageSizeRuleExpected {
+  widthMm: number;
+  heightMm: number;
+  orientation?: PageOrientation;
+  toleranceMm: number;
 }
 
 export interface RequiredSectionRuleExpected {
@@ -103,14 +113,32 @@ export interface SectionWordCountRuleExpected {
   max?: number;
 }
 
-export type PageNumberFormat = "decimal" | "lowerRoman";
+export type PageNumberFormat = "decimal" | "lowerRoman" | "upperRoman";
+
+export interface PageNumberPlacementExpected {
+  location?: HeaderFooterLocation;
+  alignment?: Exclude<ParagraphAlignment, "justify">;
+}
+
+export interface PageNumberFirstPageExpected {
+  hidden: boolean;
+}
 
 export interface PageNumberSequenceRuleExpected {
   transitionSection: string;
   aliases?: string[];
+  beforeStartSection?: string;
+  beforeStartAliases?: string[];
+  untilSection?: string;
+  untilAliases?: string[];
   beforeFormat: PageNumberFormat;
   fromFormat: PageNumberFormat;
   restartAt?: number;
+  beforePageNumber?: PageNumberPlacementExpected;
+  fromPageNumber?: PageNumberPlacementExpected;
+  beforeFirstPage?: PageNumberFirstPageExpected;
+  fromFirstPage?: PageNumberFirstPageExpected;
+  definesMainContentBoundary?: boolean;
 }
 
 export interface ObjectCaptionPlacementRuleExpected {
@@ -222,6 +250,7 @@ export type RuleExpectedValue =
   | boolean
   | PageNumberRuleExpected
   | PageNumberSequenceRuleExpected
+  | PageSizeRuleExpected
   | ObjectAlignmentRuleExpected
   | ObjectCaptionPlacementRuleExpected
   | ObjectCaptionFormatRuleExpected
@@ -458,6 +487,12 @@ export interface PageMargins {
   bottom: number | null;
 }
 
+export interface PageSize {
+  widthMm: number | null;
+  heightMm: number | null;
+  orientation: PageOrientation | null;
+}
+
 export type DocumentPageSectionSource =
   | "paragraph"
   | "body";
@@ -467,6 +502,7 @@ export interface DocumentPageSection {
   startParagraphIndex: number;
   endParagraphIndex: number;
   pageMargins: PageMargins;
+  pageSize?: PageSize | null;
   source: DocumentPageSectionSource;
 }
 
@@ -1029,6 +1065,7 @@ export interface NormalizedDocument {
   documentDefaults: DocumentDefaults;
   numberingDefinitions: NumberingDefinition[];
   pageMargins: PageMargins;
+  pageSize?: PageSize | null;
   pageSections: DocumentPageSection[];
   pageNumbering: PageNumbering;
   tableOfContents: TableOfContents;

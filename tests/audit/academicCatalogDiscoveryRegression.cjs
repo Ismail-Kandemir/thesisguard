@@ -26,9 +26,9 @@ function main() {
 }
 
 function assertProductionCatalogPreserved() {
-  assertEqual(ACADEMIC_CATALOG.length, 1, "production catalog entry count");
+  assertEqual(ACADEMIC_CATALOG.length, 2, "production catalog entry count");
 
-  const [entry] = ACADEMIC_CATALOG;
+  const entry = findCatalogEntry("applied-sciences", "food-technology");
 
   assertEqual(entry.university.id, "comu", "university id");
   assertEqual(entry.university.name, "Çanakkale Onsekiz Mart Üniversitesi", "university label");
@@ -48,10 +48,20 @@ function assertProductionCatalogPreserved() {
     ["Deneysel Çalışma", "Teorik / Kaynak Araştırması"],
     "study type labels",
   );
+
+  const computerEngineering = findCatalogEntry("engineering", "computer-engineering");
+
+  assertEqual(computerEngineering.university.id, "comu", "computer university id");
+  assertEqual(computerEngineering.faculty?.id, "engineering", "computer faculty id");
+  assertEqual(computerEngineering.faculty?.name, "Mühendislik Fakültesi", "computer faculty label");
+  assertEqual(computerEngineering.department?.id, "computer-engineering", "computer department id");
+  assertEqual(computerEngineering.department?.name, "Bilgisayar Mühendisliği", "computer department label");
+  assertEqual(computerEngineering.thesisType.id, "bachelor", "computer thesis type id");
+  assertEqual(computerEngineering.studyTypes, undefined, "computer study types");
 }
 
 function assertStableSelectionCompatibility() {
-  const [entry] = ACADEMIC_CATALOG;
+  const entry = findCatalogEntry("applied-sciences", "food-technology");
   const selectedIds = new RuleSetSelector(ACADEMIC_CATALOG, loadAvailableRuleSets())
     .select({
       universityId: entry.university.id,
@@ -72,6 +82,19 @@ function assertStableSelectionCompatibility() {
     ],
     "stable catalog ids resolve expected rule sets",
   );
+}
+
+function findCatalogEntry(facultyId, departmentId) {
+  const entry = ACADEMIC_CATALOG.find((candidate) =>
+    candidate.faculty?.id === facultyId &&
+    candidate.department?.id === departmentId
+  );
+
+  if (!entry) {
+    throw new Error(`Catalog entry not found: ${facultyId}/${departmentId}`);
+  }
+
+  return entry;
 }
 
 function assertSyntheticSecondUniversityCatalog() {

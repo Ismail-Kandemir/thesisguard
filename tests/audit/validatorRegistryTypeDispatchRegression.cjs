@@ -16,7 +16,7 @@ const SELECTION = {
   studyTypeId: "experimental",
 };
 
-const EXPECTED_REGISTERED_RULE_TYPES = 25;
+const EXPECTED_REGISTERED_RULE_TYPES = 26;
 const MISSING_VALIDATOR_MESSAGE = "Bu kural için kayıtlı validator bulunamadı.";
 
 function main() {

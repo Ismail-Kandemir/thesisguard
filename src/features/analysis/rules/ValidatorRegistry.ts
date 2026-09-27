@@ -18,6 +18,7 @@ import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlace
 import { ObjectInTextReferenceValidator } from "./validators/ObjectInTextReferenceValidator";
 import { PageNumberSequenceValidator } from "./validators/PageNumberSequenceValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
+import { PageSizeValidator } from "./validators/PageSizeValidator";
 import { ParagraphIndentationValidator } from "./validators/ParagraphIndentationValidator";
 import { RequiredSectionValidator } from "./validators/RequiredSectionValidator";
 import { SectionKeywordsValidator } from "./validators/SectionKeywordsValidator";
@@ -47,6 +48,7 @@ const DEFAULT_VALIDATOR_ENTRIES = [
   ["OBJECT_IN_TEXT_REFERENCE", new ObjectInTextReferenceValidator()],
   ["PAGE_NUMBER", new PageNumberValidator()],
   ["PAGE_NUMBER_SEQUENCE", new PageNumberSequenceValidator()],
+  ["PAGE_SIZE", new PageSizeValidator()],
   ["PARAGRAPH_INDENTATION", new ParagraphIndentationValidator()],
   ["REQUIRED_SECTION", new RequiredSectionValidator()],
   ["SECTION_KEYWORDS", new SectionKeywordsValidator()],

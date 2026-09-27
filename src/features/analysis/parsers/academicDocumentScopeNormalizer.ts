@@ -53,6 +53,7 @@ function getMainContentBoundaryNames(
 ): readonly string[] {
   const transitionSections = rules
     .filter(isPageNumberSequenceRule)
+    .filter((rule) => rule.expected.definesMainContentBoundary !== false)
     .map((rule) => rule.expected.transitionSection);
 
   return transitionSections.length > 0
