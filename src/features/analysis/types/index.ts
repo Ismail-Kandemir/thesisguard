@@ -22,6 +22,15 @@ export type RuleCategory =
 export type RuleSeverity = "info" | "warning" | "error";
 
 export type RuleType =
+  | "ALIGNMENT"
+  | "FONT_FAMILY"
+  | "FONT_SIZE"
+  | "HEADING"
+  | "LINE_SPACING"
+  | "MARGIN_BOTTOM"
+  | "MARGIN_LEFT"
+  | "MARGIN_RIGHT"
+  | "MARGIN_TOP"
   | "PAGE_NUMBER"
   | "PAGE_NUMBER_SEQUENCE"
   | "OBJECT_ALIGNMENT"

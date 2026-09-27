@@ -4,13 +4,6 @@ import type {
   RuleResult,
 } from "../types";
 import { ValidatorRegistry } from "../rules/ValidatorRegistry";
-import { FontFamilyValidator } from "../rules/validators/FontFamilyValidator";
-import { FontSizeValidator } from "../rules/validators/FontSizeValidator";
-import { LineSpacingValidator } from "../rules/validators/LineSpacingValidator";
-
-const FONT_FAMILY_RULE_ID = "comu.bachelor.typography.font-family";
-const FONT_SIZE_RULE_ID = "comu.bachelor.typography.font-size";
-const LINE_SPACING_RULE_ID = "comu.bachelor.spacing.line-height";
 
 export class RuleEngine {
   private readonly validatorRegistry: ValidatorRegistry;
@@ -23,7 +16,7 @@ export class RuleEngine {
     return rules
       .filter((rule) => rule.enabled)
       .map((rule) => {
-        const validator = this.validatorRegistry.getValidator(rule.id);
+        const validator = this.validatorRegistry.getValidator(rule);
 
         if (!validator) {
           return createMissingValidatorResult(rule);
@@ -37,13 +30,7 @@ export class RuleEngine {
 }
 
 function createDefaultValidatorRegistry(): ValidatorRegistry {
-  const registry = new ValidatorRegistry();
-
-  registry.register(FONT_FAMILY_RULE_ID, new FontFamilyValidator());
-  registry.register(FONT_SIZE_RULE_ID, new FontSizeValidator());
-  registry.register(LINE_SPACING_RULE_ID, new LineSpacingValidator());
-
-  return registry;
+  return new ValidatorRegistry();
 }
 
 function enrichRuleResult(

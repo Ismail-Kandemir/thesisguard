@@ -3,15 +3,6 @@ require("../golden/experimentalGoldenRegression.cjs");
 const { RuleResolver } = require("../../src/features/analysis/rules/RuleResolver.ts");
 const { RuleSetSelector } = require("../../src/features/analysis/rules/RuleSetSelector.ts");
 const { ValidatorRegistry } = require("../../src/features/analysis/rules/ValidatorRegistry.ts");
-const {
-  FontFamilyValidator,
-} = require("../../src/features/analysis/rules/validators/FontFamilyValidator.ts");
-const {
-  FontSizeValidator,
-} = require("../../src/features/analysis/rules/validators/FontSizeValidator.ts");
-const {
-  LineSpacingValidator,
-} = require("../../src/features/analysis/rules/validators/LineSpacingValidator.ts");
 
 const SELECTION = {
   universityId: "comu",
@@ -31,9 +22,9 @@ const CONDITIONAL_LIST_RULE_IDS = new Set([
 
 function main() {
   const rules = new RuleResolver().resolve(new RuleSetSelector().select(SELECTION));
-  const registry = createProductionRegistry();
+  const registry = new ValidatorRegistry();
   const duplicateIds = findDuplicateIds(rules);
-  const missingValidators = rules.filter((rule) => !registry.getValidator(rule.id));
+  const missingValidators = rules.filter((rule) => !registry.getValidator(rule));
   const coverageCounts = countBy(rules, (rule) => metadata(rule).coverage);
   const trustCounts = countBy(rules, (rule) => metadata(rule).trust);
 
@@ -59,15 +50,6 @@ function main() {
     coverageCounts,
     trustCounts,
   }, null, 2));
-}
-
-function createProductionRegistry() {
-  const registry = new ValidatorRegistry();
-  registry.register("comu.bachelor.typography.font-family", new FontFamilyValidator());
-  registry.register("comu.bachelor.typography.font-size", new FontSizeValidator());
-  registry.register("comu.bachelor.spacing.line-height", new LineSpacingValidator());
-
-  return registry;
 }
 
 function metadata(rule) {
