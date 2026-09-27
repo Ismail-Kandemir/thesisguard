@@ -21,16 +21,26 @@ export class RuleSetSelector {
 
   select(selection: Readonly<AcademicSelection>): UniversityRuleSet[] {
     validateSelection(selection, this.catalog);
-    const selectedRuleSet = this.availableRuleSets.find((ruleSet) =>
+    const matchingRuleSets = this.availableRuleSets.filter((ruleSet) =>
       matchesSelection(ruleSet, selection),
     );
 
-    if (!selectedRuleSet) {
+    if (matchingRuleSets.length === 0) {
       throw new AcademicSelectionError(
         "Seçim için yapılandırılmış bir rule set bulunamadı.",
       );
     }
 
+    if (matchingRuleSets.length > 1) {
+      throw new AcademicSelectionError(
+        `Selection birden fazla rule set ile eslesti: ${matchingRuleSets
+          .map((ruleSet) => ruleSet.id)
+          .sort()
+          .join(", ")}.`,
+      );
+    }
+
+    const [selectedRuleSet] = matchingRuleSets;
     const selectedIds = collectRequiredRuleSetIds(
       selectedRuleSet,
       this.availableRuleSets,

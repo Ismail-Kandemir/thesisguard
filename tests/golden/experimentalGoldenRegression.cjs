@@ -4,7 +4,10 @@ const JSZip = require("jszip");
 const ts = require(path.join(process.cwd(), "node_modules", "typescript"));
 
 require.extensions[".ts"] = (module, filename) => {
-  const source = fs.readFileSync(filename, "utf8");
+  const source = transformTypeScriptSourceForNodeTests(
+    fs.readFileSync(filename, "utf8"),
+    filename,
+  );
   const output = ts.transpileModule(source, {
     compilerOptions: {
       esModuleInterop: true,
@@ -16,6 +19,50 @@ require.extensions[".ts"] = (module, filename) => {
 
   module._compile(output, filename);
 };
+
+function transformTypeScriptSourceForNodeTests(source, filename) {
+  if (!filename.endsWith(path.join("src", "features", "analysis", "rules", "RuleLoader.ts"))) {
+    return source;
+  }
+
+  return `${createNodeRuleSetGlobSource()}\n${source.replace(
+    /import\.meta\.glob\(\s*"[^"]*data\/universities\/\*\*\/\*\.json"\s*,\s*\{\s*eager:\s*true,\s*import:\s*"default"\s*\}\s*,?\s*\)/u,
+    "createNodeRuleSetGlob()",
+  )}`;
+}
+
+function createNodeRuleSetGlobSource() {
+  return `
+const nodeTestFs = require("fs");
+const nodeTestPath = require("path");
+
+function createNodeRuleSetGlob() {
+  const root = nodeTestPath.join(process.cwd(), "src", "data", "universities");
+  const modules = {};
+
+  function visit(directory) {
+    for (const entry of nodeTestFs.readdirSync(directory, { withFileTypes: true })) {
+      const absolutePath = nodeTestPath.join(directory, entry.name);
+
+      if (entry.isDirectory()) {
+        visit(absolutePath);
+        continue;
+      }
+
+      if (entry.isFile() && entry.name.endsWith(".json")) {
+        const relativePath = nodeTestPath
+          .relative(process.cwd(), absolutePath)
+          .replace(/\\\\/g, "/");
+        modules[relativePath] = JSON.parse(nodeTestFs.readFileSync(absolutePath, "utf8"));
+      }
+    }
+  }
+
+  visit(root);
+  return modules;
+}
+`;
+}
 
 const FIXTURE_PATH = path.join(
   process.cwd(),
