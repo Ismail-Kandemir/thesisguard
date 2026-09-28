@@ -2,7 +2,7 @@ import type { DocumentSection } from "../types";
 import { normalizeSectionName } from "./documentSectionsParser";
 
 const MANUAL_NUMBER_PREFIX_PATTERN =
-  /^\s*(\d+(?:\.\d+){0,2}\.?)\s+(.+?)\s*$/u;
+  /^\s*(\d+(?:\.\d+){0,4}\.?)\s+(.+?)\s*$/u;
 
 export interface ManualNumberPrefix {
   label: string;

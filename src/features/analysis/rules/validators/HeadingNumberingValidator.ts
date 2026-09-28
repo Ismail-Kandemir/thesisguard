@@ -40,7 +40,12 @@ export class HeadingNumberingValidator implements RuleValidator {
         "Numaralandırması güvenilir biçimde değerlendirilebilecek benzersiz ana bölüm başlığı bulunmadı.");
     }
 
-    const failures = located.flatMap((item) => getFailure(item));
+    const failures = [
+      ...located.flatMap((item) => getFailure(item)),
+      ...(expected.requireHierarchicalLabels
+        ? getHierarchicalLabelFailures(document.headings, expected)
+        : []),
+    ];
     if (failures.length === 0) {
       return createResult(rule, expected, "PASSED",
         `${located.length}/${expected.sections.length} bulunan bölüm uygun`,
@@ -103,9 +108,68 @@ function isReliablyNumbered(heading: Readonly<DocumentHeadingOccurrence>): boole
     return heading.visibleLabel !== null && heading.numberingLevel !== null;
   }
   if (heading.numberingSource === "word") {
-    return heading.numId !== null && heading.numberingLevel !== null;
+    return heading.numId !== null && heading.numberingLevel !== null && heading.visibleLabel !== null;
   }
   return false;
+}
+
+function getHierarchicalLabelFailures(
+  headings: readonly DocumentHeadingOccurrence[],
+  expected: HeadingNumberingRuleExpected,
+): HeadingNumberingFailure[] {
+  const maxLevel = expected.maxLevel ?? Math.max(...expected.sections.map((section) => section.level));
+  const relevantHeadings = headings
+    .filter((heading) => heading.level <= maxLevel)
+    .sort((first, second) => first.paragraphIndex - second.paragraphIndex);
+  const previousByLevel = new Map<number, DocumentHeadingOccurrence>();
+  const failures: HeadingNumberingFailure[] = [];
+
+  for (const heading of relevantHeadings) {
+    const parts = parseDecimalLabelParts(heading.visibleLabel);
+    if (parts === null || parts.length !== heading.level + 1) {
+      failures.push({
+        actual: heading.visibleLabel ?? "Numaralandırma etiketi çözümlenemedi",
+        expected: `${heading.level + 1} düzeyli ondalık etiket`,
+        message: `“${formatHeadingLabel(heading)}” başlığının görünür numarası beklenen ondalık düzey yapısını izlemiyor.`,
+        occurrence: heading,
+      });
+      continue;
+    }
+
+    if (heading.level > 0) {
+      const parent = previousByLevel.get(heading.level - 1);
+      const parentParts = parseDecimalLabelParts(parent?.visibleLabel ?? null);
+      const parentMatches = parentParts !== null &&
+        parts.slice(0, parentParts.length).join(".") === parentParts.join(".");
+
+      if (!parent || !parentMatches) {
+        failures.push({
+          actual: heading.visibleLabel ?? "Numaralandırma etiketi çözümlenemedi",
+          expected: "üst başlık numarasını izleyen ondalık etiket",
+          message: `“${formatHeadingLabel(heading)}” başlığının numarası ilgili üst başlığı takip etmiyor.`,
+          occurrence: heading,
+        });
+      }
+    }
+
+    previousByLevel.set(heading.level, heading);
+    for (const level of Array.from(previousByLevel.keys())) {
+      if (level > heading.level) previousByLevel.delete(level);
+    }
+  }
+
+  return failures;
+}
+
+function parseDecimalLabelParts(label: string | null): number[] | null {
+  if (!label) return null;
+  const normalized = label.trim().replace(/\.$/u, "");
+  if (!/^\d+(?:\.\d+)*$/u.test(normalized)) return null;
+  return normalized.split(".").map(Number);
+}
+
+function formatHeadingLabel(heading: Readonly<DocumentHeadingOccurrence>): string {
+  return `${heading.visibleLabel ? `${heading.visibleLabel} ` : ""}${heading.text}`.trim();
 }
 
 function assertHeadingNumberingRule(
@@ -119,13 +183,23 @@ function assertHeadingNumberingRule(
 function getExpected(expected: RuleDefinition["expected"]): HeadingNumberingRuleExpected {
   if (typeof expected !== "object" || expected === null || !("sections" in expected) ||
       !Array.isArray(expected.sections) || expected.sections.length === 0 ||
-      !expected.sections.every(isValidExpectation)) {
+      !expected.sections.every(isValidExpectation) ||
+      ("maxLevel" in expected && (typeof expected.maxLevel !== "number" ||
+        !Number.isInteger(expected.maxLevel) || expected.maxLevel < 0))) {
     throw new Error("HEADING_NUMBERING kuralı en az bir geçerli section ve non-negative integer level tanımlamalıdır.");
   }
   if (hasOverlappingExpectedNames(expected.sections)) {
     throw new Error("HEADING_NUMBERING kuralı aynı section veya alias adını birden fazla expectation içinde tanımlayamaz.");
   }
-  return { sections: expected.sections.filter(isValidExpectation) };
+  return {
+    sections: expected.sections.filter(isValidExpectation),
+    ...("maxLevel" in expected && typeof expected.maxLevel === "number"
+      ? { maxLevel: expected.maxLevel }
+      : {}),
+    ...("requireHierarchicalLabels" in expected
+      ? { requireHierarchicalLabels: expected.requireHierarchicalLabels === true }
+      : {}),
+  };
 }
 
 function isValidExpectation(value: unknown): value is HeadingNumberingSectionExpectation {

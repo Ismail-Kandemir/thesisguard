@@ -16,6 +16,7 @@ import { ObjectAlignmentValidator } from "./validators/ObjectAlignmentValidator"
 import { ObjectCaptionFormatValidator } from "./validators/ObjectCaptionFormatValidator";
 import { ObjectCaptionPlacementValidator } from "./validators/ObjectCaptionPlacementValidator";
 import { ObjectInTextReferenceValidator } from "./validators/ObjectInTextReferenceValidator";
+import { ObjectMinimumWidthValidator } from "./validators/ObjectMinimumWidthValidator";
 import { PageNumberSequenceValidator } from "./validators/PageNumberSequenceValidator";
 import { PageNumberValidator } from "./validators/PageNumberValidator";
 import { PageSizeValidator } from "./validators/PageSizeValidator";
@@ -46,6 +47,7 @@ const DEFAULT_VALIDATOR_ENTRIES = [
   ["OBJECT_CAPTION_FORMAT", new ObjectCaptionFormatValidator()],
   ["OBJECT_CAPTION_PLACEMENT", new ObjectCaptionPlacementValidator()],
   ["OBJECT_IN_TEXT_REFERENCE", new ObjectInTextReferenceValidator()],
+  ["OBJECT_MIN_WIDTH", new ObjectMinimumWidthValidator()],
   ["PAGE_NUMBER", new PageNumberValidator()],
   ["PAGE_NUMBER_SEQUENCE", new PageNumberSequenceValidator()],
   ["PAGE_SIZE", new PageSizeValidator()],

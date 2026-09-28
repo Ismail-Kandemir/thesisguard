@@ -8,6 +8,7 @@ import type {
   ObjectAlignment,
   ObjectAlignmentSource,
   ObjectCaptionAssociation,
+  ObjectRepresentationDimensions,
   ObjectRepresentationKind,
   ObjectRepresentationOccurrence,
   ObjectRepresentationScope,
@@ -35,6 +36,7 @@ const WORDPROCESSING_GROUP_NAMESPACE =
 const VML_NAMESPACE = "urn:schemas-microsoft-com:vml";
 const OFFICE_NAMESPACE = "urn:schemas-microsoft-com:office:office";
 const MATH_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/math";
+const EMU_PER_CENTIMETER = 360000;
 
 interface LocationIndexes {
   paragraphIndexByElement: ReadonlyMap<Element, number>;
@@ -164,6 +166,7 @@ function parseRepresentations(
       drawingType: element.namespaceURI === WORD_NAMESPACE && element.localName === "drawing"
         ? getDrawingType(element)
         : null,
+      dimensions: parseRepresentationDimensions(element),
       ...drawingAlignment,
       evidence: getRepresentationEvidence(element, kind),
     });
@@ -216,6 +219,50 @@ function parseDrawingAlignment(
     alignment,
     alignmentSource: alignment === "unknown" ? "unknown" : "paragraph",
   };
+}
+
+function parseRepresentationDimensions(element: Element): ObjectRepresentationDimensions {
+  if (element.namespaceURI !== WORD_NAMESPACE || element.localName !== "drawing") {
+    return { status: "unsupported", source: null, widthCm: null, heightCm: null };
+  }
+
+  const extents = getSemanticDescendantsByTagNameNS(
+    element,
+    WORDPROCESSING_DRAWING_NAMESPACE,
+    "extent",
+  );
+
+  if (extents.length === 0) {
+    return { status: "missing", source: "wp:extent", widthCm: null, heightCm: null };
+  }
+
+  if (extents.length > 1) {
+    return { status: "ambiguous", source: "wp:extent", widthCm: null, heightCm: null };
+  }
+
+  const widthEmu = parseEmu(extents[0].getAttribute("cx"));
+  const heightEmu = parseEmu(extents[0].getAttribute("cy"));
+
+  if (widthEmu === null || heightEmu === null) {
+    return { status: "malformed", source: "wp:extent", widthCm: null, heightCm: null };
+  }
+
+  return {
+    status: "available",
+    source: "wp:extent",
+    widthCm: emuToCentimeters(widthEmu),
+    heightCm: emuToCentimeters(heightEmu),
+  };
+}
+
+function parseEmu(value: string | null): number | null {
+  if (value === null) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+}
+
+function emuToCentimeters(value: number): number {
+  return Number((value / EMU_PER_CENTIMETER).toFixed(6));
 }
 
 function toObjectAlignment(value: ParagraphAlignment | string | null): ObjectAlignment {

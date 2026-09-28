@@ -13,6 +13,7 @@ import type {
   RuleResultStatus,
 } from "../../types";
 import { createCaptionEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import { getDeclaredAcademicFigures } from "../objectApplicability";
 import {
   formatLineSpacingValue,
   formatUnsupportedLineSpacingRules,
@@ -23,6 +24,7 @@ import type { RuleValidator } from "./RuleValidator";
 interface CaptionFormatting {
   caption: DocumentCaption;
   alignment: ParagraphAlignment | null;
+  fontSize: number | null;
   lineSpacing: number | null;
   rawLineSpacing: LineSpacingValue | null;
 }
@@ -40,14 +42,12 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
         rule,
         expected,
         "NOT_APPLICABLE",
-        "Uygulanmadı",
-        `${objectName(expected.object)} başlığı güvenilir biçimde ilişkilendirilemediği için biçim kontrolü uygulanmadı.`,
+        "Uygulanmadi",
+        `${objectName(expected.object)} basligi guvenilir bicimde iliskilendirilemedigi icin bicim kontrolu uygulanmadi.`,
       );
     }
 
-    const wrong = formatting.filter(
-      (item) => item.alignment !== expected.alignment || item.lineSpacing !== expected.lineSpacing,
-    );
+    const wrong = formatting.filter((item) => hasFormattingIssue(item, expected));
     const unsupportedLineSpacing = wrong
       .map((item) => item.rawLineSpacing)
       .filter((value): value is LineSpacingValue =>
@@ -61,13 +61,13 @@ export class ObjectCaptionFormatValidator implements RuleValidator {
       status,
       formatActual(formatting),
       status === "PASSED"
-        ? `${objectName(expected.object)} başlıklarının biçimi uygun.`
+        ? `${objectName(expected.object)} basliklarinin bicimi uygun.`
         : createFailureMessage(expected.object, formatting.length, wrong, unsupportedLineSpacing),
       status === "FAILED"
         ? wrong.slice(0, MAX_RULE_EVIDENCE_ITEMS).map((item) =>
             createCaptionEvidence(item.caption, {
               actual: formatActual([item]),
-              expected: `${alignmentName(expected.alignment)}, ${expected.lineSpacing} satır`,
+              expected: formatExpected(expected),
             }),
           )
         : undefined,
@@ -104,56 +104,24 @@ function getLegacyAssociatedCaptionFormatting(
 function getDeclaredFigureCaptionFormatting(
   document: Readonly<NormalizedDocument>,
 ): CaptionFormatting[] {
-  const representationById = new Map(
-    document.objectSemantics.representations.map((item) => [item.id, item]),
-  );
-  const associationByObjectId = new Map(
-    document.objectSemantics.associations.map((item) => [item.objectId, item]),
-  );
-  const semanticCaptionById = new Map(
-    document.objectSemantics.captions.map((item) => [item.id, item]),
-  );
-  const legacyCaptionByParagraphId = new Map(
-    document.captions.items.map((caption) => [caption.paragraphId, caption]),
-  );
   const paragraphById = new Map(
     document.paragraphs.map((paragraph) => [paragraph.id, paragraph]),
   );
   const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults);
 
-  return document.objectSemantics.resolutions.flatMap((resolution) => {
-    if (resolution.status !== "declared" || resolution.academicType !== "figure") return [];
-
-    const representation = representationById.get(resolution.objectId);
-    const association = associationByObjectId.get(resolution.objectId);
-
+  return getDeclaredAcademicFigures(document).flatMap((figure) => {
     if (
-      !representation || representation.scope !== "body" || representation.drawingType !== "inline" ||
-      !association || association.status !== "matched" || association.captionId === null ||
-      resolution.captionId !== association.captionId
-    ) {
-      return [];
-    }
+      figure.representation.scope !== "body" ||
+      figure.representation.drawingType !== "inline" ||
+      !figure.caption ||
+      !figure.semanticCaption ||
+      figure.semanticCaption.semantic.status !== "declared" ||
+      figure.semanticCaption.semantic.academicType !== "figure"
+    ) return [];
 
-    const semanticCaption = semanticCaptionById.get(association.captionId);
-    if (
-      !semanticCaption || semanticCaption.semantic.status !== "declared" ||
-      semanticCaption.semantic.academicType !== "figure"
-    ) {
-      return [];
-    }
+    const paragraph = paragraphById.get(figure.caption.paragraphId);
 
-    const caption = legacyCaptionByParagraphId.get(semanticCaption.paragraphId);
-    const paragraph = paragraphById.get(semanticCaption.paragraphId);
-
-    if (
-      !caption || caption.kind !== "figure" ||
-      caption.number !== semanticCaption.semantic.number || !paragraph
-    ) {
-      return [];
-    }
-
-    return [resolveFormatting(caption, paragraph, resolver)];
+    return paragraph ? [resolveFormatting(figure.caption, paragraph, resolver)] : [];
   });
 }
 
@@ -169,20 +137,37 @@ function resolveFormatting(
   const comparableLineSpacing = lineSpacing === null
     ? null
     : toComparableLineMultiple(lineSpacing);
+  const visibleRuns = paragraph.runs.filter((run) => run.text.trim().length > 0);
+  const resolvedFormats = visibleRuns.map((run) =>
+    resolver.resolveRun(run, paragraph.styleId, paragraph.lineSpacing),
+  );
+  const fontSizes = Array.from(new Set(resolvedFormats.map((formatting) => formatting.fontSize)));
 
   return {
     caption,
     alignment: resolver.resolveParagraphAlignment(paragraph.styleId, paragraph.alignment),
+    fontSize: fontSizes.length === 1 ? fontSizes[0] ?? null : null,
     lineSpacing: comparableLineSpacing,
     rawLineSpacing: lineSpacing,
   };
+}
+
+function hasFormattingIssue(
+  actual: CaptionFormatting,
+  expected: ObjectCaptionFormatRuleExpected,
+): boolean {
+  return (
+    (expected.alignment !== undefined && actual.alignment !== expected.alignment) ||
+    (expected.lineSpacing !== undefined && actual.lineSpacing !== expected.lineSpacing) ||
+    (expected.fontSize !== undefined && actual.fontSize !== expected.fontSize)
+  );
 }
 
 function assertRule(
   rule: RuleDefinition,
 ): asserts rule is RuleDefinition & { type: "OBJECT_CAPTION_FORMAT" } {
   if (rule.type !== "OBJECT_CAPTION_FORMAT") {
-    throw new Error("ObjectCaptionFormatValidator yalnızca OBJECT_CAPTION_FORMAT kurallarını çalıştırır.");
+    throw new Error("ObjectCaptionFormatValidator only validates OBJECT_CAPTION_FORMAT rules.");
   }
 }
 
@@ -190,11 +175,23 @@ function getExpected(expected: RuleDefinition["expected"]): ObjectCaptionFormatR
   if (
     typeof expected !== "object" || expected === null ||
     !("object" in expected) || (expected.object !== "table" && expected.object !== "figure") ||
-    !("alignment" in expected) || !isAlignment(expected.alignment) ||
-    !("lineSpacing" in expected) || typeof expected.lineSpacing !== "number" ||
-    !Number.isFinite(expected.lineSpacing) || expected.lineSpacing <= 0
+    ("alignment" in expected && !isAlignment(expected.alignment)) ||
+    ("lineSpacing" in expected &&
+      (typeof expected.lineSpacing !== "number" ||
+        !Number.isFinite(expected.lineSpacing) || expected.lineSpacing <= 0)) ||
+    ("fontSize" in expected &&
+      (typeof expected.fontSize !== "number" ||
+        !Number.isFinite(expected.fontSize) || expected.fontSize <= 0))
   ) {
-    throw new Error("OBJECT_CAPTION_FORMAT kuralı geçerli object, alignment ve lineSpacing içermelidir.");
+    throw new Error("OBJECT_CAPTION_FORMAT must define object and at least one valid format expectation.");
+  }
+
+  if (
+    expected.alignment === undefined &&
+    expected.lineSpacing === undefined &&
+    expected.fontSize === undefined
+  ) {
+    throw new Error("OBJECT_CAPTION_FORMAT must include alignment, lineSpacing, or fontSize.");
   }
 
   return expected as ObjectCaptionFormatRuleExpected;
@@ -219,7 +216,7 @@ function createResult(
     status,
     passed: status === "PASSED",
     severity: rule.severity,
-    expected: `${alignmentName(expected.alignment)}, ${expected.lineSpacing} satır`,
+    expected: formatExpected(expected),
     actual,
     message,
     ...(evidence && evidence.length > 0 ? { evidence } : {}),
@@ -229,8 +226,20 @@ function createResult(
 
 function formatActual(items: readonly CaptionFormatting[]): string {
   return items.map((item) =>
-    `${item.caption.label} ${item.caption.number}: ${item.alignment ? alignmentName(item.alignment) : "Hizalama tespit edilemedi"}, ${formatLineSpacingValue(item.rawLineSpacing)}`,
+    `${item.caption.label} ${item.caption.number}: ${item.alignment ? alignmentName(item.alignment) : "Hizalama tespit edilemedi"}, ${formatFontSize(item.fontSize)}, ${formatLineSpacingValue(item.rawLineSpacing)}`,
   ).join("; ");
+}
+
+function formatExpected(expected: ObjectCaptionFormatRuleExpected): string {
+  const parts: string[] = [];
+  if (expected.alignment !== undefined) parts.push(alignmentName(expected.alignment));
+  if (expected.fontSize !== undefined) parts.push(`${expected.fontSize} punto`);
+  if (expected.lineSpacing !== undefined) parts.push(`${expected.lineSpacing} satir`);
+  return parts.join(", ");
+}
+
+function formatFontSize(fontSize: number | null): string {
+  return fontSize === null ? "Punto tespit edilemedi" : `${fontSize} punto`;
 }
 
 function createFailureMessage(
@@ -240,25 +249,25 @@ function createFailureMessage(
   unsupportedLineSpacing: readonly LineSpacingValue[],
 ): string {
   if (unsupportedLineSpacing.length > 0) {
-    return `${objectName(object)} başlığı satır aralığı statik OOXML'den güvenle doğrulanamadı. Karşılaştırılamayan lineRule: ${formatUnsupportedLineSpacingRules(unsupportedLineSpacing)}. Bulunan: ${formatActual(wrong)}.`;
+    return `${objectName(object)} basligi satir araligi statik OOXML'den guvenle dogrulanamadi. Karsilastirilamayan lineRule: ${formatUnsupportedLineSpacingRules(unsupportedLineSpacing)}. Bulunan: ${formatActual(wrong)}.`;
   }
 
   if (total === 1) {
-    return `${objectName(object)} başlığı sola yaslı ve tek satır aralığında olmalıdır. Bulunan: ${formatActual(wrong)}.`;
+    return `${objectName(object)} basligi beklenen bicimde olmalidir. Bulunan: ${formatActual(wrong)}.`;
   }
 
-  return `${total} ${object === "table" ? "tablo" : "şekil"} başlığından ${wrong.length} tanesinin biçimi uygun değil: ${formatActual(wrong)}.`;
+  return `${total} ${object === "table" ? "tablo" : "sekil"} basligindan ${wrong.length} tanesinin bicimi uygun degil: ${formatActual(wrong)}.`;
 }
 
-function objectName(object: CaptionKind): "Tablo" | "Şekil" {
-  return object === "table" ? "Tablo" : "Şekil";
+function objectName(object: CaptionKind): "Tablo" | "Sekil" {
+  return object === "table" ? "Tablo" : "Sekil";
 }
 
 function alignmentName(alignment: ParagraphAlignment): string {
   switch (alignment) {
-    case "left": return "Sola yaslı";
-    case "center": return "Ortalı";
-    case "right": return "Sağa yaslı";
-    case "justify": return "İki yana yaslı";
+    case "left": return "Sola yasli";
+    case "center": return "Ortali";
+    case "right": return "Saga yasli";
+    case "justify": return "Iki yana yasli";
   }
 }

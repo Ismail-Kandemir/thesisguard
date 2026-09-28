@@ -109,14 +109,14 @@ function getExpected(expected: RuleDefinition["expected"]): HeadingLevelFormatRu
     typeof expected.level !== "number" ||
     !Number.isInteger(expected.level) ||
     expected.level < 0 ||
-    !("sections" in expected) ||
-    !Array.isArray(expected.sections) ||
-    expected.sections.length === 0 ||
-    !expected.sections.every(isSectionOrderItem) ||
+    ("sections" in expected &&
+      (!Array.isArray(expected.sections) ||
+        !expected.sections.every(isSectionOrderItem))) ||
     ("fontFamily" in expected && typeof expected.fontFamily !== "string") ||
     ("fontSize" in expected &&
       (typeof expected.fontSize !== "number" || !Number.isFinite(expected.fontSize))) ||
-    ("bold" in expected && typeof expected.bold !== "boolean")
+    ("bold" in expected && typeof expected.bold !== "boolean") ||
+    ("italic" in expected && typeof expected.italic !== "boolean")
   ) {
     throw new Error(
       "HEADING_LEVEL_FORMAT kuralı level, sections ve en az bir geçerli biçim beklentisi içermelidir.",
@@ -126,10 +126,11 @@ function getExpected(expected: RuleDefinition["expected"]): HeadingLevelFormatRu
   if (
     expected.fontFamily === undefined &&
     expected.fontSize === undefined &&
-    expected.bold === undefined
+    expected.bold === undefined &&
+    expected.italic === undefined
   ) {
     throw new Error(
-      "HEADING_LEVEL_FORMAT kuralı fontFamily, fontSize veya bold beklentilerinden en az birini içermelidir.",
+      "HEADING_LEVEL_FORMAT kuralı fontFamily, fontSize, bold veya italic beklentilerinden en az birini içermelidir.",
     );
   }
 
@@ -163,6 +164,29 @@ function locateHeadings(
       .filter((block) => block.type === "paragraph")
       .map((block) => [block.paragraphId, block.blockIndex]),
   );
+
+  if (!expected.sections || expected.sections.length === 0) {
+    const paragraphsById = new Map(document.paragraphs.map((paragraph, index) => [
+      paragraph.id,
+      { paragraph, paragraphIndex: index },
+    ]));
+
+    return document.headings
+      .filter((heading) => heading.level === expected.level)
+      .flatMap((heading) => {
+        const match = paragraphsById.get(heading.paragraphId);
+
+        return match
+          ? [{
+              item: { section: heading.sectionName ?? heading.text },
+              paragraph: match.paragraph,
+              paragraphIndex: match.paragraphIndex,
+              blockIndex: blockIndexByParagraphId.get(heading.paragraphId) ?? null,
+              sectionName: heading.sectionName ?? heading.text,
+            }]
+          : [];
+      });
+  }
 
   return expected.sections.flatMap((item) => {
     const names = [item.section, ...(item.aliases ?? [])];
@@ -267,6 +291,14 @@ function compareFormatting(
     );
   }
 
+  if (expected.italic !== undefined && actual.italic !== expected.italic) {
+    problems.push(
+      expected.italic
+        ? "Başlık italik değil; italik olması bekleniyor."
+        : "Başlık italik; italik olmaması bekleniyor.",
+    );
+  }
+
   return problems;
 }
 
@@ -316,6 +348,10 @@ function formatExpected(expected: HeadingLevelFormatRuleExpected): string {
 
   if (expected.bold !== undefined) {
     parts.push(expected.bold ? "kalın" : "kalın değil");
+  }
+
+  if (expected.italic !== undefined) {
+    parts.push(expected.italic ? "italik" : "italik değil");
   }
 
   return parts.join(", ");

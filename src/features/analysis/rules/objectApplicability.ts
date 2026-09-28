@@ -126,7 +126,7 @@ export function getDeclaredAcademicFigures(
 
     const representation = representationById.get(resolution.objectId);
 
-    if (!representation) {
+    if (!representation || !isSupportedFigureRepresentation(representation)) {
       return [];
     }
 
@@ -145,6 +145,20 @@ export function getDeclaredAcademicFigures(
       semanticCaption,
     }];
   });
+}
+
+function isSupportedFigureRepresentation(
+  representation: Readonly<ObjectRepresentationOccurrence>,
+): boolean {
+  return (
+    representation.kind === "picture" ||
+    representation.kind === "chart" ||
+    representation.kind === "diagram" ||
+    representation.kind === "group" ||
+    representation.kind === "vml-image" ||
+    representation.kind === "ole" ||
+    representation.kind === "equation"
+  );
 }
 
 function isFigureCaption(caption: Readonly<DocumentCaption>): caption is DocumentCaption & {

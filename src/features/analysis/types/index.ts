@@ -37,6 +37,7 @@ export type RuleType =
   | "OBJECT_ALIGNMENT"
   | "OBJECT_CAPTION_PLACEMENT"
   | "OBJECT_CAPTION_FORMAT"
+  | "OBJECT_MIN_WIDTH"
   | "OBJECT_IN_TEXT_REFERENCE"
   | "CONDITIONAL_REQUIRED_SECTION"
   | "REQUIRED_SECTION"
@@ -148,8 +149,9 @@ export interface ObjectCaptionPlacementRuleExpected {
 
 export interface ObjectCaptionFormatRuleExpected {
   object: CaptionKind;
-  alignment: ParagraphAlignment;
-  lineSpacing: number;
+  alignment?: ParagraphAlignment;
+  lineSpacing?: number;
+  fontSize?: number;
 }
 
 export interface ObjectAlignmentRuleExpected {
@@ -159,6 +161,12 @@ export interface ObjectAlignmentRuleExpected {
 
 export interface ObjectInTextReferenceRuleExpected {
   object: CaptionKind;
+}
+
+export interface ObjectMinimumWidthRuleExpected {
+  object: CaptionKind;
+  minWidthCm: number;
+  toleranceCm?: number;
 }
 
 export interface SectionKeywordsRuleExpected {
@@ -183,14 +191,17 @@ export interface HeadingNumberingSectionExpectation {
 
 export interface HeadingNumberingRuleExpected {
   sections: HeadingNumberingSectionExpectation[];
+  requireHierarchicalLabels?: boolean;
+  maxLevel?: number;
 }
 
 export interface HeadingLevelFormatRuleExpected {
   level: number;
-  sections: SectionOrderItem[];
+  sections?: SectionOrderItem[];
   fontFamily?: string;
   fontSize?: number;
   bold?: boolean;
+  italic?: boolean;
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";
@@ -254,6 +265,7 @@ export type RuleExpectedValue =
   | ObjectAlignmentRuleExpected
   | ObjectCaptionPlacementRuleExpected
   | ObjectCaptionFormatRuleExpected
+  | ObjectMinimumWidthRuleExpected
   | ObjectInTextReferenceRuleExpected
   | ConditionalRequiredSectionRuleExpected
   | RequiredSectionRuleExpected
@@ -666,6 +678,20 @@ export type ObjectRepresentationScope =
   | "table-cell"
   | "textbox";
 
+export type ObjectDimensionEvidenceStatus =
+  | "available"
+  | "missing"
+  | "malformed"
+  | "ambiguous"
+  | "unsupported";
+
+export interface ObjectRepresentationDimensions {
+  status: ObjectDimensionEvidenceStatus;
+  source: "wp:extent" | null;
+  widthCm: number | null;
+  heightCm: number | null;
+}
+
 export interface ObjectRepresentationOccurrence {
   id: string;
   kind: ObjectRepresentationKind;
@@ -677,6 +703,7 @@ export interface ObjectRepresentationOccurrence {
   scope: ObjectRepresentationScope;
   academicScope: AcademicScopeAssignment;
   drawingType: FigureDrawingType | null;
+  dimensions: ObjectRepresentationDimensions;
   alignment: ObjectAlignment | null;
   alignmentSource: ObjectAlignmentSource | null;
   evidence: string[];

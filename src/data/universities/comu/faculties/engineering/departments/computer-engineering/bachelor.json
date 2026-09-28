@@ -371,6 +371,404 @@
       }
     },
     {
+      "id": "comu.engineering.computer-engineering.bachelor.heading-numbering",
+      "type": "HEADING_NUMBERING",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Akademik Başlık Numaralandırması",
+      "description": "Güvenilir biçimde tanınan akademik ana ve alt başlıkların ondalık hiyerarşik numaralandırmayı izlemesini doğrular.",
+      "category": "heading",
+      "expected": {
+        "requireHierarchicalLabels": true,
+        "maxLevel": 4,
+        "sections": [
+          {
+            "section": "Giriş",
+            "level": 0
+          },
+          {
+            "section": "Sonuçlar",
+            "aliases": [
+              "Sonuç"
+            ],
+            "level": 0
+          },
+          {
+            "section": "Kaynaklar",
+            "level": 0
+          },
+          {
+            "section": "Ekler",
+            "aliases": [
+              "Ek"
+            ],
+            "level": 0
+          }
+        ]
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Akademik başlık numaralandırması Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Ana ve alt başlıkları Word'ün ondalık çok düzeyli numaralandırmasıyla veya eşdeğer güvenilir ondalık etiketlerle düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.main-heading-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Ana Bölüm Başlığı Biçimi",
+      "description": "Güvenilir biçimde tanınan ana bölüm başlıklarının 12 punto ve kalın olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 0,
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Ana bölüm başlığı biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Ana bölüm başlıklarını 12 punto ve kalın olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.main-heading-alignment",
+      "type": "HEADING_ALIGNMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Ana Bölüm Başlığı Hizalaması",
+      "description": "Güvenilir biçimde tanınan ana bölüm başlıklarının ortalanmış olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "levels": [
+          0
+        ],
+        "alignment": "center"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Ana bölüm başlığı hizalaması Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Ana bölüm başlıklarını ortalanmış olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.subheading-level-1-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Birinci Derece Alt Başlık Biçimi",
+      "description": "Güvenilir biçimde tanınan birinci derece alt başlıkların 12 punto ve kalın olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 1,
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Birinci derece alt başlık biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Birinci derece alt başlıkları 12 punto ve kalın olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.subheading-level-2-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İkinci Derece Alt Başlık Biçimi",
+      "description": "Güvenilir biçimde tanınan ikinci derece alt başlıkların 12 punto ve italik olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 2,
+        "fontSize": 12,
+        "italic": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İkinci derece alt başlık biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "İkinci derece alt başlıkları 12 punto ve italik olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.subheading-level-3-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Üçüncü Derece Alt Başlık Biçimi",
+      "description": "Güvenilir biçimde tanınan üçüncü derece alt başlıkların 12 punto ve italik olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 3,
+        "fontSize": 12,
+        "italic": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Üçüncü derece alt başlık biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Üçüncü derece alt başlıkları 12 punto ve italik olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.subheading-level-4-format",
+      "type": "HEADING_LEVEL_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Dördüncü Derece Alt Başlık Biçimi",
+      "description": "Güvenilir biçimde tanınan dördüncü derece alt başlıkların 12 punto ve italik olmasını doğrular.",
+      "category": "heading",
+      "expected": {
+        "level": 4,
+        "fontSize": 12,
+        "italic": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Dördüncü derece alt başlık biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Dördüncü derece alt başlıkları 12 punto ve italik olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.table-caption-placement",
+      "type": "OBJECT_CAPTION_PLACEMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Tablo Başlığı Konumu",
+      "description": "Tablo numarası ve açıklamasının tablonun üstünde bulunmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "table",
+        "position": "before"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablo başlığı tablonun üstünde olmalıdır.",
+      "solution": "Tablo numarası ve açıklamasını ilgili tablonun üstüne yerleştirin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.figure-caption-placement",
+      "type": "OBJECT_CAPTION_PLACEMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Şekil Başlığı Konumu",
+      "description": "Şekil numarası ve açıklamasının şeklin altında bulunmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "figure",
+        "position": "after"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil başlığı şeklin altında olmalıdır.",
+      "solution": "Şekil numarası ve açıklamasını ilgili şeklin altına yerleştirin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.table-caption-format",
+      "type": "OBJECT_CAPTION_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Tablo Başlığı Biçimi",
+      "description": "Güvenilir biçimde ilişkilendirilen tablo açıklamalarının 10 punto ve ortalı olmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "table",
+        "alignment": "center",
+        "fontSize": 10
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablo başlığı biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Tablo başlığını 10 punto ve ortalı olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.figure-caption-format",
+      "type": "OBJECT_CAPTION_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Şekil Başlığı Biçimi",
+      "description": "Güvenilir biçimde ilişkilendirilen şekil açıklamalarının 10 punto ve iki yana yaslı olmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "figure",
+        "alignment": "justify",
+        "fontSize": 10
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil başlığı biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Şekil başlığını 10 punto ve iki yana yaslı olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.table-object-alignment",
+      "type": "OBJECT_ALIGNMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Tablo Nesne Hizalaması",
+      "description": "Tabloların sayfada yatay olarak ortalanmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "table",
+        "alignment": "center"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Tablo sayfada ortalanmış olmalıdır.",
+      "solution": "Tabloyu yatay olarak ortalayın.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.figure-object-alignment",
+      "type": "OBJECT_ALIGNMENT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Şekil Nesne Hizalaması",
+      "description": "Güvenilir biçimde tanınan inline şekillerin sayfada yatay olarak ortalanmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "figure",
+        "alignment": "center"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil sayfada ortalanmış olmalıdır.",
+      "solution": "Şekli taşıyan paragrafı yatay olarak ortalayın.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "COMPLETE",
+        "trust": "HIGH"
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.figure-minimum-width",
+      "type": "OBJECT_MIN_WIDTH",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Şekil Minimum Genişliği",
+      "description": "Güvenilir biçimde tanınan akademik şekillerin OOXML fiziksel genişliğinin en az 9 cm olmasını doğrular.",
+      "category": "format",
+      "expected": {
+        "object": "figure",
+        "minWidthCm": 9
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Şekil genişliği Bilgisayar Mühendisliği formatı ile uyumlu değil.",
+      "solution": "Şeklin fiziksel genişliğini en az 9 cm olacak şekilde düzenleyin.",
+      "enabled": true,
+      "version": "1.2.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML wp:extent EMU genişliği doğrulanır; güvenilir extent evidence bulunmayan akademik şekiller false PASS üretmez."
+      }
+    },
+    {
       "id": "comu.engineering.computer-engineering.bachelor.approval-page",
       "type": "REQUIRED_SECTION",
       "scope": {
