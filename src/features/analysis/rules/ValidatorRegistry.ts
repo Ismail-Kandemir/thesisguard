@@ -3,7 +3,9 @@ import type { RuleValidator } from "./validators/RuleValidator";
 import { AbbreviationListConsistencyValidator } from "./validators/AbbreviationListConsistencyValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { BibliographyReferencesValidator } from "./validators/BibliographyReferencesValidator";
+import { CoverFieldFormatValidator } from "./validators/CoverFieldFormatValidator";
 import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
+import { CoverFieldPresenceValidator } from "./validators/CoverFieldPresenceValidator";
 import { FontFamilyValidator } from "./validators/FontFamilyValidator";
 import { FontSizeValidator } from "./validators/FontSizeValidator";
 import { HeadingAlignmentValidator } from "./validators/HeadingAlignmentValidator";
@@ -32,6 +34,8 @@ const DEFAULT_VALIDATOR_ENTRIES = [
   ["ABBREVIATION_LIST_CONSISTENCY", new AbbreviationListConsistencyValidator()],
   ["ALIGNMENT", new AlignmentValidator()],
   ["CONDITIONAL_REQUIRED_SECTION", new ConditionalRequiredSectionValidator()],
+  ["COVER_FIELD_FORMAT", new CoverFieldFormatValidator()],
+  ["COVER_FIELD_PRESENCE", new CoverFieldPresenceValidator()],
   ["FONT_FAMILY", new FontFamilyValidator()],
   ["FONT_SIZE", new FontSizeValidator()],
   ["HEADING", new HeadingValidator()],

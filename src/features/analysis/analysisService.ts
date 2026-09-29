@@ -9,6 +9,7 @@ import { normalizeAcademicSections } from "./parsers/academicSectionsNormalizer"
 import { normalizeBibliographySemantics } from "./parsers/bibliographySemanticsNormalizer";
 import { normalizeFigureListSemantics } from "./parsers/figureListSemanticsNormalizer";
 import { normalizeTableListSemantics } from "./parsers/tableListSemanticsNormalizer";
+import { normalizeCoverSemantics } from "./parsers/coverSemanticsNormalizer";
 import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
 import { normalizePageNumberingSemantics } from "./parsers/pageNumberingSemantics";
 import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
@@ -78,7 +79,10 @@ export async function createNormalizedDocumentFromDocx(file: File): Promise<Norm
     ),
   };
 
-  const documentWithNumbering = normalizeDocumentNumbering(documentWithFormatting);
+  const documentWithNumbering = normalizeCoverSemantics(
+    normalizeDocumentNumbering(documentWithFormatting),
+    documentXml,
+  );
 
   return {
     ...documentWithNumbering,

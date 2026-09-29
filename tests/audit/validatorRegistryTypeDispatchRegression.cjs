@@ -16,7 +16,7 @@ const SELECTION = {
   studyTypeId: "experimental",
 };
 
-const EXPECTED_REGISTERED_RULE_TYPES = 27;
+const EXPECTED_REGISTERED_RULE_TYPES = 29;
 const MISSING_VALIDATOR_MESSAGE = "Bu kural için kayıtlı validator bulunamadı.";
 
 function main() {
@@ -74,6 +74,8 @@ function main() {
     "comu.applied-sciences.food-technology.bachelor.experimental.section-order",
     "SectionOrderValidator",
   );
+  assertSyntheticCoverFieldDispatch(registry);
+  assertSyntheticCoverFieldFormatDispatch(registry);
 
   assertDuplicateRegistration();
   assertInvalidRegistration();
@@ -122,6 +124,48 @@ function assertSyntheticCrossUniversityDispatch(registry) {
     validator?.constructor.name,
     "PageNumberValidator",
     "synthetic cross-university PAGE_NUMBER validator",
+  );
+}
+
+function assertSyntheticCoverFieldDispatch(registry) {
+  const validator = registry.getValidator({
+    ...createBaseRule(),
+    id: "second-university.engineering.software-engineering.bachelor.inner-cover-work-type",
+    type: "COVER_FIELD_PRESENCE",
+    expected: {
+      coverScope: "inner-cover",
+      field: "work-type",
+      required: true,
+      minConfidence: "medium",
+    },
+  });
+
+  assertEqual(
+    validator?.constructor.name,
+    "CoverFieldPresenceValidator",
+    "synthetic cross-university COVER_FIELD_PRESENCE validator",
+  );
+}
+
+function assertSyntheticCoverFieldFormatDispatch(registry) {
+  const validator = registry.getValidator({
+    ...createBaseRule(),
+    id: "second-university.engineering.software-engineering.bachelor.inner-cover-work-type-format",
+    type: "COVER_FIELD_FORMAT",
+    expected: {
+      coverScope: "inner-cover",
+      field: "work-type",
+      minConfidence: "medium",
+      fontFamily: "Times New Roman",
+      fontSize: 12,
+      bold: true,
+    },
+  });
+
+  assertEqual(
+    validator?.constructor.name,
+    "CoverFieldFormatValidator",
+    "synthetic cross-university COVER_FIELD_FORMAT validator",
   );
 }
 

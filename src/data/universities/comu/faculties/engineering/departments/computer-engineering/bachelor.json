@@ -1063,6 +1063,186 @@
         "coverage": "COMPLETE",
         "trust": "HIGH"
       }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.outer-cover-institution",
+      "type": "COVER_FIELD_PRESENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Dış Kapak Kurum Bilgisi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda dış kapakta bağlı bulunan kurum bilgisinin verilmesini doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "outer-cover",
+        "field": "institution",
+        "required": true,
+        "minConfidence": "medium"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Dış kapakta kurum bilgisi güvenilir semantic evidence ile doğrulanamadı.",
+      "solution": "Dış kapakta bağlı bulunan kurum bilgisini açık biçimde ekleyin.",
+      "enabled": true,
+      "version": "1.3.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML cover semantics kurum varlığını doğrular; kapak biçimi, büyük harf ve fiziksel yerleşim bu kuralın kapsamı dışındadır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.inner-cover-institution",
+      "type": "COVER_FIELD_PRESENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İç Kapak Kurum Bilgisi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda iç kapakta bağlı bulunan kurum bilgisinin verilmesini doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "inner-cover",
+        "field": "institution",
+        "required": true,
+        "minConfidence": "medium"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İç kapakta kurum bilgisi güvenilir semantic evidence ile doğrulanamadı.",
+      "solution": "İç kapakta bağlı bulunan kurum bilgisini açık biçimde ekleyin.",
+      "enabled": true,
+      "version": "1.3.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML cover semantics kurum varlığını doğrular; kapak biçimi, büyük harf ve fiziksel yerleşim bu kuralın kapsamı dışındadır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.inner-cover-work-type",
+      "type": "COVER_FIELD_PRESENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İç Kapak Çalışma Türü",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda iç kapakta çalışmanın türünün bitirme projesi olarak belirtilmesini doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "inner-cover",
+        "field": "work-type",
+        "required": true,
+        "minConfidence": "medium"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İç kapakta çalışma türü güvenilir semantic evidence ile doğrulanamadı.",
+      "solution": "İç kapakta çalışmanın türünü bitirme projesi olarak açık biçimde belirtin.",
+      "enabled": true,
+      "version": "1.3.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML cover semantics çalışma türü varlığını doğrular; kapak biçimi, punto, bold ve fiziksel yerleşim bu kuralın kapsamı dışındadır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.outer-cover-institution-format",
+      "type": "COVER_FIELD_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Dış Kapak Kurum Biçimi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda dış kapaktaki kurum bilgisinin Times New Roman, kalın ve 12 punto olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "outer-cover",
+        "field": "institution",
+        "minConfidence": "medium",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Dış kapaktaki kurum bilgisi beklenen biçimde doğrulanamadı.",
+      "solution": "Dış kapaktaki kurum bilgisini Times New Roman, kalın ve 12 punto olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.4.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML ile güvenilir cover field paragrafının run formatting'i doğrulanır; rendered yerleşim, uppercase ve field identity belirsizliği kapsam dışıdır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.inner-cover-institution-format",
+      "type": "COVER_FIELD_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İç Kapak Kurum Biçimi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda iç kapaktaki kurum bilgisinin Times New Roman, kalın ve 12 punto olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "inner-cover",
+        "field": "institution",
+        "minConfidence": "medium",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İç kapaktaki kurum bilgisi beklenen biçimde doğrulanamadı.",
+      "solution": "İç kapaktaki kurum bilgisini Times New Roman, kalın ve 12 punto olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.4.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML ile güvenilir cover field paragrafının run formatting'i doğrulanır; rendered yerleşim, uppercase ve field identity belirsizliği kapsam dışıdır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.inner-cover-work-type-format",
+      "type": "COVER_FIELD_FORMAT",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İç Kapak Çalışma Türü Biçimi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda iç kapaktaki çalışma türünün Times New Roman, kalın ve 12 punto olmasını doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "inner-cover",
+        "field": "work-type",
+        "minConfidence": "medium",
+        "fontFamily": "Times New Roman",
+        "fontSize": 12,
+        "bold": true
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İç kapaktaki çalışma türü beklenen biçimde doğrulanamadı.",
+      "solution": "İç kapaktaki çalışma türünü Times New Roman, kalın ve 12 punto olarak düzenleyin.",
+      "enabled": true,
+      "version": "1.4.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML ile güvenilir cover field paragrafının run formatting'i doğrulanır; rendered yerleşim, uppercase ve field identity belirsizliği kapsam dışıdır."
+      }
     }
   ]
 }

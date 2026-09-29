@@ -20,6 +20,7 @@ import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
 import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
 import { isRunVisibleInCurrentDocument } from "./revisionVisibility";
+import { createEmptyCoverSemantics } from "./coverSemanticsNormalizer";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
@@ -88,6 +89,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       count: 0,
       hasAbbreviations: false,
     },
+    coverSemantics: createEmptyCoverSemantics(),
     academicSections: { occurrences: [] },
     numberingDefinitions: [],
     sections: parseDocumentSections(paragraphs),

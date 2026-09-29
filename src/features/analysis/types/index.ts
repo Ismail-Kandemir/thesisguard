@@ -48,7 +48,9 @@ export type RuleType =
   | "HEADING_LEVEL_FORMAT"
   | "HEADING_ALIGNMENT"
   | "PARAGRAPH_INDENTATION"
-  | "ABBREVIATION_LIST_CONSISTENCY";
+  | "ABBREVIATION_LIST_CONSISTENCY"
+  | "COVER_FIELD_PRESENCE"
+  | "COVER_FIELD_FORMAT";
 
 export interface ParagraphIndentationRuleExpected {
   firstLineCm: number;
@@ -183,6 +185,22 @@ export interface AbbreviationListConsistencyRuleExpected {
   aliases?: string[];
 }
 
+export interface CoverFieldPresenceRuleExpected {
+  coverScope: CoverScopeKind;
+  field: CoverFieldKind;
+  required: boolean;
+  minConfidence?: Exclude<CoverScopeConfidence, "unknown">;
+}
+
+export interface CoverFieldFormatRuleExpected {
+  coverScope: CoverScopeKind;
+  field: CoverFieldKind;
+  minConfidence?: Exclude<CoverScopeConfidence, "unknown">;
+  fontFamily?: string;
+  fontSize?: number;
+  bold?: boolean;
+}
+
 export interface HeadingNumberingSectionExpectation {
   section: string;
   aliases?: string[];
@@ -277,6 +295,8 @@ export type RuleExpectedValue =
   | HeadingAlignmentRuleExpected
   | ParagraphIndentationRuleExpected
   | AbbreviationListConsistencyRuleExpected
+  | CoverFieldPresenceRuleExpected
+  | CoverFieldFormatRuleExpected
   | {
       value: string | number | boolean;
       unit?: string;
@@ -999,6 +1019,80 @@ export interface DocumentFigureList {
   unresolvedParagraphIds: string[];
 }
 
+export type CoverScopeKind =
+  | "outer-cover"
+  | "inner-cover"
+  | "unknown";
+
+export type CoverScopeConfidence =
+  | "high"
+  | "medium"
+  | "low"
+  | "unknown";
+
+export type CoverBoundaryEvidenceKind =
+  | "explicit-page-break"
+  | "paragraph-section-break"
+  | "body-section-break";
+
+export interface CoverBoundaryEvidence {
+  id: string;
+  kind: CoverBoundaryEvidenceKind;
+  paragraphId: string | null;
+  paragraphIndex: number | null;
+  beforeParagraphIndex: number | null;
+  afterParagraphIndex: number | null;
+  confidence: "high";
+  sourcePart: "word/document.xml";
+}
+
+export type CoverFieldKind =
+  | "institution"
+  | "title"
+  | "author"
+  | "advisor"
+  | "work-type"
+  | "date"
+  | "publication-place";
+
+export type CoverFieldEvidenceKind =
+  | "explicit-label"
+  | "academic-work-type-pattern"
+  | "date-pattern"
+  | "place-date-pattern"
+  | "institution-pattern";
+
+export interface CoverFieldOccurrence {
+  id: string;
+  field: CoverFieldKind;
+  value: string;
+  normalizedValue: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  coverOccurrenceId: string;
+  confidence: Exclude<CoverScopeConfidence, "unknown">;
+  evidence: CoverFieldEvidenceKind[];
+  sourcePart: "word/document.xml";
+}
+
+export interface CoverOccurrence {
+  id: string;
+  scope: CoverScopeKind;
+  confidence: CoverScopeConfidence;
+  startParagraphIndex: number;
+  endParagraphIndex: number;
+  boundaryEvidenceIds: string[];
+  fieldOccurrenceIds: string[];
+  evidence: string[];
+  sourcePart: "word/document.xml";
+}
+
+export interface DocumentCoverSemantics {
+  occurrences: CoverOccurrence[];
+  fields: CoverFieldOccurrence[];
+  boundaryEvidence: CoverBoundaryEvidence[];
+}
+
 export type AcademicSectionRecognitionStatus =
   | "declared"
   | "ambiguous"
@@ -1106,6 +1200,7 @@ export interface NormalizedDocument {
   bibliography?: DocumentBibliography;
   tableList?: DocumentTableList;
   figureList?: DocumentFigureList;
+  coverSemantics: DocumentCoverSemantics;
   academicSections: DocumentAcademicSections;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];
