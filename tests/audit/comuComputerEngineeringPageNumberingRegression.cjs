@@ -148,9 +148,9 @@ function assertComputerEngineeringOnboarding() {
   const coverageCounts = countBy(rules, (rule) => metadata(rule).coverage);
   const trustCounts = countBy(rules, (rule) => metadata(rule).trust);
 
-  assertEqual(rules.length, 43, "computer engineering rule count");
-  assertCounts(coverageCounts, { COMPLETE: 33, PARTIAL: 10, SHALLOW: 0, MISSING: 0 }, "computer coverage");
-  assertCounts(trustCounts, { HIGH: 33, MEDIUM: 10, LOW: 0 }, "computer trust");
+  assertEqual(rules.length, 44, "computer engineering rule count");
+  assertCounts(coverageCounts, { COMPLETE: 33, PARTIAL: 11, SHALLOW: 0, MISSING: 0 }, "computer coverage");
+  assertCounts(trustCounts, { HIGH: 33, MEDIUM: 11, LOW: 0 }, "computer trust");
 }
 
 function assertFoodTechnologyBaseline() {

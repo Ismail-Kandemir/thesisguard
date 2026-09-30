@@ -111,7 +111,7 @@ function assertComputerEngineeringRuleCountUnchanged() {
     thesisTypeId: "bachelor",
   }));
 
-  assertEqual(rules.length, 43, "computer engineering rule count");
+  assertEqual(rules.length, 44, "computer engineering rule count");
 }
 
 function semanticDocument(bodyXml) {

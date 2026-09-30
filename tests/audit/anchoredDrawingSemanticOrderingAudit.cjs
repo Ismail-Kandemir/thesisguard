@@ -107,8 +107,7 @@ async function main() {
   assertEqual(anchor.associations[0].status, "ambiguous", "anchor association ambiguous");
   assertEqual(anchor.associations[0].reasons[0], "object-position-not-deterministic", "anchor association reason");
   assertEqual(anchor.resolutions[0].status, "ambiguous", "anchor academic resolution ambiguous");
-  assertEqual(anchor.legacyFigures[0].drawingType, "anchor", "legacy figure preserves anchor");
-  assertEqual(anchor.legacyFigures[0].captionPosition, "ambiguous", "legacy anchor caption position ambiguous");
+  assertEqual(anchor.resolutions[0].academicType, null, "ambiguous anchor does not create academic figure identity");
   assertEqual(anchor.rules.figureCaptionPlacement.status, "NOT_APPLICABLE", "placement excludes anchor");
   assertEqual(anchor.rules.figureCaptionFormat.status, "NOT_APPLICABLE", "pilot format excludes anchor");
   assertEqual(anchor.rules.figureInTextReference.status, "NOT_APPLICABLE", "reference excludes anchor without inline caption");
@@ -132,7 +131,11 @@ async function main() {
   assertEqual(mainChart.diagnostics[0].code, "AMBIGUOUS_OBJECT_CAPTION_ASSOCIATION", "main anchor chart diagnostic ambiguous");
   assertEqual(textbox.representations[0].kind, "textbox", "anchor textbox kind preserved");
   assertEqual(textbox.resolutions[0].status, "excluded", "anchor textbox excluded");
-  assertEqual(textbox.legacyFigures.length, 0, "anchor textbox not a legacy figure");
+  assertEqual(
+    textbox.resolutions.filter((resolution) => resolution.status === "declared" && resolution.academicType === "figure").length,
+    0,
+    "anchor textbox does not create academic figure identity",
+  );
   assertEqual(diagram.representations[0].kind, "diagram", "anchor diagram payload preserved");
   assertEqual(group.representations[0].kind, "group", "anchor group payload preserved");
   assertEqual(alternate.representations.length, 1, "AlternateContent resolves one branch");
@@ -229,11 +232,9 @@ function compactCase(item) {
       status: resolution.status,
       academicType: resolution.academicType,
     })),
-    legacyFigures: item.legacyFigures.map((figure) => ({
-      drawingType: figure.drawingType,
-      alignment: figure.alignment,
-      captionPosition: figure.captionPosition,
-    })),
+    declaredAcademicFigureCount: item.resolutions
+      .filter((resolution) => resolution.status === "declared" && resolution.academicType === "figure")
+      .length,
     diagnostics: item.diagnostics.map((diagnostic) => ({
       code: diagnostic.code,
       drawingType: diagnostic.drawingType,

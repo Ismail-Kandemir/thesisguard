@@ -50,7 +50,8 @@ export type RuleType =
   | "PARAGRAPH_INDENTATION"
   | "ABBREVIATION_LIST_CONSISTENCY"
   | "COVER_FIELD_PRESENCE"
-  | "COVER_FIELD_FORMAT";
+  | "COVER_FIELD_FORMAT"
+  | "CITATION_BIBLIOGRAPHY_CONSISTENCY";
 
 export interface ParagraphIndentationRuleExpected {
   firstLineCm: number;
@@ -837,6 +838,140 @@ export interface DocumentObjectReferences {
   items: DocumentObjectReference[];
 }
 
+export type CitationOccurrenceConfidence =
+  | "medium"
+  | "low";
+
+export type CitationOccurrenceEvidence =
+  | "visible-document-paragraph"
+  | "body-academic-scope"
+  | "author-year-parenthetical-pattern"
+  | "citation-marker-preserved"
+  | "bibliography-section-excluded"
+  | "academic-section-boundary-excluded"
+  | "document-heading-excluded"
+  | "caption-excluded"
+  | "list-section-excluded"
+  | "front-matter-excluded";
+
+export type CitationOccurrenceScope =
+  | "body"
+  | "unknown";
+
+export type CitationAuthorKind =
+  | "named"
+  | "anonymous"
+  | "organization"
+  | "unknown";
+
+export type CitationItemContext =
+  | "parenthetical"
+  | "narrative"
+  | "unknown";
+
+export type CitationItemConfidence =
+  | "high"
+  | "medium"
+  | "low";
+
+export type CitationItemParseEvidence =
+  | "parenthetical-citation-group"
+  | "semicolon-item-separator"
+  | "author-year-separator"
+  | "single-author-pattern"
+  | "two-author-ve-pattern"
+  | "et-al-pattern"
+  | "anonymous-author-marker"
+  | "organization-author-marker"
+  | "year-pattern"
+  | "year-suffix"
+  | "ambiguous-author";
+
+export interface CitationItem {
+  id: string;
+  occurrenceId: string;
+  authors: string[];
+  authorKind: CitationAuthorKind;
+  year: string;
+  yearSuffix: string | null;
+  context: CitationItemContext;
+  rawText: string;
+  normalizedText: string;
+  confidence: CitationItemConfidence;
+  parseEvidence: CitationItemParseEvidence[];
+}
+
+export interface CitationOccurrence {
+  id: string;
+  paragraphId: string;
+  paragraphIndex: number;
+  blockIndex: number | null;
+  rawText: string;
+  normalizedText: string;
+  matchedText: string;
+  normalizedMatchedText: string;
+  matchStart: number;
+  matchEnd: number;
+  scope: CitationOccurrenceScope;
+  confidence: CitationOccurrenceConfidence;
+  evidence: CitationOccurrenceEvidence[];
+  items: CitationItem[];
+}
+
+export interface DocumentCitationSemantics {
+  occurrences: CitationOccurrence[];
+  excludedParagraphIds: string[];
+}
+
+export type CitationBibliographyAssociationStatus =
+  | "matched"
+  | "missing-entry"
+  | "ambiguous"
+  | "unresolved";
+
+export type CitationBibliographyAssociationConfidence =
+  | "high"
+  | "medium"
+  | "low";
+
+export type CitationBibliographyAssociationEvidence =
+  | "citation-item-reliable"
+  | "citation-item-unreliable"
+  | "bibliography-entry-identity-reliable"
+  | "bibliography-entry-identity-unreliable"
+  | "author-kind-match"
+  | "author-identity-match"
+  | "lead-author-et-al-match"
+  | "year-match"
+  | "year-suffix-match"
+  | "year-suffix-mismatch"
+  | "single-reliable-match"
+  | "no-reliable-match"
+  | "multiple-reliable-matches";
+
+export interface CitationBibliographyIdentityKey {
+  authorKind: CitationAuthorKind;
+  normalizedAuthors: string[];
+  year: string;
+  yearSuffix: string | null;
+}
+
+export interface CitationBibliographyAssociation {
+  id: string;
+  citationOccurrenceId: string;
+  citationItemId: string;
+  citationKey: CitationBibliographyIdentityKey | null;
+  status: CitationBibliographyAssociationStatus;
+  matchedEntryId: string | null;
+  candidateEntryIds: string[];
+  confidence: CitationBibliographyAssociationConfidence;
+  evidence: CitationBibliographyAssociationEvidence[];
+}
+
+export interface DocumentCitationBibliographyLinkSemantics {
+  associations: CitationBibliographyAssociation[];
+}
+
 export interface DocumentAbbreviation {
   value: string;
   occurrences: number;
@@ -872,6 +1007,46 @@ export type BibliographyEntryBoundaryStatus =
   | "POSSIBLE_CONTINUATION"
   | "UNRESOLVED";
 
+export type BibliographyAuthorKind =
+  | "named"
+  | "anonymous"
+  | "organization"
+  | "unknown";
+
+export type BibliographyEntryIdentityParseStatus =
+  | "parsed"
+  | "partial"
+  | "unresolved";
+
+export type BibliographyEntryIdentityConfidence =
+  | "high"
+  | "medium"
+  | "low";
+
+export type BibliographyEntryIdentityEvidence =
+  | "year-pattern"
+  | "year-suffix"
+  | "author-segment-before-year"
+  | "named-author-pattern"
+  | "anonymous-author-marker"
+  | "organization-author-marker"
+  | "title-after-year"
+  | "missing-year"
+  | "missing-author"
+  | "missing-title"
+  | "ambiguous-author";
+
+export interface BibliographyEntryIdentity {
+  authors: string[];
+  authorKind: BibliographyAuthorKind;
+  year: string | null;
+  yearSuffix: string | null;
+  title: string | null;
+  parseStatus: BibliographyEntryIdentityParseStatus;
+  confidence: BibliographyEntryIdentityConfidence;
+  parseEvidence: BibliographyEntryIdentityEvidence[];
+}
+
 export interface BibliographyEntryFormattingFacts {
   paragraphStyleId: string | null;
   alignment: ParagraphAlignment | null;
@@ -891,6 +1066,7 @@ export interface BibliographyEntryOccurrence {
   entryIndex: number;
   boundaryStatus: BibliographyEntryBoundaryStatus;
   confidence: "high" | "low";
+  identity: BibliographyEntryIdentity;
   formatting: BibliographyEntryFormattingFacts;
   evidence: string[];
 }
@@ -1196,6 +1372,8 @@ export interface NormalizedDocument {
   objectSemantics: DocumentObjectSemantics;
   academicScopes: AcademicDocumentScopes;
   objectReferences: DocumentObjectReferences;
+  citationSemantics: DocumentCitationSemantics;
+  citationBibliographyLinks: DocumentCitationBibliographyLinkSemantics;
   abbreviations: DocumentAbbreviations;
   bibliography?: DocumentBibliography;
   tableList?: DocumentTableList;

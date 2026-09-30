@@ -1039,6 +1039,30 @@
       }
     },
     {
+      "id": "comu.engineering.computer-engineering.bachelor.citation-bibliography-consistency",
+      "type": "CITATION_BIBLIOGRAPHY_CONSISTENCY",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Metin İçi Atıf ve Kaynakça Tutarlılığı",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda metin içinde gösterilen kaynakların kaynakçada yer almasını doğrular.",
+      "category": "citation",
+      "expected": true,
+      "severity": "error",
+      "score": 10,
+      "message": "Metin içi atıflar ile kaynakça arasında tutarlılık güvenilir biçimde doğrulanamadı.",
+      "solution": "Metin içinde verdiğiniz güvenilir yazar-yıl atıflarının kaynakçada karşılık gelen girdilerinin bulunduğundan emin olun.",
+      "enabled": true,
+      "version": "1.5.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Mevcut semantic zincir yalnız güvenilir author-year atıf item'ları ile güvenilir kaynakça identity eşleşmelerini doğrular; diğer atıf biçimleri ve rendered/manuel bağlamlar kapsam dışıdır."
+      }
+    },
+    {
       "id": "comu.engineering.computer-engineering.bachelor.appendices",
       "type": "REQUIRED_SECTION",
       "scope": {

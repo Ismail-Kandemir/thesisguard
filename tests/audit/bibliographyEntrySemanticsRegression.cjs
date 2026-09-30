@@ -1,4 +1,4 @@
-const path = require("path");
+﻿const path = require("path");
 
 require("../golden/experimentalGoldenRegression.cjs");
 
@@ -24,6 +24,16 @@ const {
 
 function main() {
   assertValidBibliographySection();
+  assertNamedAuthorYearTitleIdentity();
+  assertTwoAuthorIdentity();
+  assertThreeAuthorIdentity();
+  assertYearSuffixPreserved();
+  assertAnonymousAuthorKind();
+  assertOrganizationAuthorKind();
+  assertMissingYearUnresolved();
+  assertAmbiguousAuthorDoesNotCreateFalseIdentity();
+  assertEntryPreservedWhenIdentityUnresolved();
+  assertSyntheticSecondUniversityIdentity();
   assertMissingBibliographySection();
   assertEmptyBibliographySection();
   assertMultipleEntries();
@@ -59,8 +69,145 @@ function assertValidBibliographySection() {
   assertEqual(document.bibliography.entries[0].boundaryStatus, "DEFINITE_ENTRY", "valid entry boundary");
 }
 
+function assertNamedAuthorYearTitleIdentity() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Yilmaz, A. (2024). Gida teknolojisi arastirmalari."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "named", "named author kind");
+  assertEqual(identity.authors.length, 1, "named author count");
+  assertEqual(identity.authors[0], "Yilmaz, A.", "named author value");
+  assertEqual(identity.year, "2024", "named author year");
+  assertEqual(identity.yearSuffix, null, "named author year suffix");
+  assertEqual(identity.title, "Gida teknolojisi arastirmalari.", "named author title");
+  assertEqual(identity.parseStatus, "parsed", "named author parse status");
+  assertEqual(identity.confidence, "high", "named author identity confidence");
+}
+
+function assertTwoAuthorIdentity() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Yilmaz, A. ve Demir, B. (2024). Ortak calisma."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "named", "two-author kind");
+  assertEqual(identity.authors.length, 2, "two-author count");
+  assertEqual(identity.authors[0], "Yilmaz, A.", "two-author first");
+  assertEqual(identity.authors[1], "Demir, B.", "two-author second");
+  assertEqual(identity.year, "2024", "two-author year");
+  assertEqual(identity.title, "Ortak calisma.", "two-author title");
+}
+
+function assertThreeAuthorIdentity() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Yilmaz, A., Demir, B. ve Kaya, C. (2023). Cok yazarlı calisma."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "named", "three-author kind");
+  assertEqual(identity.authors.length, 3, "three-author count");
+  assertEqual(identity.authors[2], "Kaya, C.", "three-author third");
+  assertEqual(identity.year, "2023", "three-author year");
+}
+
+function assertYearSuffixPreserved() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Yilmaz, A. (2024b). Ayni yil calismasi."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.year, "2024", "year suffix year");
+  assertEqual(identity.yearSuffix, "b", "year suffix preserved");
+  assertEqual(identity.parseEvidence.includes("year-suffix"), true, "year suffix evidence");
+}
+
+function assertAnonymousAuthorKind() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Anonim (2024). Kurumsal olmayan kaynak."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "anonymous", "anonymous kind");
+  assertEqual(identity.authors[0], "Anonim", "anonymous author value");
+  assertEqual(identity.parseStatus, "parsed", "anonymous parsed");
+}
+
+function assertOrganizationAuthorKind() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("World Health Organization (2024). Akademik kilavuz."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "organization", "organization kind");
+  assertEqual(identity.authors[0], "World Health Organization", "organization author value");
+  assertEqual(identity.parseStatus, "parsed", "organization parsed");
+}
+
+function assertMissingYearUnresolved() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Yilmaz, A. Gida teknolojisi arastirmalari."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.year, null, "missing year remains null");
+  assertEqual(identity.authorKind, "unknown", "missing year author unresolved");
+  assertEqual(identity.parseStatus, "unresolved", "missing year unresolved");
+  assertEqual(identity.parseEvidence.includes("missing-year"), true, "missing year evidence");
+}
+
+function assertAmbiguousAuthorDoesNotCreateFalseIdentity() {
+  const { document } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Research Team (2024). Belirsiz yazar."),
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "unknown", "ambiguous author remains unknown");
+  assertEqual(identity.authors.length, 0, "ambiguous author list empty");
+  assertEqual(identity.year, "2024", "ambiguous author year preserved");
+  assertEqual(identity.parseStatus, "partial", "ambiguous author partial");
+  assertEqual(identity.parseEvidence.includes("ambiguous-author"), true, "ambiguous author evidence");
+}
+
+function assertEntryPreservedWhenIdentityUnresolved() {
+  const { document, result } = analyze(
+    heading("Kaynaklar") +
+      paragraph("Kimlik olarak parse edilemeyen kaynak metni."),
+  );
+  const entry = document.bibliography.entries[0];
+
+  assertEqual(result.status, "PASSED", "unresolved identity still passes entry presence");
+  assertEqual(document.bibliography.entries.length, 1, "unresolved identity entry preserved");
+  assertEqual(entry.identity.parseStatus, "unresolved", "entry identity unresolved");
+  assertEqual(entry.visibleText, "Kimlik olarak parse edilemeyen kaynak metni.", "unresolved entry text preserved");
+}
+
+function assertSyntheticSecondUniversityIdentity() {
+  const references = requiredRule("References");
+  const { document } = analyze(
+    heading("References") +
+      paragraph("Smith, J. (2022). Generic bibliography identity."),
+    [references],
+    references,
+  );
+  const identity = document.bibliography.entries[0].identity;
+
+  assertEqual(identity.authorKind, "named", "synthetic author kind");
+  assertEqual(identity.authors[0], "Smith, J.", "synthetic author value");
+  assertEqual(identity.year, "2022", "synthetic year");
+  assertEqual(identity.title, "Generic bibliography identity.", "synthetic title");
+}
+
 function assertMissingBibliographySection() {
-  const { result } = analyze(heading("GiriÅŸ") + paragraph("Metin."));
+  const { result } = analyze(heading("Giriş") + paragraph("Metin."));
 
   assertEqual(result.status, "FAILED", "missing bibliography status");
   assertEqual(result.actual, "Tespit edilmedi", "missing bibliography actual");
@@ -145,9 +292,9 @@ function assertNextSectionBoundaryProtection() {
   const { document, result } = analyze(
     heading("Kaynaklar") +
       paragraph("Yilmaz, A. (2024). Gida teknolojisi.") +
-      heading("Ã–zgeÃ§miÅŸ") +
+      heading("Özgeçmiş") +
       paragraph("Bu paragraf kaynak girdisi degildir."),
-    [referencesRule(), requiredRule("Ã–zgeÃ§miÅŸ")],
+    [referencesRule(), requiredRule("Özgeçmiş")],
   );
 
   assertEqual(result.status, "PASSED", "next-section boundary status");
@@ -227,14 +374,14 @@ function assertNoRawSubstringSectionDetection() {
   assertEqual(document.bibliography.status, "SECTION_MISSING", "raw substring did not create section");
 }
 
-function analyze(bodyXml, rules = [referencesRule()]) {
+function analyze(bodyXml, rules = [referencesRule()], validationRule = referencesRule()) {
   const parsed = parseDocumentXml(wrapDocumentXml(bodyXml));
   const marked = markRequiredSectionHeadings(parsed, rules);
   const headed = normalizeDocumentHeadings(marked, rules);
   const scoped = normalizeAcademicDocumentScopes(headed, rules);
   const sectioned = normalizeAcademicSections(scoped, rules);
   const document = normalizeBibliographySemantics(sectioned, rules);
-  const result = new BibliographyReferencesValidator().validate(document, referencesRule());
+  const result = new BibliographyReferencesValidator().validate(document, validationRule);
 
   return { document, result };
 }
@@ -243,7 +390,7 @@ function referencesRule() {
   return {
     id: "comu.applied-sciences.food-technology.bachelor.references",
     type: "REQUIRED_SECTION",
-    title: "Kaynaklar BÃ¶lÃ¼mÃ¼",
+    title: "Kaynaklar Bölümü",
     description: "",
     category: "structure",
     expected: { section: "Kaynaklar", required: true },

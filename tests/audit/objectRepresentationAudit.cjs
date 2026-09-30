@@ -65,34 +65,34 @@ async function main() {
     fixtures.push(await inspectFixture(path.join(FIXTURE_DIR, fixture.name), fixture.kind));
   }
 
-  assertEqual(baseline.normalized.figureCount, 1, "normal picture baseline figure count");
-  assertEqual(findFixture(fixtures, "chart").normalized.figureCount, 2, "chart classified as figure");
-  assertEqual(findFixture(fixtures, "smartart").normalized.figureCount, 2, "SmartArt classified as figure");
-  assertEqual(findFixture(fixtures, "groupedDrawing").normalized.figureCount, 2, "grouped drawing classified as figure");
-  assertEqual(findFixture(fixtures, "ole").normalized.figureCount, 1, "OLE not classified as figure");
+  assertEqual(baseline.normalized.declaredAcademicFigureCount, 1, "normal picture baseline declared figure count");
+  assertEqual(findFixture(fixtures, "chart").normalized.declaredAcademicFigureCount, 1, "chart does not create figure identity");
+  assertEqual(findFixture(fixtures, "smartart").normalized.declaredAcademicFigureCount, 1, "SmartArt does not create figure identity");
+  assertEqual(findFixture(fixtures, "groupedDrawing").normalized.declaredAcademicFigureCount, 1, "grouped drawing does not create figure identity");
+  assertEqual(findFixture(fixtures, "ole").normalized.declaredAcademicFigureCount, 1, "OLE does not create figure identity");
   assertEqual(
-    findFixture(fixtures, "smartartCaptionCollision").normalized.figureCount,
+    findFixture(fixtures, "smartartCaptionCollision").normalized.declaredAcademicFigureCount,
     2,
-    "SmartArt caption collision figure count",
+    "SmartArt caption collision declared figure count",
   );
 
   console.log(JSON.stringify({
     selectedTarget: "generic w:drawing object classification",
     detectorArchitecture: {
       figureSignal:
-        "documentCaptionsNormalizer parses every semantic w:drawing under w:body as a figure unless the drawing contains wps:txbx or w:txbxContent.",
-      pictureSpecificSignal: "No pic:pic or a:graphicData URI requirement is present in the current figure detector.",
-      oleSignal: "w:object / o:OLEObject is not a w:drawing and is not normalized as a figure occurrence.",
+        "objectSemantics preserves concrete drawing kinds and only declared caption/object pairs establish academic figure identity.",
+      pictureSpecificSignal: "pic:pic remains a picture representation and can be declared as an academic figure with reliable caption evidence.",
+      oleSignal: "w:object / o:OLEObject is preserved as an object representation without forcing figure identity.",
     },
     activeFigureRules: FIGURE_RULE_IDS,
     objectTaxonomy: createObjectTaxonomy(),
     riskRanking: createRiskRanking(),
     fixtures: [baseline, ...fixtures],
     conclusion: {
-      genericDrawingClassificationConfirmed: true,
+      genericDrawingClassificationConfirmed: false,
       wrongRuleResultProven: false,
       classification:
-        "OBJECT CLASSIFICATION GAP / ARCHITECTURAL LIMITATION / AMBIGUOUS PRODUCT SEMANTICS",
+        "OBJECT SEMANTICS PRESERVED / ACADEMIC IDENTITY REQUIRES DECLARATION",
       rationale:
         "Chart, SmartArt, and grouped DrawingML are classified as figure facts by generic w:drawing detection. Runtime rule impact is observable, but the active rule metadata only defines Şekil/Table semantics and does not provide a source-backed taxonomy that excludes charts or diagrams from Şekil.",
     },
@@ -138,6 +138,9 @@ async function inspectFixture(fixturePath, kind) {
     normalized: {
       objectRepresentationCount: document.objectSemantics.representations.length,
       objectRepresentations: document.objectSemantics.representations,
+      declaredAcademicFigureCount: document.objectSemantics.resolutions
+        .filter((resolution) => resolution.status === "declared" && resolution.academicType === "figure")
+        .length,
       captions: document.captions.items,
       orphanCaptionIds: document.captions.orphanCaptionIds,
       references: document.objectReferences.items.filter((reference) => reference.kind === "figure"),

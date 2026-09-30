@@ -9,7 +9,7 @@ import type {
 } from "../types";
 import { sectionMatchesExpectedName } from "./sectionNameMatcher";
 
-const DEFAULT_MAIN_CONTENT_BOUNDARY_NAMES = ["Giriş"];
+const DEFAULT_MAIN_CONTENT_BOUNDARY_NAMES = ["Giriş", "Giris"];
 
 export function normalizeAcademicDocumentScopes(
   document: Readonly<NormalizedDocument>,

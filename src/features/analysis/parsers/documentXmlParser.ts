@@ -21,6 +21,10 @@ import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsPa
 import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
 import { isRunVisibleInCurrentDocument } from "./revisionVisibility";
 import { createEmptyCoverSemantics } from "./coverSemanticsNormalizer";
+import { createEmptyCitationSemantics } from "./citationSemanticsNormalizer";
+import {
+  createEmptyCitationBibliographyLinkSemantics,
+} from "./citationBibliographyLinkSemanticsNormalizer";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
@@ -84,6 +88,8 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
       mainContentBoundary: null,
     },
     objectReferences: { items: [] },
+    citationSemantics: createEmptyCitationSemantics(),
+    citationBibliographyLinks: createEmptyCitationBibliographyLinkSemantics(),
     abbreviations: {
       items: [],
       count: 0,

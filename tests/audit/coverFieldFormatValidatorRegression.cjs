@@ -197,7 +197,7 @@ function assertProductionFormatRulesAndBaselines() {
     ],
     "production computer cover format rules",
   );
-  assertEqual(computerRules.length, 43, "computer engineering rule count");
+  assertEqual(computerRules.length, 44, "computer engineering rule count");
   assertEqual(foodRules.length, 46, "food technology rule count");
 }
 

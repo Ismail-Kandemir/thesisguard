@@ -3,6 +3,9 @@ import type { RuleValidator } from "./validators/RuleValidator";
 import { AbbreviationListConsistencyValidator } from "./validators/AbbreviationListConsistencyValidator";
 import { AlignmentValidator } from "./validators/AlignmentValidator";
 import { BibliographyReferencesValidator } from "./validators/BibliographyReferencesValidator";
+import {
+  CitationBibliographyConsistencyValidator,
+} from "./validators/CitationBibliographyConsistencyValidator";
 import { CoverFieldFormatValidator } from "./validators/CoverFieldFormatValidator";
 import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
 import { CoverFieldPresenceValidator } from "./validators/CoverFieldPresenceValidator";
@@ -33,6 +36,7 @@ const BIBLIOGRAPHY_SECTION_NAME = "kaynaklar";
 const DEFAULT_VALIDATOR_ENTRIES = [
   ["ABBREVIATION_LIST_CONSISTENCY", new AbbreviationListConsistencyValidator()],
   ["ALIGNMENT", new AlignmentValidator()],
+  ["CITATION_BIBLIOGRAPHY_CONSISTENCY", new CitationBibliographyConsistencyValidator()],
   ["CONDITIONAL_REQUIRED_SECTION", new ConditionalRequiredSectionValidator()],
   ["COVER_FIELD_FORMAT", new CoverFieldFormatValidator()],
   ["COVER_FIELD_PRESENCE", new CoverFieldPresenceValidator()],

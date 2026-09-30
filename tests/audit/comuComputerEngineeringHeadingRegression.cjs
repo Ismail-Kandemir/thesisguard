@@ -168,9 +168,9 @@ function assertBaselines() {
   const foodCoverage = countBy(foodRules, (rule) => metadata(rule).coverage);
   const foodTrust = countBy(foodRules, (rule) => metadata(rule).trust);
 
-  assertEqual(computerRules.length, 43, "computer engineering rule count");
-  assertCounts(computerCoverage, { COMPLETE: 33, PARTIAL: 10, SHALLOW: 0, MISSING: 0 }, "computer coverage");
-  assertCounts(computerTrust, { HIGH: 33, MEDIUM: 10, LOW: 0 }, "computer trust");
+  assertEqual(computerRules.length, 44, "computer engineering rule count");
+  assertCounts(computerCoverage, { COMPLETE: 33, PARTIAL: 11, SHALLOW: 0, MISSING: 0 }, "computer coverage");
+  assertCounts(computerTrust, { HIGH: 33, MEDIUM: 11, LOW: 0 }, "computer trust");
   assertEqual(foodRules.length, 46, "food technology rule count");
   assertCounts(foodCoverage, { COMPLETE: 45, PARTIAL: 1, SHALLOW: 0, MISSING: 0 }, "food coverage");
   assertCounts(foodTrust, { HIGH: 45, MEDIUM: 1, LOW: 0 }, "food trust");

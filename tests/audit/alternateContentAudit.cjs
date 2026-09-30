@@ -65,7 +65,7 @@ async function main() {
       markerTexts: [],
       assertSummary(summary) {
         assertEqual(summary.ooxml.drawingCount, 2, "Figure fixture OOXML drawing count");
-        assertEqual(summary.normalized.figures.length, 1, "Figure fixture normalized figure count");
+        assertEqual(summary.normalized.declaredAcademicFigureCount, 1, "Figure fixture declared academic figure count");
         assertEqual(summary.report.failed, 0, "Figure fixture failed rule count");
         assertEqual(summary.report.notApplicable, 0, "Figure fixture N/A rule count");
       },
@@ -203,6 +203,9 @@ async function inspectFixture(fixturePath, options) {
         alignment: representation.alignment,
         alignmentSource: representation.alignmentSource,
       })),
+      declaredAcademicFigureCount: document.objectSemantics.resolutions
+        .filter((resolution) => resolution.status === "declared" && resolution.academicType === "figure")
+        .length,
     },
     report: summarizeReport(report),
     relevantRuleResults: [

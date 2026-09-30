@@ -1,6 +1,10 @@
 import type {
   AcademicSectionOccurrence,
+  BibliographyAuthorKind,
   BibliographyEntryBoundaryStatus,
+  BibliographyEntryIdentity,
+  BibliographyEntryIdentityEvidence,
+  BibliographyEntryIdentityParseStatus,
   BibliographyEntryOccurrence,
   DocumentBibliography,
   NormalizedDocument,
@@ -11,7 +15,12 @@ import { findDeclaredAcademicSectionOccurrencesByNames } from "../rules/academic
 import { normalizeSectionName } from "./documentSectionsParser";
 import { EffectiveFormattingResolver } from "./effectiveFormattingResolver";
 
-const BIBLIOGRAPHY_SECTION_NAMES = ["Kaynaklar"];
+const BIBLIOGRAPHY_SECTION_NAMES = ["Kaynaklar", "References"];
+const YEAR_WITH_SUFFIX_PATTERN = /\b((?:18|19|20)\d{2})([a-z])?\b/iu;
+const NAMED_AUTHOR_PATTERN = /[\p{Lu}][\p{L}'’-]+,\s*(?:[\p{Lu}]\.?\s*)+/gu;
+const ANONYMOUS_AUTHOR_PATTERN = /^(?:anonim|anonymous)$/iu;
+const ORGANIZATION_MARKER_PATTERN =
+  /(?:üniversitesi|bakanlığı|kurumu|enstitüsü|komitesi|kurulu|\b(?:university|ministry|institute|association|organization|organisation|council|committee|who|unesco|fao)\b)/iu;
 
 export function normalizeBibliographySemantics(
   document: Readonly<NormalizedDocument>,
@@ -115,6 +124,7 @@ function collectBibliographyEntries(
       entryIndex: index + 1,
       boundaryStatus,
       confidence: boundaryStatus === "DEFINITE_ENTRY" ? "high" : "low",
+      identity: parseBibliographyEntryIdentity(paragraph.text, boundaryStatus),
       formatting: {
         paragraphStyleId: paragraph.styleId,
         alignment: resolver.resolveParagraphAlignment(
@@ -133,6 +143,199 @@ function collectBibliographyEntries(
       evidence: createEntryEvidence(paragraph, boundaryStatus),
     };
   });
+}
+
+function parseBibliographyEntryIdentity(
+  text: string,
+  boundaryStatus: BibliographyEntryBoundaryStatus,
+): BibliographyEntryIdentity {
+  const normalizedText = normalizeVisibleText(text);
+  const yearMatch = YEAR_WITH_SUFFIX_PATTERN.exec(normalizedText);
+  const evidence: BibliographyEntryIdentityEvidence[] = [];
+
+  if (!yearMatch) {
+    return createIdentity({
+      authors: [],
+      authorKind: "unknown",
+      year: null,
+      yearSuffix: null,
+      title: null,
+      parseStatus: "unresolved",
+      evidence: ["missing-year"],
+      boundaryStatus,
+    });
+  }
+
+  const year = yearMatch[1];
+  const yearSuffix = yearMatch[2]?.toLocaleLowerCase("tr-TR") ?? null;
+  evidence.push("year-pattern");
+  if (yearSuffix !== null) {
+    evidence.push("year-suffix");
+  }
+
+  const authorSegment = normalizeAuthorSegment(
+    normalizedText.slice(0, yearMatch.index),
+  );
+  const authorIdentity = parseAuthorIdentity(authorSegment);
+  evidence.push(...authorIdentity.evidence);
+
+  const title = parseTitleAfterYear(
+    normalizedText.slice(yearMatch.index + yearMatch[0].length),
+  );
+  evidence.push(title === null ? "missing-title" : "title-after-year");
+
+  const parseStatus = determineIdentityParseStatus(
+    authorIdentity.authorKind,
+    year,
+    title,
+  );
+
+  return createIdentity({
+    authors: authorIdentity.authors,
+    authorKind: authorIdentity.authorKind,
+    year,
+    yearSuffix,
+    title,
+    parseStatus,
+    evidence,
+    boundaryStatus,
+  });
+}
+
+function parseAuthorIdentity(authorSegment: string): {
+  authors: string[];
+  authorKind: BibliographyAuthorKind;
+  evidence: BibliographyEntryIdentityEvidence[];
+} {
+  if (authorSegment.length === 0) {
+    return {
+      authors: [],
+      authorKind: "unknown",
+      evidence: ["missing-author"],
+    };
+  }
+
+  if (ANONYMOUS_AUTHOR_PATTERN.test(authorSegment)) {
+    return {
+      authors: [authorSegment],
+      authorKind: "anonymous",
+      evidence: ["author-segment-before-year", "anonymous-author-marker"],
+    };
+  }
+
+  if (ORGANIZATION_MARKER_PATTERN.test(authorSegment)) {
+    return {
+      authors: [authorSegment],
+      authorKind: "organization",
+      evidence: ["author-segment-before-year", "organization-author-marker"],
+    };
+  }
+
+  const namedAuthors = [...authorSegment.matchAll(NAMED_AUTHOR_PATTERN)]
+    .map((match) => normalizeAuthorName(match[0]))
+    .filter((author) => author.length > 0);
+
+  if (namedAuthors.length > 0) {
+    return {
+      authors: namedAuthors,
+      authorKind: "named",
+      evidence: ["author-segment-before-year", "named-author-pattern"],
+    };
+  }
+
+  return {
+    authors: [],
+    authorKind: "unknown",
+    evidence: ["author-segment-before-year", "ambiguous-author"],
+  };
+}
+
+function createIdentity(params: {
+  authors: string[];
+  authorKind: BibliographyAuthorKind;
+  year: string | null;
+  yearSuffix: string | null;
+  title: string | null;
+  parseStatus: BibliographyEntryIdentityParseStatus;
+  evidence: readonly BibliographyEntryIdentityEvidence[];
+  boundaryStatus: BibliographyEntryBoundaryStatus;
+}): BibliographyEntryIdentity {
+  return {
+    authors: params.authors,
+    authorKind: params.authorKind,
+    year: params.year,
+    yearSuffix: params.yearSuffix,
+    title: params.title,
+    parseStatus: params.parseStatus,
+    confidence: determineIdentityConfidence(
+      params.parseStatus,
+      params.boundaryStatus,
+    ),
+    parseEvidence: dedupeIdentityEvidence(params.evidence),
+  };
+}
+
+function determineIdentityParseStatus(
+  authorKind: BibliographyAuthorKind,
+  year: string | null,
+  title: string | null,
+): BibliographyEntryIdentityParseStatus {
+  if (authorKind !== "unknown" && year !== null && title !== null) {
+    return "parsed";
+  }
+
+  if (year !== null && (authorKind !== "unknown" || title !== null)) {
+    return "partial";
+  }
+
+  return "unresolved";
+}
+
+function determineIdentityConfidence(
+  parseStatus: BibliographyEntryIdentityParseStatus,
+  boundaryStatus: BibliographyEntryBoundaryStatus,
+): BibliographyEntryIdentity["confidence"] {
+  if (boundaryStatus !== "DEFINITE_ENTRY") {
+    return "low";
+  }
+
+  if (parseStatus === "parsed") {
+    return "high";
+  }
+
+  if (parseStatus === "partial") {
+    return "medium";
+  }
+
+  return "low";
+}
+
+function normalizeAuthorSegment(text: string): string {
+  return text
+    .replace(/[\s(]+$/u, "")
+    .replace(/^[\s[(]+/u, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeAuthorName(text: string): string {
+  return text.replace(/\s+/g, " ").replace(/[,\s]+$/u, "").trim();
+}
+
+function parseTitleAfterYear(text: string): string | null {
+  const title = text.replace(/^[\s).,;:]+/u, "").replace(/\s+/g, " ").trim();
+
+  return title.length > 0 ? title : null;
+}
+
+function normalizeVisibleText(text: string): string {
+  return text.trim().replace(/\s+/g, " ");
+}
+
+function dedupeIdentityEvidence(
+  values: readonly BibliographyEntryIdentityEvidence[],
+): BibliographyEntryIdentityEvidence[] {
+  return [...new Set(values)];
 }
 
 function isBibliographyEntryCandidate(
@@ -221,5 +424,6 @@ function findBlockIndexByParagraphId(
 }
 
 export function isBibliographySectionIdentity(identity: string | null): boolean {
-  return identity === normalizeSectionName("Kaynaklar");
+  return identity !== null &&
+    BIBLIOGRAPHY_SECTION_NAMES.some((name) => identity === normalizeSectionName(name));
 }

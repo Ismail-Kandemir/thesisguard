@@ -1,4 +1,4 @@
-require("../golden/experimentalGoldenRegression.cjs");
+﻿require("../golden/experimentalGoldenRegression.cjs");
 
 const { RuleEngine } = require("../../src/features/analysis/engine/RuleEngine.ts");
 const { RuleResolver } = require("../../src/features/analysis/rules/RuleResolver.ts");
@@ -16,7 +16,7 @@ const SELECTION = {
   studyTypeId: "experimental",
 };
 
-const EXPECTED_REGISTERED_RULE_TYPES = 29;
+const EXPECTED_REGISTERED_RULE_TYPES = 30;
 const MISSING_VALIDATOR_MESSAGE = "Bu kural için kayıtlı validator bulunamadı.";
 
 function main() {
@@ -76,6 +76,7 @@ function main() {
   );
   assertSyntheticCoverFieldDispatch(registry);
   assertSyntheticCoverFieldFormatDispatch(registry);
+  assertSyntheticCitationBibliographyConsistencyDispatch(registry);
 
   assertDuplicateRegistration();
   assertInvalidRegistration();
@@ -166,6 +167,22 @@ function assertSyntheticCoverFieldFormatDispatch(registry) {
     validator?.constructor.name,
     "CoverFieldFormatValidator",
     "synthetic cross-university COVER_FIELD_FORMAT validator",
+  );
+}
+
+function assertSyntheticCitationBibliographyConsistencyDispatch(registry) {
+  const validator = registry.getValidator({
+    ...createBaseRule(),
+    id: "second-university.engineering.software-engineering.bachelor.citation-bibliography-consistency",
+    type: "CITATION_BIBLIOGRAPHY_CONSISTENCY",
+    category: "citation",
+    expected: true,
+  });
+
+  assertEqual(
+    validator?.constructor.name,
+    "CitationBibliographyConsistencyValidator",
+    "synthetic cross-university CITATION_BIBLIOGRAPHY_CONSISTENCY validator",
   );
 }
 
