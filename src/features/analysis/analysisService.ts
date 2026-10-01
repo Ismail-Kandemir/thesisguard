@@ -11,6 +11,7 @@ import {
   normalizeCitationBibliographyLinkSemantics,
 } from "./parsers/citationBibliographyLinkSemanticsNormalizer";
 import { normalizeCitationSemantics } from "./parsers/citationSemanticsNormalizer";
+import { normalizeDirectQuotationSemantics } from "./parsers/directQuotationSemanticsNormalizer";
 import { normalizeFigureListSemantics } from "./parsers/figureListSemanticsNormalizer";
 import { normalizeTableListSemantics } from "./parsers/tableListSemanticsNormalizer";
 import { normalizeCoverSemantics } from "./parsers/coverSemanticsNormalizer";
@@ -140,13 +141,16 @@ export async function analyzeDocx(
   const documentWithCitationBibliographyLinks = normalizeCitationBibliographyLinkSemantics(
     documentWithCitationSemantics,
   );
+  const documentWithDirectQuotationSemantics = normalizeDirectQuotationSemantics(
+    documentWithCitationBibliographyLinks,
+  );
   const documentWithSectionHeadings: NormalizedDocument = {
-    ...documentWithCitationBibliographyLinks,
+    ...documentWithDirectQuotationSemantics,
     abbreviations: normalizeDocumentAbbreviations(
-      documentWithCitationBibliographyLinks,
+      documentWithDirectQuotationSemantics,
     ),
     objectReferences: normalizeDocumentObjectReferences(
-      documentWithCitationBibliographyLinks,
+      documentWithDirectQuotationSemantics,
     ),
   };
   const ruleEngine = new RuleEngine();

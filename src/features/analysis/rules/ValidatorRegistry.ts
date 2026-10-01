@@ -9,6 +9,7 @@ import {
 import { CoverFieldFormatValidator } from "./validators/CoverFieldFormatValidator";
 import { ConditionalRequiredSectionValidator } from "./validators/ConditionalRequiredSectionValidator";
 import { CoverFieldPresenceValidator } from "./validators/CoverFieldPresenceValidator";
+import { DirectQuotationPageLocatorValidator } from "./validators/DirectQuotationPageLocatorValidator";
 import { FontFamilyValidator } from "./validators/FontFamilyValidator";
 import { FontSizeValidator } from "./validators/FontSizeValidator";
 import { HeadingAlignmentValidator } from "./validators/HeadingAlignmentValidator";
@@ -40,6 +41,7 @@ const DEFAULT_VALIDATOR_ENTRIES = [
   ["CONDITIONAL_REQUIRED_SECTION", new ConditionalRequiredSectionValidator()],
   ["COVER_FIELD_FORMAT", new CoverFieldFormatValidator()],
   ["COVER_FIELD_PRESENCE", new CoverFieldPresenceValidator()],
+  ["DIRECT_QUOTATION_PAGE_LOCATOR", new DirectQuotationPageLocatorValidator()],
   ["FONT_FAMILY", new FontFamilyValidator()],
   ["FONT_SIZE", new FontSizeValidator()],
   ["HEADING", new HeadingValidator()],

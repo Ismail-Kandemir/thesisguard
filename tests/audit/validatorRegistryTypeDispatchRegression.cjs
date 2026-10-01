@@ -16,7 +16,7 @@ const SELECTION = {
   studyTypeId: "experimental",
 };
 
-const EXPECTED_REGISTERED_RULE_TYPES = 30;
+const EXPECTED_REGISTERED_RULE_TYPES = 31;
 const MISSING_VALIDATOR_MESSAGE = "Bu kural için kayıtlı validator bulunamadı.";
 
 function main() {
@@ -77,6 +77,7 @@ function main() {
   assertSyntheticCoverFieldDispatch(registry);
   assertSyntheticCoverFieldFormatDispatch(registry);
   assertSyntheticCitationBibliographyConsistencyDispatch(registry);
+  assertSyntheticDirectQuotationPageLocatorDispatch(registry);
 
   assertDuplicateRegistration();
   assertInvalidRegistration();
@@ -183,6 +184,22 @@ function assertSyntheticCitationBibliographyConsistencyDispatch(registry) {
     validator?.constructor.name,
     "CitationBibliographyConsistencyValidator",
     "synthetic cross-university CITATION_BIBLIOGRAPHY_CONSISTENCY validator",
+  );
+}
+
+function assertSyntheticDirectQuotationPageLocatorDispatch(registry) {
+  const validator = registry.getValidator({
+    ...createBaseRule(),
+    id: "second-university.engineering.software-engineering.bachelor.direct-quotation-page-locator",
+    type: "DIRECT_QUOTATION_PAGE_LOCATOR",
+    category: "citation",
+    expected: true,
+  });
+
+  assertEqual(
+    validator?.constructor.name,
+    "DirectQuotationPageLocatorValidator",
+    "synthetic cross-university DIRECT_QUOTATION_PAGE_LOCATOR validator",
   );
 }
 

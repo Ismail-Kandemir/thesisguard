@@ -51,7 +51,8 @@ export type RuleType =
   | "ABBREVIATION_LIST_CONSISTENCY"
   | "COVER_FIELD_PRESENCE"
   | "COVER_FIELD_FORMAT"
-  | "CITATION_BIBLIOGRAPHY_CONSISTENCY";
+  | "CITATION_BIBLIOGRAPHY_CONSISTENCY"
+  | "DIRECT_QUOTATION_PAGE_LOCATOR";
 
 export interface ParagraphIndentationRuleExpected {
   firstLineCm: number;
@@ -363,6 +364,24 @@ export interface Run {
   underline: boolean | null;
   fontFamily: string | null;
   fontSize: number | null;
+}
+
+export type TextOffsetUnit = "utf16-code-unit";
+
+export interface RunTextSpanSegment {
+  runIndex: number;
+  startOffset: number;
+  endOffset: number;
+  text: string;
+}
+
+export interface TextSpan {
+  paragraphId: string;
+  startOffset: number;
+  endOffset: number;
+  offsetUnit: TextOffsetUnit;
+  runSegments: RunTextSpanSegment[];
+  text: string;
 }
 
 export type FontSlotReference =
@@ -972,6 +991,114 @@ export interface DocumentCitationBibliographyLinkSemantics {
   associations: CitationBibliographyAssociation[];
 }
 
+export type DirectQuotationKind =
+  | "inline"
+  | "block-candidate"
+  | "ambiguous";
+
+export type DirectQuotationScope =
+  | "body"
+  | "unknown";
+
+export type DirectQuotationConfidence =
+  | "high"
+  | "low";
+
+export type DirectQuotationDelimiterKind =
+  | "straight-double"
+  | "smart-left-double"
+  | "smart-right-double";
+
+export type DirectQuotationDelimiterRole =
+  | "opening"
+  | "closing"
+  | "ambiguous";
+
+export interface DirectQuotationDelimiterEvidence {
+  character: string;
+  kind: DirectQuotationDelimiterKind;
+  role: DirectQuotationDelimiterRole;
+  span: TextSpan;
+}
+
+export type DirectQuotationCitationAssociationMethod =
+  | "same-paragraph-single-following-citation"
+  | "same-paragraph-sequential-following-citation";
+
+export type DirectQuotationCitationAssociationStatus =
+  | "associated"
+  | "unresolved"
+  | "ambiguous";
+
+export type DirectQuotationCitationAssociationConfidence =
+  | "high"
+  | "low";
+
+export type DirectQuotationCitationAmbiguityReason =
+  | "no-following-citation"
+  | "citation-before-quote"
+  | "multiple-candidate-citations"
+  | "multiple-quotes-one-citation"
+  | "multiple-quotes-citations-not-sequential"
+  | "ambiguous-quotation";
+
+export interface DirectQuotationPageEvidence {
+  hasPageMarker: boolean;
+  marker: "s." | "ss." | null;
+  rawText: string | null;
+  pageStart: string | null;
+  pageEnd: string | null;
+  confidence: DirectQuotationCitationAssociationConfidence;
+}
+
+export interface DirectQuotationCitationEvidence {
+  citationOccurrenceId: string | null;
+  associationStatus: DirectQuotationCitationAssociationStatus;
+  associationMethod: DirectQuotationCitationAssociationMethod | null;
+  pageEvidence: DirectQuotationPageEvidence;
+  confidence: DirectQuotationCitationAssociationConfidence;
+  ambiguityReason: DirectQuotationCitationAmbiguityReason | null;
+}
+
+export type DirectQuotationExclusionEvidence =
+  | "non-main-content-scope"
+  | "empty-paragraph"
+  | "textbox-excluded"
+  | "table-cell-excluded"
+  | "toc-excluded"
+  | "heading-excluded"
+  | "caption-excluded"
+  | "list-section-excluded"
+  | "bibliography-section-excluded"
+  | "academic-section-boundary-excluded"
+  | "unmatched-delimiter"
+  | "nested-double-quote"
+  | "empty-quoted-span"
+  | "word-count-not-short-quote"
+  | "citation-association-missing"
+  | "citation-association-ambiguous";
+
+export interface DirectQuotationOccurrence {
+  id: string;
+  kind: DirectQuotationKind;
+  paragraphIds: string[];
+  textSpan: TextSpan;
+  rawText: string;
+  normalizedText: string;
+  wordCount: number;
+  delimiterEvidence: DirectQuotationDelimiterEvidence[];
+  citationOccurrenceIds: string[];
+  citationEvidence: DirectQuotationCitationEvidence[];
+  scope: DirectQuotationScope;
+  confidence: DirectQuotationConfidence;
+  exclusionEvidence: DirectQuotationExclusionEvidence[];
+}
+
+export interface DocumentDirectQuotationSemantics {
+  occurrences: DirectQuotationOccurrence[];
+  excludedParagraphIds: string[];
+}
+
 export interface DocumentAbbreviation {
   value: string;
   occurrences: number;
@@ -1374,6 +1501,7 @@ export interface NormalizedDocument {
   objectReferences: DocumentObjectReferences;
   citationSemantics: DocumentCitationSemantics;
   citationBibliographyLinks: DocumentCitationBibliographyLinkSemantics;
+  directQuotations: DocumentDirectQuotationSemantics;
   abbreviations: DocumentAbbreviations;
   bibliography?: DocumentBibliography;
   tableList?: DocumentTableList;

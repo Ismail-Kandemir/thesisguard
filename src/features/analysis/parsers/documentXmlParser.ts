@@ -25,6 +25,7 @@ import { createEmptyCitationSemantics } from "./citationSemanticsNormalizer";
 import {
   createEmptyCitationBibliographyLinkSemantics,
 } from "./citationBibliographyLinkSemanticsNormalizer";
+import { createEmptyDirectQuotationSemantics } from "./directQuotationSemanticsNormalizer";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 const RELATIONSHIP_NAMESPACE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships";
@@ -90,6 +91,7 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     objectReferences: { items: [] },
     citationSemantics: createEmptyCitationSemantics(),
     citationBibliographyLinks: createEmptyCitationBibliographyLinkSemantics(),
+    directQuotations: createEmptyDirectQuotationSemantics(),
     abbreviations: {
       items: [],
       count: 0,
