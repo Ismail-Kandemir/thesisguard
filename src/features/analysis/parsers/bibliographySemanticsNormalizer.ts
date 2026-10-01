@@ -6,6 +6,10 @@ import type {
   BibliographyEntryIdentityEvidence,
   BibliographyEntryIdentityParseStatus,
   BibliographyEntryOccurrence,
+  BibliographyPublicationFacts,
+  BibliographySourceType,
+  BibliographySourceTypeClassification,
+  BibliographySourceTypeEvidence,
   DocumentBibliography,
   NormalizedDocument,
   Paragraph,
@@ -16,6 +20,32 @@ import { normalizeSectionName } from "./documentSectionsParser";
 import { EffectiveFormattingResolver } from "./effectiveFormattingResolver";
 
 const BIBLIOGRAPHY_SECTION_NAMES = ["Kaynaklar", "References"];
+const URL_PATTERN = /\b(?:https?:\/\/|www\.)\S+/iu;
+const WEB_CONTEXT_PATTERN =
+  /\b(?:retrieved|accessed|available\s+at|from|erisim|internet|online)\b|(?:\d{1,2}\s+[\p{L}]+\s+(?:18|19|20)\d{2})/iu;
+const RETRIEVED_PATTERN = /\b(?:retrieved|accessed|from|available\s+at)\b/iu;
+const ACCESS_DATE_PATTERN =
+  /\b(?:\d{1,2}\s+[\p{L}]+\s+(?:18|19|20)\d{2}|(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+\d{1,2},\s+(?:18|19|20)\d{2})\b/iu;
+const IN_PRESS_PATTERN = /\b(?:baskida|baskıda|in\s+press)\b/iu;
+const THESIS_PATTERN =
+  /\b(?:phd\s+dissertation|doctoral\s+dissertation|master'?s?\s+thesis|dissertation|tezi|doktora\s+tezi|yuksek\s+lisans\s+tezi|yüksek\s+lisans\s+tezi)\b/iu;
+const BOOK_CHAPTER_IN_PATTERN = /\bIn\s*:/u;
+const BOOK_CHAPTER_EDITOR_PATTERN =
+  /\b(?:ed\.|eds\.|editors?|ed\.?s\.?)(?:\b|(?=[,.;\s]))/iu;
+const CONFERENCE_PATTERN =
+  /\b(?:cong\.|congress|conference|symposium|sempozyumu|proceedings|world\s+cong\.|kongre)(?:\b|(?=[,.;]))/iu;
+const JOURNAL_VOLUME_ISSUE_PAGES_PATTERN =
+  /,\s*(?:[IVXLCDM]+|\d+)\s*\(\s*\d+\s*\)\s*:\s*\d+\s*[-–]\s*\d+\.?$/iu;
+const JOURNAL_VOLUME_PAGES_PATTERN =
+  /,\s*(?:[IVXLCDM]+|\d+)\s*:\s*\d+\s*[-–]\s*\d+\.?$/iu;
+const PAGE_RANGE_PATTERN = /\b\d+\s*[-–]\s*\d+\.?$/u;
+const BOOK_PAGE_COUNT_PATTERN = /\b\d+\s*(?:p|s)\.?$/iu;
+const BOOK_PUBLISHER_PATTERN =
+  /\b(?:press|publisher|publ\.|mcgraw-hill|blackwell|crc|saunders|wiley|springer|elsevier)\b/iu;
+const PUBLISHER_CANDIDATE_PATTERN =
+  /(?:\.\s*)([^.]*\b(?:Press|Publisher|Publ\.|McGraw-Hill|Blackwell|CRC|Saunders|Wiley|Springer|Elsevier)[^.]*\.)/iu;
+const VOLUME_ISSUE_CANDIDATE_PATTERN =
+  /\b((?:[IVXLCDM]+|\d+)\s*(?:\(\s*\d+\s*\))?)\s*:\s*\d+\s*[-–]\s*\d+/iu;
 const YEAR_WITH_SUFFIX_PATTERN = /\b((?:18|19|20)\d{2})([a-z])?\b/iu;
 const NAMED_AUTHOR_PATTERN = /[\p{Lu}][\p{L}'’-]+,\s*(?:[\p{Lu}]\.?\s*)+/gu;
 const ANONYMOUS_AUTHOR_PATTERN = /^(?:anonim|anonymous)$/iu;
@@ -111,6 +141,7 @@ function collectBibliographyEntries(
   return candidateParagraphs.map(({ paragraph, paragraphIndex }, index) => {
     const blockIndex = findBlockIndexByParagraphId(document, paragraph.id);
     const boundaryStatus = classifyEntryBoundary(paragraph, index);
+    const identity = parseBibliographyEntryIdentity(paragraph.text, boundaryStatus);
 
     return {
       id: `bibliography-entry-${index + 1}`,
@@ -124,7 +155,12 @@ function collectBibliographyEntries(
       entryIndex: index + 1,
       boundaryStatus,
       confidence: boundaryStatus === "DEFINITE_ENTRY" ? "high" : "low",
-      identity: parseBibliographyEntryIdentity(paragraph.text, boundaryStatus),
+      identity,
+      sourceTypeClassification: classifyBibliographySourceType(
+        paragraph.text,
+        boundaryStatus,
+        identity,
+      ),
       formatting: {
         paragraphStyleId: paragraph.styleId,
         alignment: resolver.resolveParagraphAlignment(
@@ -336,6 +372,241 @@ function dedupeIdentityEvidence(
   values: readonly BibliographyEntryIdentityEvidence[],
 ): BibliographyEntryIdentityEvidence[] {
   return [...new Set(values)];
+}
+
+function classifyBibliographySourceType(
+  text: string,
+  boundaryStatus: BibliographyEntryBoundaryStatus,
+  identity: Readonly<BibliographyEntryIdentity>,
+): BibliographySourceTypeClassification {
+  const normalizedText = normalizeVisibleText(text);
+  const publicationFacts = extractPublicationFacts(normalizedText);
+  const identityEvidence = createIdentitySourceTypeEvidence(identity);
+
+  if (boundaryStatus !== "DEFINITE_ENTRY") {
+    return createSourceTypeClassification({
+      sourceType: "unknown",
+      confidence: "low",
+      evidence: identityEvidence,
+      ambiguityReason: "entry-boundary-unresolved",
+      publicationFacts,
+    });
+  }
+
+  if (identity.parseStatus === "unresolved") {
+    return createSourceTypeClassification({
+      sourceType: "unknown",
+      confidence: "low",
+      evidence: identityEvidence,
+      ambiguityReason: "incomplete-entry-identity",
+      publicationFacts,
+    });
+  }
+
+  const candidates = collectSourceTypeCandidates(normalizedText, publicationFacts);
+  if (candidates.length === 0) {
+    return createSourceTypeClassification({
+      sourceType: "unknown",
+      confidence: "low",
+      evidence: identityEvidence,
+      ambiguityReason: publicationFacts.urlCandidate
+        ? "url-without-web-context"
+        : "insufficient-evidence",
+      publicationFacts,
+    });
+  }
+
+  const uniqueTypes = [...new Set(candidates.map((candidate) => candidate.sourceType))];
+  if (uniqueTypes.length > 1) {
+    return createSourceTypeClassification({
+      sourceType: "ambiguous",
+      confidence: "low",
+      evidence: [
+        ...identityEvidence,
+        ...candidates.flatMap((candidate) => candidate.evidence),
+      ],
+      ambiguityReason: "conflicting-source-type-evidence",
+      publicationFacts,
+    });
+  }
+
+  const candidate = candidates[0];
+
+  return createSourceTypeClassification({
+    sourceType: candidate.sourceType,
+    confidence: identity.confidence === "high" ? "high" : "medium",
+    evidence: [...identityEvidence, ...candidate.evidence],
+    ambiguityReason: "none",
+    publicationFacts,
+  });
+}
+
+function collectSourceTypeCandidates(
+  text: string,
+  facts: Readonly<BibliographyPublicationFacts>,
+): {
+  sourceType: Exclude<BibliographySourceType, "unknown" | "ambiguous">;
+  evidence: BibliographySourceTypeEvidence[];
+}[] {
+  const candidates: {
+    sourceType: Exclude<BibliographySourceType, "unknown" | "ambiguous">;
+    evidence: BibliographySourceTypeEvidence[];
+  }[] = [];
+
+  if (facts.inPressMarker !== null) {
+    candidates.push({
+      sourceType: "in-press",
+      evidence: ["in-press-marker"],
+    });
+  }
+
+  if (facts.thesisMarker !== null) {
+    candidates.push({
+      sourceType: "thesis",
+      evidence: ["thesis-marker"],
+    });
+  }
+
+  if (
+    facts.urlCandidate !== null &&
+    (facts.accessDateCandidate !== null || RETRIEVED_PATTERN.test(text)) &&
+    WEB_CONTEXT_PATTERN.test(text)
+  ) {
+    candidates.push({
+      sourceType: "web-online",
+      evidence: [
+        "url-marker",
+        ...(facts.accessDateCandidate !== null
+          ? ["access-date-marker" as const]
+          : []),
+        ...(RETRIEVED_PATTERN.test(text) ? ["retrieved-marker" as const] : []),
+      ],
+    });
+  }
+
+  if (facts.conferenceProceedingsMarker !== null) {
+    candidates.push({
+      sourceType: "conference-proceedings",
+      evidence: ["conference-marker"],
+    });
+  }
+
+  if (BOOK_CHAPTER_IN_PATTERN.test(text) && BOOK_CHAPTER_EDITOR_PATTERN.test(text)) {
+    candidates.push({
+      sourceType: "book-chapter",
+      evidence: ["book-chapter-in-marker", "book-chapter-editor-marker"],
+    });
+  }
+
+  if (
+    (JOURNAL_VOLUME_ISSUE_PAGES_PATTERN.test(text) ||
+      JOURNAL_VOLUME_PAGES_PATTERN.test(text)) &&
+    facts.journalOrVenueCandidate !== null &&
+    facts.publisherCandidate === null
+  ) {
+    candidates.push({
+      sourceType: "journal-article",
+      evidence: [
+        JOURNAL_VOLUME_ISSUE_PAGES_PATTERN.test(text)
+          ? "journal-volume-issue-pages"
+          : "journal-volume-pages",
+      ],
+    });
+  }
+
+  if (
+    BOOK_PAGE_COUNT_PATTERN.test(text) &&
+    facts.publisherCandidate !== null &&
+    !BOOK_CHAPTER_IN_PATTERN.test(text)
+  ) {
+    candidates.push({
+      sourceType: "book",
+      evidence: ["book-page-count", "book-publisher-marker"],
+    });
+  }
+
+  return candidates;
+}
+
+function extractPublicationFacts(text: string): BibliographyPublicationFacts {
+  const urlCandidate = firstMatch(text, URL_PATTERN);
+  const accessDateCandidate = firstMatch(text, ACCESS_DATE_PATTERN);
+  const inPressMarker = firstMatch(text, IN_PRESS_PATTERN);
+  const thesisMarker = firstMatch(text, THESIS_PATTERN);
+  const conferenceProceedingsMarker = firstMatch(text, CONFERENCE_PATTERN);
+  const volumeIssueCandidate = firstCapture(text, VOLUME_ISSUE_CANDIDATE_PATTERN);
+  const pageRangeCandidate = firstMatch(text, PAGE_RANGE_PATTERN);
+  const publisherCandidate = firstCapture(text, PUBLISHER_CANDIDATE_PATTERN);
+
+  return {
+    journalOrVenueCandidate: extractJournalOrVenueCandidate(text),
+    volumeIssueCandidate,
+    pageRangeCandidate,
+    publisherCandidate,
+    thesisMarker,
+    conferenceProceedingsMarker,
+    urlCandidate,
+    accessDateCandidate,
+    inPressMarker,
+  };
+}
+
+function extractJournalOrVenueCandidate(text: string): string | null {
+  const match = /([^.]*)?,\s*(?:[IVXLCDM]+|\d+)\s*(?:\(\s*\d+\s*\))?\s*:/iu.exec(text);
+  const candidate = match?.[1]?.trim() ?? null;
+
+  if (!candidate || candidate.length === 0 || BOOK_PUBLISHER_PATTERN.test(candidate)) {
+    return null;
+  }
+
+  const lastSentence = candidate.split(".").map((part) => part.trim()).filter(Boolean).pop();
+
+  return lastSentence ?? candidate;
+}
+
+function createIdentitySourceTypeEvidence(
+  identity: Readonly<BibliographyEntryIdentity>,
+): BibliographySourceTypeEvidence[] {
+  switch (identity.parseStatus) {
+    case "parsed":
+      return ["identity-parsed"];
+    case "partial":
+      return ["identity-partial"];
+    case "unresolved":
+      return ["identity-unresolved"];
+    default:
+      return [];
+  }
+}
+
+function createSourceTypeClassification(
+  params: Readonly<{
+    sourceType: BibliographySourceType;
+    confidence: BibliographySourceTypeClassification["confidence"];
+    evidence: readonly BibliographySourceTypeEvidence[];
+    ambiguityReason: BibliographySourceTypeClassification["ambiguityReason"];
+    publicationFacts: BibliographyPublicationFacts;
+  }>,
+): BibliographySourceTypeClassification {
+  return {
+    sourceType: params.sourceType,
+    confidence: params.confidence,
+    evidence: [...new Set(params.evidence)],
+    ambiguityReason: params.ambiguityReason,
+    publicationFacts: params.publicationFacts,
+  };
+}
+
+function firstMatch(text: string, pattern: RegExp): string | null {
+  const match = pattern.exec(text);
+
+  return match?.[0] ?? null;
+}
+
+function firstCapture(text: string, pattern: RegExp): string | null {
+  const match = pattern.exec(text);
+
+  return match?.[1]?.trim() ?? null;
 }
 
 function isBibliographyEntryCandidate(

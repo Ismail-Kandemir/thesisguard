@@ -1181,6 +1181,64 @@ export interface BibliographyEntryFormattingFacts {
   paragraphFormatting: ParagraphFormatting;
 }
 
+export type BibliographySourceType =
+  | "journal-article"
+  | "book"
+  | "book-chapter"
+  | "thesis"
+  | "conference-proceedings"
+  | "web-online"
+  | "in-press"
+  | "unknown"
+  | "ambiguous";
+
+export type BibliographySourceTypeConfidence = "high" | "medium" | "low";
+
+export type BibliographySourceTypeEvidence =
+  | "journal-volume-issue-pages"
+  | "journal-volume-pages"
+  | "book-page-count"
+  | "book-publisher-marker"
+  | "book-chapter-in-marker"
+  | "book-chapter-editor-marker"
+  | "thesis-marker"
+  | "conference-marker"
+  | "url-marker"
+  | "access-date-marker"
+  | "retrieved-marker"
+  | "in-press-marker"
+  | "identity-parsed"
+  | "identity-partial"
+  | "identity-unresolved";
+
+export type BibliographySourceTypeAmbiguityReason =
+  | "none"
+  | "entry-boundary-unresolved"
+  | "insufficient-evidence"
+  | "conflicting-source-type-evidence"
+  | "url-without-web-context"
+  | "incomplete-entry-identity";
+
+export interface BibliographyPublicationFacts {
+  journalOrVenueCandidate: string | null;
+  volumeIssueCandidate: string | null;
+  pageRangeCandidate: string | null;
+  publisherCandidate: string | null;
+  thesisMarker: string | null;
+  conferenceProceedingsMarker: string | null;
+  urlCandidate: string | null;
+  accessDateCandidate: string | null;
+  inPressMarker: string | null;
+}
+
+export interface BibliographySourceTypeClassification {
+  sourceType: BibliographySourceType;
+  confidence: BibliographySourceTypeConfidence;
+  evidence: BibliographySourceTypeEvidence[];
+  ambiguityReason: BibliographySourceTypeAmbiguityReason;
+  publicationFacts: BibliographyPublicationFacts;
+}
+
 export interface BibliographyEntryOccurrence {
   id: string;
   sectionOccurrenceId: string;
@@ -1194,6 +1252,7 @@ export interface BibliographyEntryOccurrence {
   boundaryStatus: BibliographyEntryBoundaryStatus;
   confidence: "high" | "low";
   identity: BibliographyEntryIdentity;
+  sourceTypeClassification: BibliographySourceTypeClassification;
   formatting: BibliographyEntryFormattingFacts;
   evidence: string[];
 }
