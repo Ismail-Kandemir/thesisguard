@@ -10,6 +10,7 @@ function main() {
   const loginPage = read("src/pages/LoginPage.tsx");
   const registerPage = read("src/pages/RegisterPage.tsx");
   const forgotPasswordPage = read("src/pages/ForgotPasswordPage.tsx");
+  const vercelConfig = JSON.parse(read("vercel.json"));
 
   assertIncludes(indexHtml, '<html lang="tr">', "Turkish document language");
   assertIncludes(indexHtml, "<title>ThesisGuard</title>", "release document title");
@@ -31,7 +32,13 @@ function main() {
   assertIncludes(routeErrorPage, "routePaths.upload", "fallback returns to upload route");
 
   assert(!exists("public/_redirects"), "provider-specific Netlify redirects were not added without a provider");
-  assert(!exists("vercel.json"), "provider-specific Vercel config was not added without a provider");
+  assert(Array.isArray(vercelConfig.rewrites), "Vercel config declares rewrites");
+  assert(
+    vercelConfig.rewrites.some(
+      (rewrite) => rewrite.source === "/(.*)" && rewrite.destination === "/index.html",
+    ),
+    "Vercel config preserves SPA direct-route fallback",
+  );
 
   console.log("Release deployment hardening regression passed.");
 }
