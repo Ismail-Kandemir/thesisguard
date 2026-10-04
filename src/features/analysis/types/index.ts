@@ -1174,6 +1174,61 @@ export interface BibliographyEntryIdentity {
   parseEvidence: BibliographyEntryIdentityEvidence[];
 }
 
+export type BibliographyContributorKind =
+  | "person"
+  | "organization"
+  | "anonymous"
+  | "unknown";
+
+export type BibliographyContributorCompleteness =
+  | "complete"
+  | "incomplete"
+  | "ambiguous"
+  | "unknown";
+
+export type BibliographyContributorAmbiguityReason =
+  | "none"
+  | "entry-boundary-unresolved"
+  | "missing-year"
+  | "missing-contributor"
+  | "ambiguous-contributor"
+  | "malformed-contributor-list"
+  | "et-al-marker"
+  | "insufficient-identity-evidence";
+
+export interface BibliographyContributor {
+  kind: BibliographyContributorKind;
+  familyName: string | null;
+  givenNameEvidence: string | null;
+  initials: string[];
+  normalizedComparisonForm: string | null;
+  originalText: string;
+  displayText: string;
+  order: number;
+  parseConfidence: BibliographyEntryIdentityConfidence;
+  completeness: BibliographyContributorCompleteness;
+  ambiguityReason: BibliographyContributorAmbiguityReason;
+}
+
+export interface BibliographyContributorSemantics {
+  contributors: BibliographyContributor[];
+  completeness: BibliographyContributorCompleteness;
+  confidence: BibliographyEntryIdentityConfidence;
+  hasEtAlEvidence: boolean;
+  etAlEvidence: string[];
+  ambiguityReasons: BibliographyContributorAmbiguityReason[];
+}
+
+export interface BibliographySortKey {
+  contributorKind: BibliographyContributorKind;
+  primaryContributorIdentity: string;
+  subsequentContributorIdentities: string[];
+  year: string;
+  yearSuffix: string | null;
+  originalEntryOrder: number;
+  confidence: BibliographyEntryIdentityConfidence;
+}
+
 export interface BibliographyEntryFormattingFacts {
   paragraphStyleId: string | null;
   alignment: ParagraphAlignment | null;
@@ -1252,6 +1307,8 @@ export interface BibliographyEntryOccurrence {
   boundaryStatus: BibliographyEntryBoundaryStatus;
   confidence: "high" | "low";
   identity: BibliographyEntryIdentity;
+  contributorSemantics: BibliographyContributorSemantics;
+  sortKey: BibliographySortKey | null;
   sourceTypeClassification: BibliographySourceTypeClassification;
   formatting: BibliographyEntryFormattingFacts;
   evidence: string[];

@@ -1,12 +1,18 @@
 import type {
   AcademicSectionOccurrence,
   BibliographyAuthorKind,
+  BibliographyContributor,
+  BibliographyContributorAmbiguityReason,
+  BibliographyContributorCompleteness,
+  BibliographyContributorKind,
+  BibliographyContributorSemantics,
   BibliographyEntryBoundaryStatus,
   BibliographyEntryIdentity,
   BibliographyEntryIdentityEvidence,
   BibliographyEntryIdentityParseStatus,
   BibliographyEntryOccurrence,
   BibliographyPublicationFacts,
+  BibliographySortKey,
   BibliographySourceType,
   BibliographySourceTypeClassification,
   BibliographySourceTypeEvidence,
@@ -20,6 +26,10 @@ import { normalizeSectionName } from "./documentSectionsParser";
 import { EffectiveFormattingResolver } from "./effectiveFormattingResolver";
 
 const BIBLIOGRAPHY_SECTION_NAMES = ["Kaynaklar", "References"];
+const CONTRIBUTOR_PERSON_PATTERN =
+  /[\p{Lu}][\p{L}'\u2019-]+(?:\s+(?:de|der|den|van|von|bin|al|el|da|dos|del|la|le|[\p{Lu}][\p{L}'\u2019-]+))*\s*,\s*(?:[\p{Lu}]\.?\s*)+/gu;
+const ET_AL_PATTERN = /(?:^|[\s,;])((?:et\s+al\.?|ve\s+di(?:\u011f|g)\.?|vd\.))(?:$|[\s,;])/iu;
+const TRAILING_AUTHOR_SEPARATOR_PATTERN = /(?:,|\bve|\band)\s*$/iu;
 const URL_PATTERN = /\b(?:https?:\/\/|www\.)\S+/iu;
 const WEB_CONTEXT_PATTERN =
   /\b(?:retrieved|accessed|available\s+at|from|erisim|internet|online)\b|(?:\d{1,2}\s+[\p{L}]+\s+(?:18|19|20)\d{2})/iu;
@@ -142,6 +152,11 @@ function collectBibliographyEntries(
     const blockIndex = findBlockIndexByParagraphId(document, paragraph.id);
     const boundaryStatus = classifyEntryBoundary(paragraph, index);
     const identity = parseBibliographyEntryIdentity(paragraph.text, boundaryStatus);
+    const contributorSemantics = parseBibliographyContributorSemantics(
+      paragraph.text,
+      boundaryStatus,
+      identity,
+    );
 
     return {
       id: `bibliography-entry-${index + 1}`,
@@ -156,6 +171,13 @@ function collectBibliographyEntries(
       boundaryStatus,
       confidence: boundaryStatus === "DEFINITE_ENTRY" ? "high" : "low",
       identity,
+      contributorSemantics,
+      sortKey: createBibliographySortKey(
+        contributorSemantics,
+        identity,
+        boundaryStatus,
+        index + 1,
+      ),
       sourceTypeClassification: classifyBibliographySourceType(
         paragraph.text,
         boundaryStatus,
@@ -236,6 +258,298 @@ function parseBibliographyEntryIdentity(
     evidence,
     boundaryStatus,
   });
+}
+
+function parseBibliographyContributorSemantics(
+  text: string,
+  boundaryStatus: BibliographyEntryBoundaryStatus,
+  identity: Readonly<BibliographyEntryIdentity>,
+): BibliographyContributorSemantics {
+  const normalizedText = normalizeVisibleText(text);
+  const yearMatch = YEAR_WITH_SUFFIX_PATTERN.exec(normalizedText);
+  const authorSegment = yearMatch
+    ? normalizeAuthorSegment(normalizedText.slice(0, yearMatch.index))
+    : "";
+  const etAlEvidence = collectEtAlEvidence(authorSegment);
+
+  if (boundaryStatus !== "DEFINITE_ENTRY") {
+    return createContributorSemantics({
+      contributors: [],
+      completeness: "unknown",
+      confidence: "low",
+      hasEtAlEvidence: etAlEvidence.length > 0,
+      etAlEvidence,
+      ambiguityReasons: ["entry-boundary-unresolved"],
+    });
+  }
+
+  if (!yearMatch) {
+    return createContributorSemantics({
+      contributors: [],
+      completeness: "unknown",
+      confidence: "low",
+      hasEtAlEvidence: etAlEvidence.length > 0,
+      etAlEvidence,
+      ambiguityReasons: ["missing-year"],
+    });
+  }
+
+  if (authorSegment.length === 0) {
+    return createContributorSemantics({
+      contributors: [],
+      completeness: "unknown",
+      confidence: "low",
+      hasEtAlEvidence: etAlEvidence.length > 0,
+      etAlEvidence,
+      ambiguityReasons: ["missing-contributor"],
+    });
+  }
+
+  const listLooksMalformed = TRAILING_AUTHOR_SEPARATOR_PATTERN.test(authorSegment);
+  const contributors = createContributorsFromIdentity(identity, authorSegment);
+  const ambiguityReasons: BibliographyContributorAmbiguityReason[] = [
+    ...(identity.authorKind === "unknown" ? ["ambiguous-contributor" as const] : []),
+    ...(listLooksMalformed ? ["malformed-contributor-list" as const] : []),
+    ...(etAlEvidence.length > 0 ? ["et-al-marker" as const] : []),
+    ...(contributors.length === 0 ? ["insufficient-identity-evidence" as const] : []),
+  ];
+
+  return createContributorSemantics({
+    contributors: contributors.map((contributor) =>
+      markContributorCompleteness(contributor, ambiguityReasons),
+    ),
+    completeness: determineContributorCompleteness(contributors, ambiguityReasons),
+    confidence: determineContributorConfidence(
+      contributors,
+      ambiguityReasons,
+      identity.confidence,
+    ),
+    hasEtAlEvidence: etAlEvidence.length > 0,
+    etAlEvidence,
+    ambiguityReasons: ambiguityReasons.length > 0 ? ambiguityReasons : ["none"],
+  });
+}
+
+function createContributorsFromIdentity(
+  identity: Readonly<BibliographyEntryIdentity>,
+  authorSegment: string,
+): BibliographyContributor[] {
+  if (identity.authorKind === "named") {
+    const segmentContributors = createPersonContributorsFromSegment(authorSegment);
+
+    return segmentContributors.length > 0
+      ? segmentContributors
+      : identity.authors.map((author, index) => createPersonContributor(author, index + 1));
+  }
+
+  if (identity.authorKind === "organization") {
+    return identity.authors.map((author, index) =>
+      createSimpleContributor("organization", author, index + 1, "high"),
+    );
+  }
+
+  if (identity.authorKind === "anonymous") {
+    return identity.authors.map((author, index) =>
+      createSimpleContributor("anonymous", author, index + 1, "high"),
+    );
+  }
+
+  return [];
+}
+
+function createPersonContributorsFromSegment(authorSegment: string): BibliographyContributor[] {
+  return [...authorSegment.matchAll(CONTRIBUTOR_PERSON_PATTERN)]
+    .map((match, index) => createPersonContributor(normalizeAuthorName(match[0]), index + 1));
+}
+
+function createPersonContributor(author: string, order: number): BibliographyContributor {
+  const [rawFamily = "", rawGiven = ""] = author.split(",", 2);
+  const familyName = rawFamily.trim();
+  const givenNameEvidence = rawGiven.trim().length > 0 ? rawGiven.trim() : null;
+  const initials = givenNameEvidence?.match(/\p{Lu}\.?/gu)?.map((value) =>
+    value.replace(/\./gu, ""),
+  ) ?? [];
+  const isComplete = familyName.length > 0 && initials.length > 0;
+
+  return {
+    kind: "person",
+    familyName: familyName.length > 0 ? familyName : null,
+    givenNameEvidence,
+    initials,
+    normalizedComparisonForm: normalizeContributorComparisonForm(author),
+    originalText: author,
+    displayText: author,
+    order,
+    parseConfidence: isComplete ? "high" : "medium",
+    completeness: isComplete ? "complete" : "incomplete",
+    ambiguityReason: isComplete ? "none" : "malformed-contributor-list",
+  };
+}
+
+function createSimpleContributor(
+  kind: Exclude<BibliographyContributorKind, "person" | "unknown">,
+  author: string,
+  order: number,
+  confidence: BibliographyEntryIdentity["confidence"],
+): BibliographyContributor {
+  return {
+    kind,
+    familyName: null,
+    givenNameEvidence: null,
+    initials: [],
+    normalizedComparisonForm: normalizeContributorComparisonForm(author),
+    originalText: author,
+    displayText: author,
+    order,
+    parseConfidence: confidence,
+    completeness: "complete",
+    ambiguityReason: "none",
+  };
+}
+
+function markContributorCompleteness(
+  contributor: BibliographyContributor,
+  ambiguityReasons: readonly BibliographyContributorAmbiguityReason[],
+): BibliographyContributor {
+  if (contributor.completeness !== "complete") {
+    return contributor;
+  }
+
+  if (ambiguityReasons.includes("et-al-marker") ||
+    ambiguityReasons.includes("ambiguous-contributor")) {
+    return {
+      ...contributor,
+      completeness: "ambiguous",
+      parseConfidence: "low",
+      ambiguityReason: ambiguityReasons.includes("et-al-marker")
+        ? "et-al-marker"
+        : "ambiguous-contributor",
+    };
+  }
+
+  if (ambiguityReasons.includes("malformed-contributor-list")) {
+    return {
+      ...contributor,
+      completeness: "incomplete",
+      parseConfidence: "low",
+      ambiguityReason: "malformed-contributor-list",
+    };
+  }
+
+  return contributor;
+}
+
+function determineContributorCompleteness(
+  contributors: readonly BibliographyContributor[],
+  ambiguityReasons: readonly BibliographyContributorAmbiguityReason[],
+): BibliographyContributorCompleteness {
+  if (contributors.length === 0) {
+    return "unknown";
+  }
+
+  if (ambiguityReasons.includes("et-al-marker") ||
+    ambiguityReasons.includes("ambiguous-contributor")) {
+    return "ambiguous";
+  }
+
+  if (ambiguityReasons.includes("malformed-contributor-list") ||
+    contributors.some((contributor) => contributor.completeness === "incomplete")) {
+    return "incomplete";
+  }
+
+  return "complete";
+}
+
+function determineContributorConfidence(
+  contributors: readonly BibliographyContributor[],
+  ambiguityReasons: readonly BibliographyContributorAmbiguityReason[],
+  identityConfidence: BibliographyEntryIdentity["confidence"],
+): BibliographyEntryIdentity["confidence"] {
+  if (contributors.length === 0 ||
+    ambiguityReasons.some((reason) => reason !== "none")) {
+    return "low";
+  }
+
+  return identityConfidence;
+}
+
+function createContributorSemantics(
+  params: Readonly<{
+    contributors: readonly BibliographyContributor[];
+    completeness: BibliographyContributorCompleteness;
+    confidence: BibliographyEntryIdentity["confidence"];
+    hasEtAlEvidence: boolean;
+    etAlEvidence: readonly string[];
+    ambiguityReasons: readonly BibliographyContributorAmbiguityReason[];
+  }>,
+): BibliographyContributorSemantics {
+  return {
+    contributors: [...params.contributors],
+    completeness: params.completeness,
+    confidence: params.confidence,
+    hasEtAlEvidence: params.hasEtAlEvidence,
+    etAlEvidence: [...params.etAlEvidence],
+    ambiguityReasons: dedupeContributorReasons(params.ambiguityReasons),
+  };
+}
+
+function createBibliographySortKey(
+  contributorSemantics: Readonly<BibliographyContributorSemantics>,
+  identity: Readonly<BibliographyEntryIdentity>,
+  boundaryStatus: BibliographyEntryBoundaryStatus,
+  entryOrder: number,
+): BibliographySortKey | null {
+  if (
+    boundaryStatus !== "DEFINITE_ENTRY" ||
+    contributorSemantics.completeness !== "complete" ||
+    contributorSemantics.confidence === "low" ||
+    contributorSemantics.hasEtAlEvidence ||
+    identity.year === null
+  ) {
+    return null;
+  }
+
+  const contributorIdentities = contributorSemantics.contributors
+    .map((contributor) => contributor.normalizedComparisonForm)
+    .filter((value): value is string => value !== null && value.length > 0);
+
+  if (contributorIdentities.length !== contributorSemantics.contributors.length ||
+    contributorIdentities.length === 0) {
+    return null;
+  }
+
+  return {
+    contributorKind: contributorSemantics.contributors[0].kind,
+    primaryContributorIdentity: contributorIdentities[0],
+    subsequentContributorIdentities: contributorIdentities.slice(1),
+    year: identity.year,
+    yearSuffix: identity.yearSuffix,
+    originalEntryOrder: entryOrder,
+    confidence: contributorSemantics.confidence,
+  };
+}
+
+function collectEtAlEvidence(authorSegment: string): string[] {
+  const match = ET_AL_PATTERN.exec(authorSegment);
+
+  return match?.[1] ? [match[1]] : [];
+}
+
+function normalizeContributorComparisonForm(value: string): string {
+  const normalized = value
+    .trim()
+    .toLocaleLowerCase("tr-TR")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim()
+    .replace(/\s+/g, " ");
+
+  return normalized.length > 0 ? normalized : "";
+}
+
+function dedupeContributorReasons(
+  values: readonly BibliographyContributorAmbiguityReason[],
+): BibliographyContributorAmbiguityReason[] {
+  return [...new Set(values)];
 }
 
 function parseAuthorIdentity(authorSegment: string): {
