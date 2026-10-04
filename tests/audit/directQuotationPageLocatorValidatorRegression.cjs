@@ -67,7 +67,7 @@ function main() {
     audit: path.basename(__filename),
     result: "PASS",
     ruleType: "DIRECT_QUOTATION_PAGE_LOCATOR",
-    ceRules: 45,
+    ceRules: 47,
     foodTechnologyRules: 46,
   }, null, 2));
 }
@@ -212,11 +212,11 @@ function assertProductionBaselines() {
     studyTypeId: "experimental",
   }));
 
-  assertEqual(computerRules.length, 45, "CE rule count");
+  assertEqual(computerRules.length, 47, "CE rule count");
   assertEqual(foodRules.length, 46, "food rule count");
-  assertEqual(countBy(computerRules, (rule) => rule.validation.coverage).PARTIAL, 12,
+  assertEqual(countBy(computerRules, (rule) => rule.validation.coverage).PARTIAL, 14,
     "CE partial count");
-  assertEqual(countBy(computerRules, (rule) => rule.validation.trust).MEDIUM, 12,
+  assertEqual(countBy(computerRules, (rule) => rule.validation.trust).MEDIUM, 14,
     "CE medium count");
 }
 
@@ -303,4 +303,3 @@ function assertEqual(actual, expected, label) {
 }
 
 main();
-

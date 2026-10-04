@@ -27,6 +27,7 @@ function main() {
   assertCorrectCoverFieldPass();
   assertMissingFieldFails();
   assertWrongCoverScopeFails();
+  assertDatePrecisionPresenceRules();
   assertUnknownAndAmbiguousEvidenceDoNotPass();
   assertFalsePositiveSourcesDoNotPass();
   assertSyntheticSecondUniversityRuleUsesGenericValidator();
@@ -73,6 +74,39 @@ function assertWrongCoverScopeFails() {
   );
 
   assertStatus(document, coverRule("outer-cover", "work-type", "medium"), "FAILED", "wrong scope fail");
+}
+
+function assertDatePrecisionPresenceRules() {
+  [
+    ["outer Turkish month-year PASS", paragraph("Date: Haziran 2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "PASSED"],
+    ["inner Turkish month-year PASS", paragraph("Title: Outer") + pageBreakParagraph() + paragraph("Date: Haziran 2006") + sectionBreakParagraph(), coverRule("inner-cover", "date", "medium", "month-year"), "PASSED"],
+    ["uppercase Turkish month PASS", paragraph("Date: HAZİRAN 2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "PASSED"],
+    ["comma variant PASS", paragraph("Date: Haziran, 2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "PASSED"],
+    ["numeric month-year PASS", paragraph("Date: 06/2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "PASSED"],
+    ["year-only FAIL", paragraph("Date: 2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "FAILED"],
+    ["missing date FAIL", paragraph("Institution: Example University") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium", "month-year"), "FAILED"],
+    ["wrong cover scope date FAIL", paragraph("Date: Haziran 2006") + pageBreakParagraph(), coverRule("inner-cover", "date", "medium", "month-year"), "FAILED"],
+    [
+      "body date must not satisfy",
+      paragraph("Institution: Example University") +
+        pageBreakParagraph() +
+        paragraph("Work Type: Bitirme Projesi") +
+        sectionBreakParagraph() +
+        paragraph("Date: Haziran 2006"),
+      coverRule("inner-cover", "date", "medium", "month-year"),
+      "FAILED",
+    ],
+    ["rules without datePrecision unchanged", paragraph("Date: 2006") + pageBreakParagraph(), coverRule("outer-cover", "date", "medium"), "PASSED"],
+  ].forEach(([message, xml, rule, expectedStatus]) => {
+    assertStatus(semanticDocument(xml), rule, expectedStatus, message);
+  });
+
+  assertStatus(
+    lowConfidenceDateDocument(),
+    coverRule("outer-cover", "date", "medium", "month-year"),
+    "FAILED",
+    "insufficient confidence must not pass",
+  );
 }
 
 function assertUnknownAndAmbiguousEvidenceDoNotPass() {
@@ -178,13 +212,17 @@ function assertProductionCoverRulesAndBaselines() {
   assertDeepEqual(
     coverRuleIds,
     [
+      "comu.engineering.computer-engineering.bachelor.inner-cover-date",
       "comu.engineering.computer-engineering.bachelor.inner-cover-institution",
       "comu.engineering.computer-engineering.bachelor.inner-cover-work-type",
+      "comu.engineering.computer-engineering.bachelor.outer-cover-date",
       "comu.engineering.computer-engineering.bachelor.outer-cover-institution",
     ],
     "production computer cover rules",
   );
-  assertEqual(computerRules.length, 45, "computer engineering rule count");
+  assertMetadata(computerRules, "comu.engineering.computer-engineering.bachelor.outer-cover-date", "PARTIAL", "MEDIUM");
+  assertMetadata(computerRules, "comu.engineering.computer-engineering.bachelor.inner-cover-date", "PARTIAL", "MEDIUM");
+  assertEqual(computerRules.length, 47, "computer engineering rule count");
   assertEqual(foodRules.length, 46, "food technology rule count");
 }
 
@@ -201,7 +239,20 @@ function runRule(document, rule) {
   return new RuleEngine().run(document, [rule])[0];
 }
 
-function coverRule(coverScope, field, minConfidence = "high") {
+function lowConfidenceDateDocument() {
+  const document = semanticDocument(paragraph("Date: Haziran 2006") + pageBreakParagraph());
+  return {
+    ...document,
+    coverSemantics: {
+      ...document.coverSemantics,
+      fields: document.coverSemantics.fields.map((field) =>
+        field.field === "date" ? { ...field, confidence: "low" } : field
+      ),
+    },
+  };
+}
+
+function coverRule(coverScope, field, minConfidence = "high", datePrecision = undefined) {
   return {
     id: `synthetic.cover.${coverScope}.${field}`,
     type: "COVER_FIELD_PRESENCE",
@@ -213,6 +264,7 @@ function coverRule(coverScope, field, minConfidence = "high") {
       field,
       required: true,
       minConfidence,
+      ...(datePrecision ? { datePrecision } : {}),
     },
     severity: "error",
     score: 1,
@@ -258,6 +310,17 @@ function assertDeepEqual(actual, expected, message) {
   if (actualText !== expectedText) {
     throw new Error(`${message}: expected ${expectedText}, received ${actualText}`);
   }
+}
+
+function assertMetadata(rules, ruleId, coverage, trust) {
+  const rule = rules.find((item) => item.id === ruleId);
+
+  if (!rule) {
+    throw new Error(`${ruleId}: rule not found`);
+  }
+
+  assertEqual(rule.validation.coverage, coverage, `${ruleId}: coverage`);
+  assertEqual(rule.validation.trust, trust, `${ruleId}: trust`);
 }
 
 function assertEqual(actual, expected, message) {

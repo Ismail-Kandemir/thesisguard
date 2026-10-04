@@ -57,10 +57,10 @@ function main() {
   const trustCounts = countBy(rules, (rule) => metadata(rule).trust);
   const ruleTypes = Array.from(new Set(rules.map((rule) => rule.type))).sort();
 
-  assertEqual(rules.length, 45, "computer engineering rule count");
+  assertEqual(rules.length, 47, "computer engineering rule count");
   assertEqual(missingValidators.length, 0, "computer engineering missing validator count");
-  assertCounts(coverageCounts, { COMPLETE: 33, PARTIAL: 12, SHALLOW: 0, MISSING: 0 }, "computer coverage");
-  assertCounts(trustCounts, { HIGH: 33, MEDIUM: 12, LOW: 0 }, "computer trust");
+  assertCounts(coverageCounts, { COMPLETE: 33, PARTIAL: 14, SHALLOW: 0, MISSING: 0 }, "computer coverage");
+  assertCounts(trustCounts, { HIGH: 33, MEDIUM: 14, LOW: 0 }, "computer trust");
   assertNoProgramSpecificRegistryBranch();
   assertFoodTechnologyBaseline();
   assertUnsupportedRequirementIsNotSilentPass();

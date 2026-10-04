@@ -9,6 +9,8 @@ const { RuleSetSelector } = require("../../src/features/analysis/rules/RuleSetSe
 
 function main() {
   assertExplicitCoverScopesAndFields();
+  assertTurkishMonthYearDateFacts();
+  assertPublicationPlaceContext();
   assertUnknownScopeWhenBoundaryEvidenceIsInsufficient();
   assertFalsePositiveExclusions();
   assertComputerEngineeringRuleCountUnchanged();
@@ -46,10 +48,107 @@ function assertExplicitCoverScopesAndFields() {
   assertField(document, "cover-2", "work-type", "Bachelor Thesis", "high");
   assertField(document, "cover-2", "publication-place", "Canakkale", "high");
   assertField(document, "cover-2", "date", "2026", "high");
+  assertEqual(findField(document, "cover-2", "date", "2026").dateFacts.precision, "year",
+    "year-only date remains distinguishable");
   assertEqual(
     document.coverSemantics.fields.some((field) => field.value === "Body Repeat Must Not Become Cover"),
     false,
     "body repeat after cover boundaries excluded",
+  );
+}
+
+function assertTurkishMonthYearDateFacts() {
+  [
+    ["Ocak 2006", 1],
+    ["Haziran 2006", 6],
+    ["Haziran, 2006", 6],
+    ["HAZİRAN 2006", 6],
+    ["HAZİRAN, 2006", 6],
+  ].forEach(([value, month]) => {
+    const document = semanticDocument(paragraph(`Date: ${value}`) + pageBreakParagraph());
+    const date = findField(document, "cover-1", "date", value);
+
+    assertEqual(date.dateFacts.month, month, `${value} month`);
+    assertEqual(date.dateFacts.year, "2006", `${value} year`);
+    assertEqual(date.dateFacts.precision, "month-year", `${value} precision`);
+    assertEqual(date.dateFacts.detectionStrategy, "turkish-month-year", `${value} strategy`);
+  });
+
+  const document = semanticDocument(
+    paragraph("Date: Ocak 2006") +
+      paragraph("Date: Haziran 2006") +
+      paragraph("Date: Haziran, 2006") +
+      paragraph("Date: HAZİRAN 2006") +
+      paragraph("Date: HAZİRAN, 2006") +
+      pageBreakParagraph() +
+      paragraph("Date: 06/2006") +
+      sectionBreakParagraph(),
+  );
+  const dates = document.coverSemantics.fields.filter((field) => field.field === "date");
+  const outerDate = findField(document, "cover-1", "date", "Ocak 2006");
+  const innerDate = findField(document, "cover-2", "date", "06/2006");
+
+  assertEqual(dates.length, 2, "one date per cover scope retained");
+  assertEqual(outerDate.dateFacts.month, 1, "turkish month parsed");
+  assertEqual(outerDate.dateFacts.year, "2006", "turkish year parsed");
+  assertEqual(outerDate.dateFacts.precision, "month-year", "turkish date precision");
+  assertEqual(outerDate.dateFacts.detectionStrategy, "turkish-month-year", "turkish date strategy");
+  assertEqual(outerDate.evidence.includes("turkish-month-year-pattern"), true, "turkish evidence");
+  assertEqual(innerDate.dateFacts.month, 6, "numeric month preserved");
+  assertEqual(innerDate.dateFacts.detectionStrategy, "numeric-month-year", "numeric date strategy");
+}
+
+function assertPublicationPlaceContext() {
+  const strong = semanticDocument(
+    paragraph("Title: Contextual Place") +
+      paragraph("Haziran 2006") +
+      paragraph("ÇANAKKALE") +
+      pageBreakParagraph() +
+      paragraph("Work Type: Bitirme Projesi") +
+      paragraph("Haziran 2006") +
+      paragraph("Bursa") +
+      sectionBreakParagraph() +
+      paragraph("Haziran 2006") +
+      paragraph("ÇANAKKALE"),
+  );
+  const weak = semanticDocument(
+    paragraph("Title: Random Uppercase") +
+      paragraph("RASTGELE") +
+      paragraph("Haziran 2006") +
+      pageBreakParagraph() +
+      paragraph("Çanakkale") +
+      sectionBreakParagraph(),
+  );
+  const misleading = semanticDocument(
+    paragraph("Institution: Çanakkale Onsekiz Mart Üniversitesi") +
+      paragraph("Haziran 2006") +
+      paragraph("Bitirme Projesi") +
+      pageBreakParagraph() +
+      paragraph("Author: Ada Lovelace") +
+      paragraph("Haziran 2006") +
+      paragraph("Danışman") +
+      sectionBreakParagraph(),
+  );
+
+  assertField(strong, "cover-1", "publication-place", "ÇANAKKALE", "medium");
+  assertField(strong, "cover-2", "publication-place", "Bursa", "medium");
+  assertEqual(
+    strong.coverSemantics.fields.some((field) => field.value === "Body Repeat Must Not Become Cover"),
+    false,
+    "body place repeat excluded",
+  );
+  assertEqual(
+    weak.coverSemantics.fields.some((field) => field.field === "publication-place"),
+    false,
+    "arbitrary uppercase without terminal date context not place",
+  );
+  assertEqual(
+    misleading.coverSemantics.fields.some((field) =>
+      field.field === "publication-place" &&
+      (field.value === "Bitirme Projesi" || field.value === "Danışman")
+    ),
+    false,
+    "institution/work-type/person-like text not place",
   );
 }
 
@@ -111,7 +210,7 @@ function assertComputerEngineeringRuleCountUnchanged() {
     thesisTypeId: "bachelor",
   }));
 
-  assertEqual(rules.length, 44, "computer engineering rule count");
+  assertEqual(rules.length, 47, "computer engineering rule count");
 }
 
 function semanticDocument(bodyXml) {
@@ -120,11 +219,7 @@ function semanticDocument(bodyXml) {
 }
 
 function assertField(document, coverOccurrenceId, field, value, confidence) {
-  const found = document.coverSemantics.fields.find((item) =>
-    item.coverOccurrenceId === coverOccurrenceId &&
-    item.field === field &&
-    item.value === value
-  );
+  const found = findField(document, coverOccurrenceId, field, value);
 
   if (!found) {
     throw new Error(`Expected cover field not found: ${coverOccurrenceId} ${field} ${value}`);
@@ -132,6 +227,14 @@ function assertField(document, coverOccurrenceId, field, value, confidence) {
 
   assertEqual(found.confidence, confidence, `${field} confidence`);
   assertEqual(found.sourcePart, "word/document.xml", `${field} source part`);
+}
+
+function findField(document, coverOccurrenceId, field, value) {
+  return document.coverSemantics.fields.find((item) =>
+    item.coverOccurrenceId === coverOccurrenceId &&
+    item.field === field &&
+    item.value === value
+  );
 }
 
 function wrapDocumentXml(content) {

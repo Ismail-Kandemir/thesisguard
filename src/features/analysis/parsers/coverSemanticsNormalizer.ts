@@ -1,5 +1,6 @@
 import type {
   CoverBoundaryEvidence,
+  CoverDateFacts,
   CoverFieldEvidenceKind,
   CoverFieldKind,
   CoverFieldOccurrence,
@@ -27,7 +28,30 @@ interface FieldCandidate {
   value: string;
   confidence: CoverFieldOccurrence["confidence"];
   evidence: CoverFieldEvidenceKind[];
+  dateFacts?: CoverDateFacts;
 }
+
+interface FieldDetectionContext {
+  paragraphs: readonly Paragraph[];
+  range: CoverCandidateRange;
+  paragraphIndex: number;
+  seenFields: ReadonlySet<CoverFieldKind>;
+}
+
+const TURKISH_MONTHS = new Map<string, number>([
+  ["ocak", 1],
+  ["subat", 2],
+  ["mart", 3],
+  ["nisan", 4],
+  ["mayis", 5],
+  ["haziran", 6],
+  ["temmuz", 7],
+  ["agustos", 8],
+  ["eylul", 9],
+  ["ekim", 10],
+  ["kasim", 11],
+  ["aralik", 12],
+]);
 
 const LABEL_PATTERNS: ReadonlyArray<{
   field: CoverFieldKind;
@@ -274,7 +298,12 @@ function extractCoverFields(
       continue;
     }
 
-    for (const candidate of detectFieldCandidates(paragraph.text)) {
+    for (const candidate of detectFieldCandidates(paragraph.text, {
+      paragraphs,
+      range,
+      paragraphIndex,
+      seenFields,
+    })) {
       if (seenFields.has(candidate.field)) {
         continue;
       }
@@ -290,6 +319,7 @@ function extractCoverFields(
         coverOccurrenceId,
         confidence: candidate.confidence,
         evidence: candidate.evidence,
+        ...(candidate.dateFacts ? { dateFacts: candidate.dateFacts } : {}),
         sourcePart: "word/document.xml",
       });
     }
@@ -298,7 +328,10 @@ function extractCoverFields(
   return fields;
 }
 
-function detectFieldCandidates(text: string): FieldCandidate[] {
+function detectFieldCandidates(
+  text: string,
+  context: FieldDetectionContext,
+): FieldCandidate[] {
   const trimmed = normalizeVisibleWhitespace(text);
 
   if (trimmed.length === 0) {
@@ -310,7 +343,7 @@ function detectFieldCandidates(text: string): FieldCandidate[] {
     return [explicit];
   }
 
-  const inferred = detectStrongPatternField(trimmed);
+  const inferred = detectStrongPatternField(trimmed, context);
   return inferred ? [inferred] : [];
 }
 
@@ -330,11 +363,25 @@ function detectExplicitLabelField(text: string): FieldCandidate | null {
 
   for (const pattern of LABEL_PATTERNS) {
     if (pattern.labels.some((candidate) => candidate.test(label))) {
+      const dateFacts = pattern.field === "date"
+        ? parseCoverDateFacts(value)
+        : null;
+
       return {
         field: pattern.field,
         value,
         confidence: "high",
-        evidence: ["explicit-label"],
+        evidence: [
+          "explicit-label",
+          ...(dateFacts?.detectionStrategy === "turkish-month-year"
+            ? ["turkish-month-year-pattern" as const]
+            : []),
+          ...(dateFacts &&
+            dateFacts.detectionStrategy !== "turkish-month-year"
+            ? ["date-pattern" as const]
+            : []),
+        ],
+        ...(dateFacts ? { dateFacts: { ...dateFacts, confidence: "high" } } : {}),
       };
     }
   }
@@ -342,7 +389,10 @@ function detectExplicitLabelField(text: string): FieldCandidate | null {
   return null;
 }
 
-function detectStrongPatternField(text: string): FieldCandidate | null {
+function detectStrongPatternField(
+  text: string,
+  context: FieldDetectionContext,
+): FieldCandidate | null {
   const normalized = normalizeAsciiTurkish(text);
 
   if (/\b(university|universitesi|universite)\b/i.test(normalized)) {
@@ -373,16 +423,153 @@ function detectStrongPatternField(text: string): FieldCandidate | null {
     };
   }
 
-  if (/^(?:19|20)\d{2}$/.test(text) || /^(?:0?[1-9]|1[0-2])[./-](?:19|20)\d{2}$/.test(text)) {
+  const dateFacts = parseCoverDateFacts(text);
+  if (dateFacts) {
     return {
       field: "date",
       value: text,
       confidence: "medium",
-      evidence: ["date-pattern"],
+      evidence: [
+        dateFacts.detectionStrategy === "turkish-month-year"
+          ? "turkish-month-year-pattern"
+          : "date-pattern",
+      ],
+      dateFacts,
+    };
+  }
+
+  if (isTerminalPublicationPlaceCandidate(text, context)) {
+    return {
+      field: "publication-place",
+      value: text,
+      confidence: "medium",
+      evidence: ["terminal-place-date-proximity"],
     };
   }
 
   return null;
+}
+
+function parseCoverDateFacts(text: string): CoverDateFacts | null {
+  const trimmed = normalizeVisibleWhitespace(text);
+  const yearOnly = /^((?:19|20)\d{2})$/u.exec(trimmed);
+  if (yearOnly) {
+    return {
+      month: null,
+      year: yearOnly[1],
+      rawText: trimmed,
+      confidence: "medium",
+      detectionStrategy: "year-only",
+      precision: "year",
+    };
+  }
+
+  const numericMonthYear = /^(0?[1-9]|1[0-2])[./-]((?:19|20)\d{2})$/u.exec(trimmed);
+  if (numericMonthYear) {
+    return {
+      month: Number(numericMonthYear[1]),
+      year: numericMonthYear[2],
+      rawText: trimmed,
+      confidence: "medium",
+      detectionStrategy: "numeric-month-year",
+      precision: "month-year",
+    };
+  }
+
+  const turkishMonthYear = /^([\p{L}]+)\s*,?\s*((?:19|20)\d{2})$/u.exec(trimmed);
+  if (!turkishMonthYear) {
+    return null;
+  }
+
+  const month = TURKISH_MONTHS.get(normalizeMonthName(turkishMonthYear[1]));
+  if (!month) {
+    return null;
+  }
+
+  return {
+    month,
+    year: turkishMonthYear[2],
+    rawText: trimmed,
+    confidence: "medium",
+    detectionStrategy: "turkish-month-year",
+    precision: "month-year",
+  };
+}
+
+function isTerminalPublicationPlaceCandidate(
+  text: string,
+  context: FieldDetectionContext,
+): boolean {
+  const trimmed = normalizeVisibleWhitespace(text);
+
+  if (
+    context.seenFields.has("publication-place") ||
+    trimmed.length < 3 ||
+    trimmed.length > 40 ||
+    /[0-9:]/u.test(trimmed) ||
+    /\s/u.test(trimmed) ||
+    !/^\p{L}+$/u.test(trimmed) ||
+    detectStrongNonPlaceText(trimmed)
+  ) {
+    return false;
+  }
+
+  const terminalDistance = context.range.endParagraphIndex - context.paragraphIndex;
+  if (terminalDistance > 2) {
+    return false;
+  }
+
+  return hasCoverDateNearParagraph(context) &&
+    hasNonPlaceCoverEvidenceBeforeParagraph(context);
+}
+
+function hasCoverDateNearParagraph(context: FieldDetectionContext): boolean {
+  const start = Math.max(context.range.startParagraphIndex, context.paragraphIndex - 2);
+  const end = context.paragraphIndex - 1;
+
+  for (let index = start; index <= end; index += 1) {
+    const paragraph = context.paragraphs[index];
+    if (paragraph && parseCoverDateFacts(paragraph.text) !== null) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function hasNonPlaceCoverEvidenceBeforeParagraph(context: FieldDetectionContext): boolean {
+  for (
+    let index = context.range.startParagraphIndex;
+    index < context.paragraphIndex;
+    index += 1
+  ) {
+    const paragraph = context.paragraphs[index];
+    if (!paragraph || !isCoverParagraphCandidate(paragraph)) {
+      continue;
+    }
+
+    const explicit = detectExplicitLabelField(paragraph.text);
+    if (explicit && explicit.field !== "publication-place") {
+      return true;
+    }
+
+    const normalized = normalizeAsciiTurkish(paragraph.text);
+    if (
+      /\b(university|universitesi|universite)\b/i.test(normalized) ||
+      /\b(thesis|tez|dissertation|project|proje[a-z]*)\b/i.test(normalized)
+    ) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+function detectStrongNonPlaceText(text: string): boolean {
+  const normalized = normalizeAsciiTurkish(text);
+
+  return /\b(university|universitesi|universite|faculty|fakulte|project|proje|tez|title|baslik|author|yazar|advisor|danisman)\b/i
+    .test(normalized);
 }
 
 function isCoverParagraphCandidate(paragraph: Paragraph): boolean {
@@ -456,4 +643,13 @@ function normalizeAsciiTurkish(value: string): string {
     .replace(/ı/g, "i")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "");
+}
+
+function normalizeMonthName(value: string): string {
+  return normalizeAsciiTurkish(value)
+    .replace(/ş/g, "s")
+    .replace(/ğ/g, "g")
+    .replace(/ç/g, "c")
+    .replace(/ö/g, "o")
+    .replace(/ü/g, "u");
 }

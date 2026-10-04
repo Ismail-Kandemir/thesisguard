@@ -192,6 +192,7 @@ export interface CoverFieldPresenceRuleExpected {
   field: CoverFieldKind;
   required: boolean;
   minConfidence?: Exclude<CoverScopeConfidence, "unknown">;
+  datePrecision?: "month-year";
 }
 
 export interface CoverFieldFormatRuleExpected {
@@ -1478,8 +1479,24 @@ export type CoverFieldEvidenceKind =
   | "explicit-label"
   | "academic-work-type-pattern"
   | "date-pattern"
+  | "turkish-month-year-pattern"
   | "place-date-pattern"
+  | "terminal-place-date-proximity"
   | "institution-pattern";
+
+export type CoverDateDetectionStrategy =
+  | "year-only"
+  | "numeric-month-year"
+  | "turkish-month-year";
+
+export interface CoverDateFacts {
+  month: number | null;
+  year: string;
+  rawText: string;
+  confidence: Exclude<CoverScopeConfidence, "unknown">;
+  detectionStrategy: CoverDateDetectionStrategy;
+  precision: "year" | "month-year";
+}
 
 export interface CoverFieldOccurrence {
   id: string;
@@ -1491,6 +1508,7 @@ export interface CoverFieldOccurrence {
   coverOccurrenceId: string;
   confidence: Exclude<CoverScopeConfidence, "unknown">;
   evidence: CoverFieldEvidenceKind[];
+  dateFacts?: CoverDateFacts;
   sourcePart: "word/document.xml";
 }
 

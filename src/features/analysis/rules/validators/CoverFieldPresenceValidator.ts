@@ -22,7 +22,8 @@ export class CoverFieldPresenceValidator implements RuleValidator {
     const minConfidence = expected.minConfidence ?? "high";
     const matchingFields = findMatchingFields(document, expected);
     const verifiedFields = matchingFields.filter((field) =>
-      hasSufficientFieldConfidence(field, minConfidence),
+      hasSufficientFieldConfidence(field, minConfidence) &&
+      hasExpectedDatePrecision(field, expected),
     );
     const passed = expected.required
       ? verifiedFields.length > 0
@@ -88,6 +89,7 @@ function isCoverFieldPresenceExpected(
     field?: unknown;
     required?: unknown;
     minConfidence?: unknown;
+    datePrecision?: unknown;
   };
 
   return (
@@ -97,7 +99,9 @@ function isCoverFieldPresenceExpected(
     (candidate.minConfidence === undefined ||
       candidate.minConfidence === "high" ||
       candidate.minConfidence === "medium" ||
-      candidate.minConfidence === "low")
+      candidate.minConfidence === "low") &&
+    (candidate.datePrecision === undefined ||
+      (candidate.field === "date" && candidate.datePrecision === "month-year"))
   );
 }
 
@@ -125,6 +129,17 @@ function hasSufficientFieldConfidence(
   minConfidence: Exclude<CoverScopeConfidence, "unknown">,
 ): boolean {
   return CONFIDENCE_RANK[field.confidence] >= CONFIDENCE_RANK[minConfidence];
+}
+
+function hasExpectedDatePrecision(
+  field: Readonly<CoverFieldOccurrence>,
+  expected: CoverFieldPresenceRuleExpected,
+): boolean {
+  return expected.datePrecision === undefined ||
+    (
+      field.field === "date" &&
+      field.dateFacts?.precision === expected.datePrecision
+    );
 }
 
 function createFailureEvidence(

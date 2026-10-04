@@ -1200,6 +1200,66 @@
       }
     },
     {
+      "id": "comu.engineering.computer-engineering.bachelor.outer-cover-date",
+      "type": "COVER_FIELD_PRESENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "Dış Kapak Basım Tarihi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzu 3.1 maddesinde dış kapakta basım tarihinin ay ve yıl olarak verilmesini doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "outer-cover",
+        "field": "date",
+        "required": true,
+        "minConfidence": "medium",
+        "datePrecision": "month-year"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "Dış kapakta ay ve yıl hassasiyetinde basım tarihi güvenilir semantic evidence ile doğrulanamadı.",
+      "solution": "Dış kapakta basım tarihini ay ve yıl olarak belirtin.",
+      "enabled": true,
+      "version": "1.7.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML cover semantics ay-yıl hassasiyetinde tarih varlığını doğrular; tarih biçimi, punto, bold ve fiziksel yerleşim bu kuralın kapsamı dışındadır."
+      }
+    },
+    {
+      "id": "comu.engineering.computer-engineering.bachelor.inner-cover-date",
+      "type": "COVER_FIELD_PRESENCE",
+      "scope": {
+        "level": "department",
+        "targetId": "computer-engineering",
+        "targetSlug": "computer-engineering"
+      },
+      "title": "İç Kapak Basım Tarihi",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzu 3.1 maddesinde iç kapakta basım tarihinin ay ve yıl olarak verilmesini doğrular.",
+      "category": "structure",
+      "expected": {
+        "coverScope": "inner-cover",
+        "field": "date",
+        "required": true,
+        "minConfidence": "medium",
+        "datePrecision": "month-year"
+      },
+      "severity": "error",
+      "score": 10,
+      "message": "İç kapakta ay ve yıl hassasiyetinde basım tarihi güvenilir semantic evidence ile doğrulanamadı.",
+      "solution": "İç kapakta basım tarihini ay ve yıl olarak belirtin.",
+      "enabled": true,
+      "version": "1.7.0",
+      "validationEvidence": {
+        "coverage": "PARTIAL",
+        "trust": "MEDIUM",
+        "note": "Static OOXML cover semantics ay-yıl hassasiyetinde tarih varlığını doğrular; tarih biçimi, punto, bold ve fiziksel yerleşim bu kuralın kapsamı dışındadır."
+      }
+    },
+    {
       "id": "comu.engineering.computer-engineering.bachelor.outer-cover-institution-format",
       "type": "COVER_FIELD_FORMAT",
       "scope": {
