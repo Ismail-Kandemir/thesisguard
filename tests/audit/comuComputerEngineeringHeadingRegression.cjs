@@ -49,6 +49,8 @@ const HEADING_RULE_IDS = [
 function main() {
   assertCorrectHeadingRulesPass();
   assertMainHeadingFormattingFailures();
+  assertMainHeadingUppercaseValidation();
+  assertUppercaseIsOptIn();
   assertNestedNumbering();
   assertSubheadingFormatting();
   assertTocDeletedAndTextboxProtections();
@@ -59,7 +61,7 @@ function main() {
     audit: "comuComputerEngineeringHeadingRegression.cjs",
     result: "PASS",
     productionHeadingRules: HEADING_RULE_IDS.length,
-    unsupported: ["uppercase", "heading indentation"],
+    unsupported: ["heading indentation"],
   }, null, 2));
 }
 
@@ -90,6 +92,60 @@ function assertMainHeadingFormattingFailures() {
     "FAILED",
     "main heading wrong alignment fails",
   );
+}
+
+function assertMainHeadingUppercaseValidation() {
+  const correct = validateHeadingRules(createHeadingDocument({
+    extraMainHeadings: [
+      "5. MATERYAL VE YÖNTEM",
+      "6. İSTATİSTİKSEL DEĞERLENDİRME",
+      "7. BÖLÜM 1: DEĞERLENDİRME",
+    ],
+  }));
+
+  assertStatus(
+    correct.results,
+    "comu.engineering.computer-engineering.bachelor.main-heading-format",
+    "PASSED",
+    "Turkish uppercase, numbers, and punctuation pass",
+  );
+  assert(
+    correct.document.headings.some((heading) => heading.text === "GİRİŞ"),
+    "manual numbering prefix is excluded from semantic heading text",
+  );
+
+  for (const text of [
+    "5. Giriş",
+    "5. MATERYAL VE Yöntem",
+    "5. İstatistiksel Değerlendirme",
+    "5. TÜRKÇE şĞÜÖÇ BAŞLIK",
+  ]) {
+    assertStatus(
+      validateHeadingRules(createHeadingDocument({ extraMainHeadings: [text] })).results,
+      "comu.engineering.computer-engineering.bachelor.main-heading-format",
+      "FAILED",
+      `${text} lowercase main heading fails`,
+    );
+  }
+}
+
+function assertUppercaseIsOptIn() {
+  const configuredRule = headingRules().find(
+    (rule) => rule.id === "comu.engineering.computer-engineering.bachelor.main-heading-format",
+  );
+  const expectedWithoutUppercase = { ...configuredRule.expected };
+  delete expectedWithoutUppercase.uppercase;
+  const ruleWithoutUppercase = {
+    ...configuredRule,
+    id: "audit.heading-level-format.without-uppercase",
+    expected: expectedWithoutUppercase,
+  };
+  const { document } = validateHeadingRules(createHeadingDocument({
+    extraMainHeadings: ["5. Giriş"],
+  }));
+  const [result] = new RuleEngine(new ValidatorRegistry()).run(document, [ruleWithoutUppercase]);
+
+  assertEqual(result.status, "PASSED", "HEADING_LEVEL_FORMAT without uppercase remains unchanged");
 }
 
 function assertNestedNumbering() {
@@ -205,17 +261,20 @@ function createHeadingDocument(options = {}) {
     ...(options.includeTocCollision ? [tocHeading("1. Giriş")] : []),
     ...(options.includeDeletedCollision ? [deletedHeading("2. Silinen")] : []),
     ...(options.includeTextboxCollision ? [textboxHeading("2. Textbox")] : []),
-    heading("1. Giriş", "Heading1", mainAlignment, mainFontSize, mainBold, false),
+    heading("1. GİRİŞ", "Heading1", mainAlignment, mainFontSize, mainBold, false),
     heading(`${level1Label} Kapsam`, "Heading2", "left", 12, options.level1Bold ?? true, false),
     heading("1.1.1 Ayrıntı", "Heading3", "left", 12, false, options.level2Italic ?? true),
     heading("1.1.1.1 Derinlik", "Heading4", "left", 12, false, true),
     heading("1.1.1.1.1 En Alt", "Heading5", "left", 12, false, true),
+    ...(options.extraMainHeadings ?? []).map((text) =>
+      heading(text, "Heading1", mainAlignment, mainFontSize, mainBold, false)
+    ),
     paragraph("Akademik gövde metni."),
-    heading("2. Sonuçlar", "Heading1", mainAlignment, mainFontSize, mainBold, false),
+    heading("2. SONUÇLAR", "Heading1", mainAlignment, mainFontSize, mainBold, false),
     paragraph("Sonuç metni."),
-    heading("3. Kaynaklar", "Heading1", mainAlignment, mainFontSize, mainBold, false),
+    heading("3. KAYNAKLAR", "Heading1", mainAlignment, mainFontSize, mainBold, false),
     paragraph("Kaynak metni."),
-    heading("4. Ekler", "Heading1", mainAlignment, mainFontSize, mainBold, false),
+    heading("4. EKLER", "Heading1", mainAlignment, mainFontSize, mainBold, false),
   ];
 
   return parts.join("");

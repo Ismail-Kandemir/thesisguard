@@ -429,17 +429,18 @@
         "targetSlug": "computer-engineering"
       },
       "title": "Ana Bölüm Başlığı Biçimi",
-      "description": "Güvenilir biçimde tanınan ana bölüm başlıklarının 12 punto ve kalın olmasını doğrular.",
+      "description": "Güvenilir biçimde tanınan ana bölüm başlıklarının 12 punto, kalın ve tamamen büyük harfle yazılmasını doğrular.",
       "category": "heading",
       "expected": {
         "level": 0,
         "fontSize": 12,
-        "bold": true
+        "bold": true,
+        "uppercase": true
       },
       "severity": "error",
       "score": 10,
       "message": "Ana bölüm başlığı biçimi Bilgisayar Mühendisliği formatı ile uyumlu değil.",
-      "solution": "Ana bölüm başlıklarını 12 punto ve kalın olarak düzenleyin.",
+      "solution": "Ana bölüm başlıklarını 12 punto, kalın ve tamamen büyük harfle düzenleyin.",
       "enabled": true,
       "version": "1.2.0",
       "validationEvidence": {

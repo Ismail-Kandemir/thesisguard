@@ -223,6 +223,7 @@ export interface HeadingLevelFormatRuleExpected {
   fontSize?: number;
   bold?: boolean;
   italic?: boolean;
+  uppercase?: true;
 }
 
 export type HeadingLevel = "Heading1" | "Heading2" | "Heading3";

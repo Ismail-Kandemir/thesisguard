@@ -21,6 +21,7 @@ interface LocatedHeading {
   paragraphIndex: number;
   blockIndex: number | null;
   sectionName: string;
+  semanticText: string;
 }
 
 interface FormattingIssue {
@@ -116,7 +117,8 @@ function getExpected(expected: RuleDefinition["expected"]): HeadingLevelFormatRu
     ("fontSize" in expected &&
       (typeof expected.fontSize !== "number" || !Number.isFinite(expected.fontSize))) ||
     ("bold" in expected && typeof expected.bold !== "boolean") ||
-    ("italic" in expected && typeof expected.italic !== "boolean")
+    ("italic" in expected && typeof expected.italic !== "boolean") ||
+    ("uppercase" in expected && expected.uppercase !== true)
   ) {
     throw new Error(
       "HEADING_LEVEL_FORMAT kuralı level, sections ve en az bir geçerli biçim beklentisi içermelidir.",
@@ -127,7 +129,8 @@ function getExpected(expected: RuleDefinition["expected"]): HeadingLevelFormatRu
     expected.fontFamily === undefined &&
     expected.fontSize === undefined &&
     expected.bold === undefined &&
-    expected.italic === undefined
+    expected.italic === undefined &&
+    expected.uppercase === undefined
   ) {
     throw new Error(
       "HEADING_LEVEL_FORMAT kuralı fontFamily, fontSize, bold veya italic beklentilerinden en az birini içermelidir.",
@@ -183,6 +186,7 @@ function locateHeadings(
               paragraphIndex: match.paragraphIndex,
               blockIndex: blockIndexByParagraphId.get(heading.paragraphId) ?? null,
               sectionName: heading.sectionName ?? heading.text,
+              semanticText: heading.text,
             }]
           : [];
       });
@@ -203,9 +207,13 @@ function locateHeadings(
       (candidate) => candidate.id === section.paragraphId,
     );
     const paragraph = paragraphIndex >= 0 ? document.paragraphs[paragraphIndex] : undefined;
+    const semanticHeading = document.headings.find(
+      (heading) => heading.paragraphId === section.paragraphId,
+    );
 
     if (
       !paragraph ||
+      (expected.uppercase === true && !semanticHeading) ||
       paragraph.numbering.level !== expected.level ||
       !isReliablyNumbered(paragraph)
     ) {
@@ -218,6 +226,7 @@ function locateHeadings(
       paragraphIndex,
       blockIndex: blockIndexByParagraphId.get(paragraph.id) ?? null,
       sectionName: section.displayName,
+      semanticText: semanticHeading?.text ?? section.displayName,
     }];
   });
 }
@@ -251,6 +260,9 @@ function validateParagraphFormatting(
   const problems = resolvedFormats.flatMap((formatting) =>
     compareFormatting(formatting, expected),
   );
+  if (expected.uppercase === true && !isUppercase(locatedHeading.semanticText)) {
+    problems.push("Başlık metninin tamamen büyük harfle yazılması bekleniyor.");
+  }
   const actualFormats = resolvedFormats.map(formatActualFormatting);
   const uniqueProblems = Array.from(new Set(problems));
   const uniqueActualFormats = Array.from(new Set(actualFormats));
@@ -263,6 +275,10 @@ function validateParagraphFormatting(
         actual: uniqueActualFormats.join("; "),
       }]
     : [];
+}
+
+function isUppercase(text: string): boolean {
+  return text === text.toLocaleUpperCase("tr-TR");
 }
 
 function compareFormatting(
@@ -352,6 +368,10 @@ function formatExpected(expected: HeadingLevelFormatRuleExpected): string {
 
   if (expected.italic !== undefined) {
     parts.push(expected.italic ? "italik" : "italik değil");
+  }
+
+  if (expected.uppercase === true) {
+    parts.push("tamamen büyük harf");
   }
 
   return parts.join(", ");
