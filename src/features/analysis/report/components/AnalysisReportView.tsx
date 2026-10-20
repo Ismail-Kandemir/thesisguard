@@ -1123,12 +1123,12 @@ function getCorrectionGuidance(result: RuleResult): string | null {
   return null
 }
 
-function hasResultValue(value: RuleResultValue): boolean {
+function hasResultValue(value: RuleResultValue | undefined): boolean {
   return value !== null && value !== ''
 }
 
 function formatRuleResultValue(
-  value: RuleResultValue,
+  value: RuleResultValue | undefined,
   context: 'actual' | 'expected',
 ): string {
   if (hasResultValue(value)) {
@@ -1139,7 +1139,7 @@ function formatRuleResultValue(
 }
 
 function formatEvidenceValue(
-  value: RuleResultValue,
+  value: RuleResultValue | undefined,
   unit: string | undefined,
   context: 'actual' | 'expected',
 ): string {

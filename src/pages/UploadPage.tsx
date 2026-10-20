@@ -81,7 +81,8 @@ export function UploadPage() {
 
   async function handleAnalyzeClick() {
     if (!selectedFile) {
-      setErrorMessage(validateUploadFile(null).message)
+      const validation = validateUploadFile(null)
+      if (!validation.valid) setErrorMessage(validation.message)
       return
     }
 

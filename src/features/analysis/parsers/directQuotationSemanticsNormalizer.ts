@@ -108,7 +108,7 @@ function scanParagraph(
   for (const token of tokens) {
     if (isOpeningDelimiter(token, open)) {
       if (open !== null) {
-        open = { ...open, nested: true };
+        open = { token: open.token, nested: true };
       } else {
         open = { token, nested: false };
       }

@@ -9,6 +9,7 @@ import type {
   PageOrientation,
   PageSize,
   PageNumberHeaderFooterReference,
+  PageNumberSection,
   Paragraph,
   ParagraphAlignment,
   ParagraphNumbering,
@@ -331,7 +332,7 @@ function parseSectionProperties(xmlDocument: Document): ParsedSectionProperties[
   }
 
   const paragraphs = getSemanticDescendantsByTagNameNS(body, WORD_NAMESPACE, "p");
-  const sectionBreaks = paragraphs.flatMap((paragraph, paragraphIndex) => {
+  const sectionBreaks = paragraphs.flatMap((paragraph, paragraphIndex): Omit<ParsedSectionProperties, "startParagraphIndex">[] => {
     const paragraphProperties = Array.from(paragraph.children).find(
       (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pPr",
     );
@@ -380,7 +381,7 @@ function parsePageNumberSections(xmlDocument: Document) {
   );
 }
 
-function parsePageNumberSection(section: ParsedSectionProperties, index: number) {
+function parsePageNumberSection(section: ParsedSectionProperties, index: number): PageNumberSection {
   const pageNumberType = Array.from(section.element.children).find(
     (child) => child.namespaceURI === WORD_NAMESPACE && child.localName === "pgNumType",
   );
@@ -511,7 +512,7 @@ function parseRunStyleId(runElement: Element): string | null {
   return runStyle ? getWordAttribute(runStyle, "val") : null;
 }
 
-function parseRunStyle(runElement: Element): Omit<Run, "text"> {
+function parseRunStyle(runElement: Element): Omit<Run, "text" | "styleId"> {
   const runProperties = getFirstDescendant(runElement, "rPr");
   const fontFamilyReference = parseRunFontFamilyReference(runProperties);
 

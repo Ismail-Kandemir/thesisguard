@@ -8,6 +8,7 @@ import type {
   ObjectAlignmentRuleExpected,
   ObjectAlignmentSource,
   ObjectRepresentationOccurrence,
+  ParagraphAlignment,
   RuleDefinition,
   RuleEvidence,
   RuleEvaluationCoverage,
@@ -339,7 +340,7 @@ function formatLabels(items: readonly ResolvedObjectAlignment[]): string {
   return items.map((item) => item.label).join(", ");
 }
 
-function toObjectAlignment(value: ObjectAlignment | null): ObjectAlignment {
+function toObjectAlignment(value: ParagraphAlignment | ObjectAlignment | null): ObjectAlignment {
   switch (value) {
     case "left":
     case "right":

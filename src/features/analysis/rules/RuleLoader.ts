@@ -126,7 +126,7 @@ function adaptLegacyRuleSet(
 function assertUniversityRuleSet(
   path: string,
   value: Record<string, unknown>,
-): asserts value is UniversityRuleSet {
+): asserts value is Record<string, unknown> & UniversityRuleSet {
   if (typeof value.id !== "string" || value.id.trim().length === 0) {
     throw new RuleSetLoadError(`${path}: rule set id eksik veya geçersiz.`);
   }
@@ -147,7 +147,7 @@ function assertUniversityRuleSet(
 function assertRuleSetMetadata(
   path: string,
   metadata: Record<string, unknown>,
-): asserts metadata is RuleSetMetadata {
+): asserts metadata is Record<string, unknown> & RuleSetMetadata {
   assertNamedEntity(path, metadata.university, "metadata.university");
   assertNamedEntity(path, metadata.thesisType, "metadata.thesisType");
 
@@ -180,7 +180,7 @@ function assertRuleSetMetadata(
   }
 }
 
-function isLegacyRuleFile(value: Record<string, unknown>): value is LegacyRuleFile {
+function isLegacyRuleFile(value: Record<string, unknown>): value is Record<string, unknown> & LegacyRuleFile {
   if (!isRecord(value.metadata)) {
     return false;
   }
@@ -346,31 +346,20 @@ function requireRuleSet(
 }
 
 function cloneRuleSet(ruleSet: UniversityRuleSet): UniversityRuleSet {
+  // Keep the validated faculty/institute and department/program union intact.
+  const metadata = { ...ruleSet.metadata };
+  metadata.university = { ...ruleSet.metadata.university };
+  metadata.thesisType = { ...ruleSet.metadata.thesisType };
+  metadata.studyType = ruleSet.metadata.studyType ? { ...ruleSet.metadata.studyType } : undefined;
+  metadata.guide = ruleSet.metadata.guide ? { ...ruleSet.metadata.guide } : undefined;
+  metadata.faculty = ruleSet.metadata.faculty ? { ...ruleSet.metadata.faculty } : undefined;
+  metadata.institute = ruleSet.metadata.institute ? { ...ruleSet.metadata.institute } : undefined;
+  metadata.department = ruleSet.metadata.department ? { ...ruleSet.metadata.department } : undefined;
+  metadata.program = ruleSet.metadata.program ? { ...ruleSet.metadata.program } : undefined;
+
   return {
     ...ruleSet,
-    metadata: {
-      ...ruleSet.metadata,
-      university: { ...ruleSet.metadata.university },
-      thesisType: { ...ruleSet.metadata.thesisType },
-      studyType: ruleSet.metadata.studyType
-        ? { ...ruleSet.metadata.studyType }
-        : undefined,
-      guide: ruleSet.metadata.guide
-        ? { ...ruleSet.metadata.guide }
-        : undefined,
-      faculty: ruleSet.metadata.faculty
-        ? { ...ruleSet.metadata.faculty }
-        : undefined,
-      institute: ruleSet.metadata.institute
-        ? { ...ruleSet.metadata.institute }
-        : undefined,
-      department: ruleSet.metadata.department
-        ? { ...ruleSet.metadata.department }
-        : undefined,
-      program: ruleSet.metadata.program
-        ? { ...ruleSet.metadata.program }
-        : undefined,
-    },
+    metadata,
     extends: ruleSet.extends?.map((reference) => ({ ...reference })),
     rules: cloneRules(ruleSet.rules),
   };

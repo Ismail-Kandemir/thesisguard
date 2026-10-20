@@ -121,8 +121,8 @@ function getPageNumberExpected(expected: RuleDefinition["expected"]): PageNumber
     typeof expected !== "object" ||
     !("required" in expected) ||
     typeof expected.required !== "boolean" ||
-    (expected.location !== undefined && !isHeaderFooterLocation(expected.location)) ||
-    (expected.alignment !== undefined && !isPageNumberAlignment(expected.alignment))
+    ("location" in expected && expected.location !== undefined && !isHeaderFooterLocation(expected.location)) ||
+    ("alignment" in expected && expected.alignment !== undefined && !isPageNumberAlignment(expected.alignment))
   ) {
     throw new Error("PAGE_NUMBER kuralı geçerli bir expected değeri içermelidir.");
   }
@@ -242,7 +242,9 @@ function formatLocation(location: HeaderFooterLocation): string {
   return location === "header" ? "Üst bilgi" : "Alt bilgi";
 }
 
-function formatAlignment(alignment: PageNumberAlignment): string {
+function formatAlignment(alignment: PageNumberAlignment): string;
+function formatAlignment(alignment: ParagraphAlignment): string | undefined;
+function formatAlignment(alignment: ParagraphAlignment): string | undefined {
   switch (alignment) {
     case "left":
       return "Sol";

@@ -158,7 +158,7 @@ function assertSafeDocxPackage(zip: JSZip): void {
 function getUncompressedEntrySize(entry: JSZip.JSZipObject): number {
   const size = (entry as ZipObjectWithSizeMetadata)._data?.uncompressedSize;
 
-  if (!Number.isFinite(size)) {
+  if (typeof size !== "number" || !Number.isFinite(size)) {
     throw new DocxPackageError(
       "DOCX_MALFORMED_PACKAGE",
       `${entry.name} parcasi boyut bilgisi okunamadi.`,

@@ -187,9 +187,9 @@ function getExpected(expected: RuleDefinition["expected"]): ObjectCaptionFormatR
   }
 
   if (
-    expected.alignment === undefined &&
-    expected.lineSpacing === undefined &&
-    expected.fontSize === undefined
+    (!("alignment" in expected) || expected.alignment === undefined) &&
+    (!("lineSpacing" in expected) || expected.lineSpacing === undefined) &&
+    (!("fontSize" in expected) || expected.fontSize === undefined)
   ) {
     throw new Error("OBJECT_CAPTION_FORMAT must include alignment, lineSpacing, or fontSize.");
   }

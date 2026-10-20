@@ -6,6 +6,7 @@ import type {
   PageNumberPlacementExpected,
   PageNumberSection,
   PageNumberSequenceRuleExpected,
+  ParagraphAlignment,
   RuleDefinition,
   RuleEvidence,
   RuleResult,
@@ -566,12 +567,13 @@ function sectionMatchesPageNumberPlacement(
     return false;
   }
 
-  if (!expected.alignment) {
+  const expectedAlignment = expected.alignment;
+  if (!expectedAlignment) {
     return true;
   }
 
   return references.some((reference) =>
-    reference.alignments.includes(expected.alignment),
+    reference.alignments.includes(expectedAlignment),
   );
 }
 
@@ -774,7 +776,9 @@ function formatLocation(location: "header" | "footer"): string {
   return location === "header" ? "Üst bilgi" : "Alt bilgi";
 }
 
-function formatAlignment(alignment: "left" | "center" | "right"): string {
+function formatAlignment(alignment: "left" | "center" | "right"): string;
+function formatAlignment(alignment: ParagraphAlignment): string | undefined;
+function formatAlignment(alignment: ParagraphAlignment): string | undefined {
   switch (alignment) {
     case "left":
       return "Sol";

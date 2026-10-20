@@ -223,7 +223,7 @@ function hasHeadingSectionsExpected(
         (!("aliases" in section) ||
           section.aliases === undefined ||
           (Array.isArray(section.aliases) &&
-            section.aliases.every((alias) => typeof alias === "string"))),
+            section.aliases.every((alias: unknown) => typeof alias === "string"))),
     )
   );
 }

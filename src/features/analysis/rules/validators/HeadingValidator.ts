@@ -15,6 +15,10 @@ interface ExpectedHeadingFormatting {
   bold: boolean;
 }
 
+type LegacyHeadingExpected = Partial<Omit<ExpectedHeadingFormatting, "semanticLevel">> & {
+  value?: RuleExpectedValue;
+};
+
 export class HeadingValidator implements RuleValidator {
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expected = getExpected(rule);
@@ -60,8 +64,11 @@ export class HeadingValidator implements RuleValidator {
 }
 
 function getExpected(rule: RuleDefinition): ExpectedHeadingFormatting {
-  const expected = rule.expected;
-  if (rule.category !== "heading" || typeof expected !== "object") throw new Error("Heading kuralı heading kategorisinde nesne expected içermelidir.");
+  const rawExpected = rule.expected;
+  if (rule.category !== "heading" || typeof rawExpected !== "object") throw new Error("Heading kuralı heading kategorisinde nesne expected içermelidir.");
+  // Legacy HEADING uses this payload; keep its existing runtime checks below.
+  // RuleDefinition does not correlate category with the expected union.
+  const expected = rawExpected as LegacyHeadingExpected;
   const level = expected.level ?? parseLevel(expected.value);
   if (!level || typeof expected.fontFamily !== "string" || typeof expected.fontSize !== "number" ||
       !Number.isFinite(expected.fontSize) || typeof expected.bold !== "boolean") {
@@ -70,7 +77,7 @@ function getExpected(rule: RuleDefinition): ExpectedHeadingFormatting {
   return { level, semanticLevel: LEVELS.indexOf(level), fontFamily: expected.fontFamily, fontSize: expected.fontSize, bold: expected.bold };
 }
 
-function parseLevel(value: RuleExpectedValue): HeadingLevel | null {
+function parseLevel(value: unknown): HeadingLevel | null {
   if (typeof value !== "string") return null;
   const normalized = value.toLowerCase().replace(/[^a-z0-9]/g, "");
   return LEVELS.find((level) => level.toLowerCase() === normalized) ?? null;

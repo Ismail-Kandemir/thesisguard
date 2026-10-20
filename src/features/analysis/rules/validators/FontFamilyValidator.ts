@@ -65,7 +65,7 @@ function getExpectedFontFamily(expected: RuleExpectedValue): string {
   }
 
   if (typeof expected === "object") {
-    return String(expected.value);
+    return String("value" in expected ? expected.value : undefined);
   }
 
   return String(expected);

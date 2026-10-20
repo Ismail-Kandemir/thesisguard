@@ -75,7 +75,9 @@ function getAlignmentObservations(document: NormalizedDocument): AlignmentObserv
 }
 
 function getExpectedAlignment(expected: RuleExpectedValue): ParagraphAlignment {
-  const value = typeof expected === "object" ? expected.value : expected;
+  const value = typeof expected === "object"
+    ? "value" in expected ? expected.value : undefined
+    : expected;
 
   if (!isParagraphAlignment(value)) {
     throw new Error(

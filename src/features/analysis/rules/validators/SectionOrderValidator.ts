@@ -130,7 +130,9 @@ function getSectionOrderExpected(
     );
   }
 
-  return expected;
+  // Every section item has been checked above; array.every does not narrow
+  // the containing RuleExpectedValue union to SectionOrderRuleExpected.
+  return expected as SectionOrderRuleExpected;
 }
 
 function isSectionOrderItem(value: unknown): value is SectionOrderItem {
