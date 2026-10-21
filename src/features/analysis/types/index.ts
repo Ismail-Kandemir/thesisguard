@@ -434,6 +434,9 @@ export interface StyleDefinition {
   alignment: ParagraphAlignment | null;
   tableAlignment: ObjectAlignment | null;
   numbering: NumberingReference | null;
+  /** Undefined: absent; null: malformed; 9: explicitly no outline level. */
+  outlineLevel?: number | null;
+  customStyle?: boolean | null;
 }
 
 export interface NumberingReference {
@@ -534,6 +537,8 @@ export interface Paragraph {
   isTableOfContentsEntry: boolean;
   isInTableCell: boolean;
   isEmpty: boolean;
+  /** Direct paragraph setting, before style inheritance. */
+  outlineLevel?: number | null;
   /** Source context for opt-in section identity; does not change legacy extraction. */
   sectionContext?: {
     placement: "body" | "nested" | "unsupported";
@@ -1600,6 +1605,13 @@ export interface AcademicSectionOccurrence {
     certainty: "confirmed" | "unresolved" | "ambiguous";
     reason: string;
     evidence: AcademicSectionStructuralEvidence[];
+    headingProvenance?: {
+      certainty: "confirmed" | "non-heading" | "unresolved" | "ambiguous";
+      level: number | null;
+      source: "paragraph-outline" | "style-outline" | "heading-style" | "none";
+      styleIds: string[];
+      reason: string;
+    };
   };
 }
 

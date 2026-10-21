@@ -17,6 +17,7 @@ import type {
 } from "../types";
 import { analyzeTableOfContentsFields } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
+import { parseOutlineLevel } from "./outlineLevelParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
 import { getSemanticChildElements, getSemanticDescendantsByTagNameNS, selectAlternateContentBranch } from "./markupCompatibilityResolver";
@@ -231,6 +232,8 @@ function parseParagraphs(
         isInTableCell: hasAncestor(paragraphElement, "tc"),
         isEmpty: runs.every((run) => run.text.length === 0),
         sectionContext: parseSectionContext(paragraphElement),
+        outlineLevel: parseOutlineLevel(Array.from(paragraphElement.children).find((element) =>
+          element.namespaceURI === WORD_NAMESPACE && element.localName === "pPr") ?? null),
       };
     },
   );

@@ -8,6 +8,7 @@ import type {
   StyleDefinition,
 } from "../types";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
+import { parseOutlineLevel } from "./outlineLevelParser";
 
 const WORD_NAMESPACE = "http://schemas.openxmlformats.org/wordprocessingml/2006/main";
 
@@ -108,8 +109,20 @@ function parseStyle(styleElement: Element): StyleDefinition | null {
     basedOn: parseElementValue(styleElement, "basedOn"),
     nextStyle: parseElementValue(styleElement, "next"),
     numbering: parseNumberingReference(styleElement),
+    outlineLevel: parseOutlineLevel(getFirstDirectChild(styleElement, "pPr")),
+    customStyle: parseCustomStyle(styleElement),
     ...parseStyleProperties(styleElement),
   };
+}
+
+function parseCustomStyle(style: Element): boolean | null | undefined {
+  const value = getWordAttribute(style, "customStyle");
+  if (value === null) return undefined;
+  switch (value.trim().toLowerCase()) {
+    case "true": case "on": case "1": return true;
+    case "false": case "off": case "0": return false;
+    default: return null;
+  }
 }
 
 function parseNumberingReference(styleElement: Element): NumberingReference | null {

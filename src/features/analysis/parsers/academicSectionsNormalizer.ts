@@ -11,8 +11,7 @@ import type {
 } from "../types";
 import { normalizeSectionName } from "./documentSectionsParser";
 import { parseManualNumberPrefix } from "./sectionNameMatcher";
-import { getHeadingStyleLevel } from "./documentHeadingsNormalizer";
-import { StyleInheritanceResolver } from "./styleInheritanceResolver";
+import { resolveHeadingStyleProvenance } from "./headingStyleProvenance";
 
 interface AcademicSectionIdentity {
   identity: string;
@@ -74,7 +73,12 @@ export function qualifyAcademicSectionIdentity(
 ): NonNullable<AcademicSectionOccurrence["structuralIdentity"]> {
   const evidence: AcademicSectionStructuralEvidence[] = occurrence.recognitionEvidence.filter((item) =>
     item !== "heading-style" && item !== "automatic-numbering");
-  const result = (certainty: "confirmed" | "unresolved" | "ambiguous", reason: string) => ({ certainty, reason, evidence });
+  const result = (
+    certainty: "confirmed" | "unresolved" | "ambiguous", reason: string,
+    headingProvenance?: NonNullable<AcademicSectionOccurrence["structuralIdentity"]>["headingProvenance"],
+  ) => ({
+    certainty, reason, evidence, ...(headingProvenance ? { headingProvenance } : {}),
+  });
   if (occurrence.status !== "declared" || !occurrence.identity || occurrence.candidateIdentities.length !== 1) {
     return result(occurrence.status === "ambiguous" ? "ambiguous" : "unresolved", "Academic name recognition does not resolve a unique section identity.");
   }
@@ -100,7 +104,11 @@ export function qualifyAcademicSectionIdentity(
     return result("unresolved", "The occurrence has no consistent document paragraph-block reference.");
   }
   evidence.push("paragraph-block");
-  const styleLevel = getHeadingStyleLevel(paragraph.styleId, new StyleInheritanceResolver(document.styles));
+  const headingProvenance = resolveHeadingStyleProvenance(document, paragraph);
+  if (headingProvenance.certainty === "unresolved" || headingProvenance.certainty === "ambiguous") {
+    return result(headingProvenance.certainty, headingProvenance.reason, headingProvenance);
+  }
+  const styleLevel = headingProvenance.level;
   const numbering = paragraph.numbering;
   const numberingLevel = numbering.visibleLabel !== null &&
     (numbering.source === "text" || (numbering.source === "word" && numbering.numId !== null))
@@ -108,24 +116,27 @@ export function qualifyAcademicSectionIdentity(
   if (styleLevel !== null) evidence.push("heading-style");
   if (numberingLevel !== null) evidence.push(numbering.source === "text" ? "manual-numbering-prefix" : "automatic-numbering");
   if (numbering.source === "word" && numberingLevel === null) {
-    return result("unresolved", "Word numbering does not resolve the current heading level and label.");
+    return result("unresolved", "Word numbering does not resolve the current heading level and label.", headingProvenance);
+  }
+  if (headingProvenance.certainty === "non-heading" && headingProvenance.source !== "none" && numberingLevel !== null) {
+    return result("ambiguous", "Explicit non-heading outline evidence conflicts with heading numbering.", headingProvenance);
   }
   if (styleLevel === null && numberingLevel === null) {
-    return result("unresolved", "A matching name or rule-created heading anchor is not independent structural evidence.");
+    return result("unresolved", "A matching name or rule-created heading anchor is not independent structural evidence.", headingProvenance);
   }
   if (styleLevel !== null && numberingLevel !== null && styleLevel !== numberingLevel) {
     evidence.push("conflicting-heading-levels");
-    return result("ambiguous", "Source heading style and numbering disagree about structural level.");
+    return result("ambiguous", "Source heading style and numbering disagree about structural level.", headingProvenance);
   }
   if ((numberingLevel ?? styleLevel ?? 0) > 0) {
     evidence.push("nested-heading");
-    return result("ambiguous", "A subsection name does not establish the identity of the requested academic section.");
+    return result("ambiguous", "A subsection name does not establish the identity of the requested academic section.", headingProvenance);
   }
   if (population.filter((item) => item.identity === occurrence.identity).length > 1) {
     evidence.push("competing-section-occurrences");
-    return result("ambiguous", "Multiple occurrences compete for the same academic section identity.");
+    return result("ambiguous", "Multiple occurrences compete for the same academic section identity.", headingProvenance);
   }
-  return result("confirmed", "Unique academic name recognition agrees with current body, block and heading structure.");
+  return result("confirmed", "Unique academic name recognition agrees with current body, block and heading structure.", headingProvenance);
 }
 
 function collectAcademicSectionIdentities(
