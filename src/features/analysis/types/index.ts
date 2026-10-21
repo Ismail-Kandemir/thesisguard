@@ -1,3 +1,5 @@
+import type { AssessmentCoverage } from "./RuleAssessment";
+
 export interface DocumentInfo {
   id: string;
 }
@@ -532,6 +534,12 @@ export interface Paragraph {
   isTableOfContentsEntry: boolean;
   isInTableCell: boolean;
   isEmpty: boolean;
+  /** Source context for opt-in section identity; does not change legacy extraction. */
+  sectionContext?: {
+    placement: "body" | "nested" | "unsupported";
+    revision: "current" | "deleted";
+    isTocResult: boolean;
+  };
 }
 
 export interface PageMargins {
@@ -1553,6 +1561,14 @@ export type AcademicSectionRecognitionEvidence =
   | "textbox-excluded"
   | "table-cell-excluded";
 
+export type AcademicSectionStructuralEvidence = AcademicSectionRecognitionEvidence
+  | "body-paragraph"
+  | "current-revision"
+  | "paragraph-block"
+  | "nested-heading"
+  | "conflicting-heading-levels"
+  | "competing-section-occurrences";
+
 export interface AcademicSectionBoundary {
   startParagraphIndex: number;
   endParagraphIndex: number;
@@ -1579,6 +1595,12 @@ export interface AcademicSectionOccurrence {
   recognitionEvidence: AcademicSectionRecognitionEvidence[];
   boundary: AcademicSectionBoundary;
   scope: AcademicScopeAssignment | null;
+  /** Independent qualification of the legacy name-based recognition record. */
+  structuralIdentity?: {
+    certainty: "confirmed" | "unresolved" | "ambiguous";
+    reason: string;
+    evidence: AcademicSectionStructuralEvidence[];
+  };
 }
 
 export interface DocumentAcademicSections {
@@ -1643,6 +1665,8 @@ export interface NormalizedDocument {
   figureList?: DocumentFigureList;
   coverSemantics: DocumentCoverSemantics;
   academicSections: DocumentAcademicSections;
+  /** Parser carrier enumeration only; this does not confirm section identity. */
+  sectionExtractionCoverage?: AssessmentCoverage;
   sections: DocumentSection[];
   headings: DocumentHeadingOccurrence[];
   themeFonts?: DocumentThemeFonts | null;

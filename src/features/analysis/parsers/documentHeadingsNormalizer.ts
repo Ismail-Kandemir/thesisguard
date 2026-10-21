@@ -94,7 +94,7 @@ function isHeadingNumberingRule(
     rule.expected !== null && "sections" in rule.expected && Array.isArray(rule.expected.sections);
 }
 
-function getHeadingStyleLevel(
+export function getHeadingStyleLevel(
   styleId: string | null,
   resolver: StyleInheritanceResolver,
 ): number | null {

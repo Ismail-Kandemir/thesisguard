@@ -12,8 +12,10 @@ import type {
   RuleResult,
   RuleResultStatus,
 } from "../../types";
-import { createMissingSectionEvidence } from "../ruleEvidence";
+import { createDocumentFormatEvidence, createMissingSectionEvidence } from "../ruleEvidence";
 import type { RuleValidator } from "./RuleValidator";
+import type { RuleAssessment } from "../../types/RuleAssessment";
+import { assessRequiredSection } from "./RequiredSectionValidator";
 
 const FACT_LABELS: Record<ConditionalRequiredSectionFact, string> = {
   hasTables: "tablo",
@@ -22,6 +24,33 @@ const FACT_LABELS: Record<ConditionalRequiredSectionFact, string> = {
 };
 
 export class ConditionalRequiredSectionValidator implements RuleValidator {
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    assertConditionalRequiredSectionRule(rule);
+    const expected = getConditionalRequiredSectionExpected(rule.expected);
+    const reference = { kind: "rule", id: rule.id } as const;
+    // Existing boolean readers prove positive presence, but expose no closed
+    // absence coverage. Do not turn a false flag into semantic N/A or failure.
+    const fact = expected.requiredWhen.fact;
+    const hasPositiveRecord = fact === "hasTables" ? document.tables.items.length > 0
+      : fact === "hasAbbreviations" ? document.abbreviations.items.length > 0
+      : getDocumentFactValue(document, fact);
+    if (!rule.enabled || !getDocumentFactValue(document, fact) || !hasPositiveRecord) return {
+      reference,
+      applicability: { state: "undetermined", reason: "The condition lacks confirmed positive presence or the rule is disabled." },
+      coverage: {
+        population: "open", excludedSubjects: [], unresolvedSubjects: [{ kind: "document" }],
+        reason: "Document fact absence has no completeness evidence in the current boolean contract.",
+      },
+      observations: [],
+    };
+    const proof = [createDocumentFormatEvidence(expected.requiredWhen.fact, { actual: true, expected: expected.requiredWhen.equals })] as const;
+    if (!expected.requiredWhen.equals) return {
+      reference,
+      applicability: { state: "not-applicable", reason: "Confirmed presence makes the explicit source condition false.", evidence: proof },
+    };
+    return assessRequiredSection(document, rule, { section: expected.section, aliases: expected.aliases, required: true }, proof);
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertConditionalRequiredSectionRule(rule);
     const expected = getConditionalRequiredSectionExpected(rule.expected);

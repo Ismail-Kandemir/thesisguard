@@ -11,7 +11,14 @@ import type {
   RuleResultStatus,
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
-import { createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import type {
+  AssessmentEvidence,
+  AssessmentExclusion,
+  AssessmentObservation,
+  AssessmentSubject,
+  RuleAssessment,
+} from "../../types/RuleAssessment";
+import { createDocumentFormatEvidence, createObjectEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 import { getDeclaredAcademicFigures } from "../objectApplicability";
 
 type CaptionOccurrence = DocumentTableOccurrence | FigureCaptionOccurrence;
@@ -21,6 +28,143 @@ interface FigureCaptionOccurrence extends ObjectRepresentationOccurrence {
 }
 
 export class ObjectCaptionPlacementValidator implements RuleValidator {
+  /** Opt-in figure caption placement; table assessment is not migrated. */
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    assertRule(rule);
+    const expected = getExpected(rule.expected);
+    const reference = { kind: "rule", id: rule.id } as const;
+    const semantics = document.objectSemantics;
+    if (!rule.enabled || expected.object !== "figure" || !semantics) {
+      return {
+        reference,
+        applicability: { state: "undetermined", reason: "An enabled figure placement rule and semantic inventory are required." },
+        coverage: {
+          population: "open", excludedSubjects: [],
+          reason: "Figure assessment scope is unavailable.", unresolvedSubjects: [{ kind: "document" }],
+        },
+        observations: [],
+      };
+    }
+
+    const declaredById = new Map(getDeclaredAcademicFigures(document).map((figure) => [figure.representation.id, figure]));
+    const resolutionById = new Map(semantics.resolutions.map((resolution) => [resolution.objectId, resolution]));
+    const representationIds = new Set(semantics.representations.map((item) => item.id));
+    const observations: AssessmentObservation[] = [];
+    const excludedSubjects: AssessmentExclusion[] = [];
+    const unresolvedSubjects: AssessmentSubject[] = [];
+
+    for (const representation of semantics.representations) {
+      const subject = { kind: "representation", representationId: representation.id } as const;
+      const resolution = resolutionById.get(representation.id);
+      const resolutionEvidence: AssessmentEvidence = [createDocumentFormatEvidence(
+        `${representation.id}: academic resolution`,
+        { actual: resolution ? `${resolution.status}: ${resolution.academicType ?? "unknown"}; ${resolution.reasons.join("; ")}` : null },
+      )];
+      if (resolution?.status === "excluded" && resolution.reasons.some((reason) => reason.trim().length > 0)) {
+        excludedSubjects.push({ subject, reason: resolution.reasons.join("; "), evidence: resolutionEvidence });
+        continue;
+      }
+      if (resolution?.status === "declared" && resolution.academicType === "table") {
+        excludedSubjects.push({ subject, reason: "Declared academic table is outside figure placement scope.", evidence: resolutionEvidence });
+        continue;
+      }
+
+      const figure = declaredById.get(representation.id);
+      if (!figure) {
+        unresolvedSubjects.push(subject);
+        observations.push({
+          state: "undetermined", subject,
+          identity: {
+            certainty: resolution?.status === "ambiguous" ? "ambiguous" : "unresolved",
+            reason: "No supported declared academic figure identity is available.",
+          },
+          evidence: { certainty: "sufficient", items: resolutionEvidence },
+        });
+        continue;
+      }
+
+      const identity = { certainty: "confirmed", evidence: resolutionEvidence } as const;
+      if (representation.drawingType !== "inline") {
+        observations.push({
+          state: "undetermined", subject, identity,
+          evidence: {
+            certainty: "unsupported",
+            boundary: representation.drawingType === "anchor" ? "rendered-layout" : "static-docx",
+            reason: "Only inline figure caption placement is deterministically supported.",
+          },
+        });
+        continue;
+      }
+
+      const { association, semanticCaption } = figure;
+      if (
+        representation.blockIndex === null || association?.status !== "matched" ||
+        !semanticCaption || semanticCaption.semantic.status !== "declared" ||
+        semanticCaption.semantic.academicType !== "figure" || association.captionId !== semanticCaption.id ||
+        (association.position !== "before" && association.position !== "after")
+      ) {
+        observations.push({
+          state: "undetermined", subject, identity,
+          evidence: { certainty: "missing", reason: "A deterministic matched figure caption position is unavailable." },
+        });
+        continue;
+      }
+      observations.push({
+        state: "confirmed", subject, identity,
+        evidence: {
+          certainty: "sufficient",
+          items: [createObjectEvidence("figure", representation, {
+            captionId: semanticCaption.id, actual: association.position, expected: expected.position,
+          })],
+        },
+        finding: association.position === expected.position ? "compliant" : "violation",
+      });
+    }
+
+    // Dangling semantic records and unaccounted figure declarations cannot close scope.
+    for (const resolution of semantics.resolutions) {
+      if (!representationIds.has(resolution.objectId)) {
+        unresolvedSubjects.push({ kind: "representation", representationId: resolution.objectId });
+      }
+    }
+    for (const association of semantics.associations) {
+      if (!representationIds.has(association.objectId)) {
+        unresolvedSubjects.push({ kind: "representation", representationId: association.objectId });
+      }
+    }
+    for (const caption of semantics.captions) {
+      if (
+        caption.semantic.status === "declared" && caption.semantic.academicType === "figure" &&
+        !semantics.resolutions.some((resolution) => representationIds.has(resolution.objectId) &&
+          resolution.status === "declared" && resolution.academicType === "figure" && resolution.captionId === caption.id)
+      ) {
+        unresolvedSubjects.push({ kind: "caption", captionId: caption.id });
+      }
+    }
+
+    const inventoryEvidence: AssessmentEvidence = [createDocumentFormatEvidence(
+      `${rule.id}: semantic figure placement inventory`,
+      { actual: `${semantics.representations.length} representations; ${semantics.resolutions.length} resolutions; ${semantics.captions.length} captions`, expected: expected.position },
+    )];
+    if (unresolvedSubjects.length === 0 && observations.length === 0) {
+      return {
+        reference,
+        applicability: {
+          state: "not-applicable", reason: "The closed semantic inventory contains no eligible academic figure.",
+          evidence: [inventoryEvidence[0], ...excludedSubjects.flatMap((subject) => subject.evidence)],
+        },
+      };
+    }
+    return {
+      reference,
+      applicability: { state: "applicable", evidence: inventoryEvidence },
+      coverage: unresolvedSubjects.length > 0
+        ? { population: "open", excludedSubjects, unresolvedSubjects, reason: "Academic object identity or inventory remains unresolved." }
+        : { population: "closed", excludedSubjects },
+      observations,
+    };
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertRule(rule);
     const expected = getExpected(rule.expected);

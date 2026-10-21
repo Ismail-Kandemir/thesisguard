@@ -1,6 +1,7 @@
 import type {
   AcademicSectionOccurrence,
   AcademicSectionRecognitionEvidence,
+  AcademicSectionStructuralEvidence,
   DocumentHeadingOccurrence,
   DocumentSection,
   HeadingNumberingSource,
@@ -10,6 +11,8 @@ import type {
 } from "../types";
 import { normalizeSectionName } from "./documentSectionsParser";
 import { parseManualNumberPrefix } from "./sectionNameMatcher";
+import { getHeadingStyleLevel } from "./documentHeadingsNormalizer";
+import { StyleInheritanceResolver } from "./styleInheritanceResolver";
 
 interface AcademicSectionIdentity {
   identity: string;
@@ -58,8 +61,71 @@ export function buildAcademicSections(
     occurrences: occurrencesWithoutBoundaries.map((occurrence) => ({
       ...occurrence,
       boundary: createBoundary(occurrence, boundaryCandidates, document),
+      structuralIdentity: qualifyAcademicSectionIdentity(document, occurrence, occurrencesWithoutBoundaries),
     })),
   };
+}
+
+/** Qualifies the existing occurrence, never promotes a rule-created anchor. */
+export function qualifyAcademicSectionIdentity(
+  document: Readonly<NormalizedDocument>,
+  occurrence: Readonly<AcademicSectionOccurrence>,
+  population: readonly AcademicSectionOccurrence[] = document.academicSections.occurrences,
+): NonNullable<AcademicSectionOccurrence["structuralIdentity"]> {
+  const evidence: AcademicSectionStructuralEvidence[] = occurrence.recognitionEvidence.filter((item) =>
+    item !== "heading-style" && item !== "automatic-numbering");
+  const result = (certainty: "confirmed" | "unresolved" | "ambiguous", reason: string) => ({ certainty, reason, evidence });
+  if (occurrence.status !== "declared" || !occurrence.identity || occurrence.candidateIdentities.length !== 1) {
+    return result(occurrence.status === "ambiguous" ? "ambiguous" : "unresolved", "Academic name recognition does not resolve a unique section identity.");
+  }
+  const paragraph = document.paragraphs[occurrence.headingParagraphIndex];
+  if (!paragraph || paragraph.id !== occurrence.headingParagraphId ||
+    normalizeSectionName(paragraph.text) !== normalizeSectionName(occurrence.displayHeadingText)) {
+    return result("unresolved", "The occurrence cannot be linked to its current source paragraph.");
+  }
+  if (paragraph.contentScope !== "document" || paragraph.isInTableCell || paragraph.isTableOfContentsEntry || paragraph.sectionContext?.isTocResult ||
+    paragraph.isEmpty || document.captions.items.some((caption) => caption.paragraphId === paragraph.id)) {
+    return result("unresolved", "Excluded carriers, TOC entries, captions and empty paragraphs cannot confirm a section identity.");
+  }
+  if (!paragraph.sectionContext || paragraph.sectionContext.revision !== "current") {
+    return result("unresolved", "Current-document revision provenance is missing or deleted.");
+  }
+  evidence.push("current-revision");
+  if (paragraph.sectionContext.placement !== "body") {
+    return result("unresolved", "The heading is nested in another carrier or has unsupported body structure.");
+  }
+  evidence.push("body-paragraph");
+  const block = document.blocks.find((item) => item.type === "paragraph" && item.paragraphId === paragraph.id);
+  if (!block || occurrence.blockIndex !== block.blockIndex) {
+    return result("unresolved", "The occurrence has no consistent document paragraph-block reference.");
+  }
+  evidence.push("paragraph-block");
+  const styleLevel = getHeadingStyleLevel(paragraph.styleId, new StyleInheritanceResolver(document.styles));
+  const numbering = paragraph.numbering;
+  const numberingLevel = numbering.visibleLabel !== null &&
+    (numbering.source === "text" || (numbering.source === "word" && numbering.numId !== null))
+    ? numbering.level : null;
+  if (styleLevel !== null) evidence.push("heading-style");
+  if (numberingLevel !== null) evidence.push(numbering.source === "text" ? "manual-numbering-prefix" : "automatic-numbering");
+  if (numbering.source === "word" && numberingLevel === null) {
+    return result("unresolved", "Word numbering does not resolve the current heading level and label.");
+  }
+  if (styleLevel === null && numberingLevel === null) {
+    return result("unresolved", "A matching name or rule-created heading anchor is not independent structural evidence.");
+  }
+  if (styleLevel !== null && numberingLevel !== null && styleLevel !== numberingLevel) {
+    evidence.push("conflicting-heading-levels");
+    return result("ambiguous", "Source heading style and numbering disagree about structural level.");
+  }
+  if ((numberingLevel ?? styleLevel ?? 0) > 0) {
+    evidence.push("nested-heading");
+    return result("ambiguous", "A subsection name does not establish the identity of the requested academic section.");
+  }
+  if (population.filter((item) => item.identity === occurrence.identity).length > 1) {
+    evidence.push("competing-section-occurrences");
+    return result("ambiguous", "Multiple occurrences compete for the same academic section identity.");
+  }
+  return result("confirmed", "Unique academic name recognition agrees with current body, block and heading structure.");
 }
 
 function collectAcademicSectionIdentities(

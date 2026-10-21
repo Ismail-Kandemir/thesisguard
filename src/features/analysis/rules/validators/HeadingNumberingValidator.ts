@@ -10,6 +10,8 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import type { RuleAssessment } from "../../types/RuleAssessment";
+import { assessQualifiedHeadingTargets, hasStructuralHeadingEvidence } from "../semanticQualification";
 
 const MAX_FAILURE_SAMPLES = 3;
 
@@ -26,6 +28,49 @@ interface HeadingNumberingFailure {
 }
 
 export class HeadingNumberingValidator implements RuleValidator {
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    assertHeadingNumberingRule(rule);
+    const expected = getExpected(rule.expected);
+    const bySection = indexNamedOccurrences(document.headings);
+    const located = expected.sections.flatMap((expectation) => {
+      const matches = bySection.get(normalizeSectionName(expectation.section)) ?? [];
+      return matches.map((occurrence) => ({ expectation, occurrence }));
+    });
+    const incomplete = expected.sections.some((item) =>
+      (bySection.get(normalizeSectionName(item.section)) ?? []).length !== 1);
+    const maxLevel = expected.maxLevel ?? Math.max(...expected.sections.map((item) => item.level));
+    const hierarchicalTargets = document.headings.filter((heading) => heading.level <= maxLevel);
+    const hierarchicalKnown = hierarchicalTargets.every((heading) =>
+      hasStructuralHeadingEvidence(document, heading.paragraphId) && isReliablyNumbered(heading));
+    const hierarchicalFailures = expected.requireHierarchicalLabels && hierarchicalKnown
+      ? getHierarchicalLabelFailures(document.headings, expected) : [];
+    const targets = expected.requireHierarchicalLabels
+      ? document.headings.filter((heading) => hierarchicalTargets.includes(heading) ||
+          located.some((item) => item.occurrence === heading))
+      : located.map((item) => item.occurrence);
+    return assessQualifiedHeadingTargets(document, rule, targets, (heading, identity) => {
+      const subject = { kind: "paragraph", paragraphId: heading.paragraphId } as const;
+      const item = located.find((candidate) => candidate.occurrence === heading);
+      const failures = [
+        ...(item && (heading.numberingSource === "none" || isReliablyNumbered(heading)) ? getFailure(item) : []),
+        ...hierarchicalFailures.filter((failure) => failure.occurrence === heading),
+      ];
+      if (failures.length === 0 && (!isReliablyNumbered(heading) ||
+        (expected.requireHierarchicalLabels && !hierarchicalKnown))) return {
+        state: "undetermined", subject, identity,
+        evidence: { certainty: "missing", reason: "Numbering labels or hierarchical targets are unresolved." },
+      };
+      return {
+        state: "confirmed", subject, identity,
+        evidence: { certainty: "sufficient", items: [createHeadingEvidence(heading, {
+          actual: failures.length > 0 ? failures.map((failure) => failure.actual).join("; ") : heading.visibleLabel,
+          expected: failures.length > 0 ? failures.map((failure) => failure.expected).join("; ") : JSON.stringify(expected),
+        })] },
+        finding: failures.length > 0 ? "violation" : "compliant",
+      };
+    }, incomplete ? [{ kind: "document" }] : []);
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertHeadingNumberingRule(rule);
     const expected = getExpected(rule.expected);

@@ -65,7 +65,7 @@ function collectSemanticDescendants(
   }
 }
 
-function selectAlternateContentBranch(alternateContent: Element): Element | null {
+export function selectAlternateContentBranch(alternateContent: Element): Element | null {
   const choices = Array.from(alternateContent.children).filter(isChoiceElement);
   const supportedChoice = choices.find(isSupportedChoice);
 

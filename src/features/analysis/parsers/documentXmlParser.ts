@@ -19,8 +19,9 @@ import { analyzeTableOfContentsFields } from "./tableOfContentsXmlParser";
 import { parseDocumentSections } from "./documentSectionsParser";
 import { normalizeDocumentCaptions } from "./documentCaptionsNormalizer";
 import { getLegacyExplicitFont, parseRunFontFamilyReference } from "./runFontsParser";
-import { getSemanticDescendantsByTagNameNS } from "./markupCompatibilityResolver";
-import { isRunVisibleInCurrentDocument } from "./revisionVisibility";
+import { getSemanticChildElements, getSemanticDescendantsByTagNameNS, selectAlternateContentBranch } from "./markupCompatibilityResolver";
+import { isInsideInvisibleCurrentDocumentRevision, isRunVisibleInCurrentDocument } from "./revisionVisibility";
+import type { AssessmentCoverage } from "../types/RuleAssessment";
 import { createEmptyCoverSemantics } from "./coverSemanticsNormalizer";
 import { createEmptyCitationSemantics } from "./citationSemanticsNormalizer";
 import {
@@ -100,10 +101,37 @@ export function parseDocumentXml(documentXml: string): NormalizedDocument {
     },
     coverSemantics: createEmptyCoverSemantics(),
     academicSections: { occurrences: [] },
+    sectionExtractionCoverage: getSectionExtractionCoverage(xmlDocument),
     numberingDefinitions: [],
     sections: parseDocumentSections(paragraphs),
     headings: [],
   };
+}
+
+/** Records unreadable active carriers without inventing academic identities. */
+function getSectionExtractionCoverage(xmlDocument: Document): AssessmentCoverage {
+  const body = xmlDocument.getElementsByTagNameNS(WORD_NAMESPACE, "body").item(0);
+  const hasUnsupportedCarrier = (element: Element): boolean => {
+    if (isInsideInvisibleCurrentDocumentRevision(element)) return false;
+    if (element.namespaceURI === WORD_NAMESPACE &&
+      ["altChunk", "subDoc", "contentPart"].includes(element.localName)) return true;
+    // Foreign text (including DrawingML) and orphan Word text are not
+    // enumerated by parseParagraphs. Presence is uncertainty, not identity.
+    const hasLeafText = element.children.length === 0 && (element.textContent ?? "").trim().length > 0;
+    if (hasLeafText && (element.namespaceURI !== WORD_NAMESPACE ||
+      (element.localName === "t" && findNearestAncestor(element, "p") === null))) return true;
+    for (const child of Array.from(element.children)) {
+      if (child.namespaceURI === "http://schemas.openxmlformats.org/markup-compatibility/2006" &&
+        child.localName === "AlternateContent" && selectAlternateContentBranch(child) === null) return true;
+    }
+    return getSemanticChildElements(element).some(hasUnsupportedCarrier);
+  };
+  return !body || hasUnsupportedCarrier(body)
+    ? {
+        population: "open", excludedSubjects: [], unresolvedSubjects: [{ kind: "document" }],
+        reason: "The document body is missing or contains active carriers outside Word paragraph extraction.",
+      }
+    : { population: "closed", excludedSubjects: [] };
 }
 
 function parsePageMargins(xmlDocument: Document): PageMargins {
@@ -162,7 +190,7 @@ function parseMarginInCentimeters(
 
   const twipsValue = getWordAttribute(pageMarginElement, marginName);
 
-  if (twipsValue === null) {
+  if (twipsValue === null || twipsValue.trim().length === 0) {
     return null;
   }
 
@@ -202,9 +230,32 @@ function parseParagraphs(
           tableOfContentsResultParagraphs.has(paragraphElement),
         isInTableCell: hasAncestor(paragraphElement, "tc"),
         isEmpty: runs.every((run) => run.text.length === 0),
+        sectionContext: parseSectionContext(paragraphElement),
       };
     },
   );
+}
+
+function parseSectionContext(paragraph: Element): NonNullable<Paragraph["sectionContext"]> {
+  const revision = isInsideInvisibleCurrentDocumentRevision(paragraph) ? "deleted" : "current";
+  const isTocResult = getSemanticDescendantsByTagNameNS(paragraph, WORD_NAMESPACE, "fldSimple")
+    .some((field) => /^TOC(?:\s|$)/i.test((getWordAttribute(field, "instr") ?? "").trim()));
+  const context = { revision, isTocResult } as const;
+  let ancestor = paragraph.parentElement;
+  while (ancestor) {
+    if (ancestor.namespaceURI === WORD_NAMESPACE) {
+      if (ancestor.localName === "body") return { placement: "body", ...context };
+      if (["p", "tc", "txbxContent"].includes(ancestor.localName)) return { placement: "nested", ...context };
+      if (!["sdt", "sdtContent", "customXml", "ins", "moveTo", "del", "moveFrom"].includes(ancestor.localName)) {
+        return { placement: "unsupported", ...context };
+      }
+    } else if (ancestor.namespaceURI !== "http://schemas.openxmlformats.org/markup-compatibility/2006" ||
+      !["AlternateContent", "Choice", "Fallback"].includes(ancestor.localName)) {
+      return { placement: "unsupported", ...context };
+    }
+    ancestor = ancestor.parentElement;
+  }
+  return { placement: "unsupported", ...context };
 }
 
 function parseParagraphFormatting(paragraphElement: Element) {

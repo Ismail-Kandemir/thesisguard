@@ -196,7 +196,12 @@ check("actual production discovery/resolution preserves COMU 46/47 and metadata"
     for (const item of rules) {
       const validator = registry.getValidator(item);
       assert.ok(validator, item.id);
-      assert.equal(validator.assess, undefined, `Production validator not migrated: ${item.id}`);
+      const migrated = [
+        "MarginValidator", "ObjectCaptionPlacementValidator", "RequiredSectionValidator",
+        "ConditionalRequiredSectionValidator", "HeadingNumberingValidator", "HeadingLevelFormatValidator",
+        "HeadingAlignmentValidator", "HeadingValidator",
+      ].includes(validator.constructor.name);
+      assert.equal(typeof validator.assess, migrated ? "function" : "undefined", `Opt-in capability: ${item.id}`);
     }
     if (food) {
       const prefix = "comu.applied-sciences.food-technology.bachelor.";

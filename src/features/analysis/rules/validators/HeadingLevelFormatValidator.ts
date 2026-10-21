@@ -2,6 +2,7 @@ import { sectionMatchesAnyExpectedName } from "../../parsers/sectionNameMatcher"
 import { EffectiveFormattingResolver } from "../../parsers/effectiveFormattingResolver";
 import type {
   EffectiveFormatting,
+  DocumentHeadingOccurrence,
   HeadingLevelFormatRuleExpected,
   NormalizedDocument,
   Paragraph,
@@ -14,6 +15,8 @@ import type {
 import { createHeadingParagraphEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
 import { fontFamiliesEqual } from "../fontFamilyComparison";
 import type { RuleValidator } from "./RuleValidator";
+import type { AssessmentSubject, RuleAssessment } from "../../types/RuleAssessment";
+import { assessQualifiedHeadingTargets } from "../semanticQualification";
 
 interface LocatedHeading {
   item: SectionOrderItem;
@@ -32,6 +35,18 @@ interface FormattingIssue {
 }
 
 export class HeadingLevelFormatValidator implements RuleValidator {
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    assertHeadingLevelFormatRule(rule);
+    const expected = getExpected(rule.expected);
+    const located = locateHeadings(document, expected);
+    const targets = located.flatMap((item) => document.headings.filter((heading) => heading.paragraphId === item.paragraph.id));
+    const missingTargets: AssessmentSubject[] = [];
+    if ((expected.sections?.length && located.length !== expected.sections.length) || targets.length !== located.length) {
+      missingTargets.push({ kind: "document" });
+    }
+    return assessHeadingFormatting(document, rule, targets, expected, missingTargets);
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     assertHeadingLevelFormatRule(rule);
     const expected = getExpected(rule.expected);
@@ -90,6 +105,53 @@ export class HeadingLevelFormatValidator implements RuleValidator {
       "Bulunan akademik başlıkların biçimi beklenen değerlerle uyumlu.",
     );
   }
+}
+
+/** Shared formatting assessment for existing HEADING and HEADING_LEVEL_FORMAT targets. */
+export function assessHeadingFormatting(
+  document: NormalizedDocument,
+  rule: RuleDefinition,
+  targets: readonly DocumentHeadingOccurrence[],
+  expected: HeadingLevelFormatRuleExpected,
+  missingTargets: readonly AssessmentSubject[] = [],
+): RuleAssessment {
+  const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults, document.themeFonts);
+  return assessQualifiedHeadingTargets(document, rule, targets, (heading, identity) => {
+    const subject = { kind: "paragraph", paragraphId: heading.paragraphId } as const;
+    const paragraph = document.paragraphs.find((item) => item.id === heading.paragraphId);
+    if (!paragraph) return {
+      state: "undetermined", subject, identity,
+      evidence: { certainty: "missing", reason: "The heading paragraph is unavailable." },
+    };
+    const formats = paragraph.runs.filter((run) => run.text.trim().length > 0)
+      .map((run) => resolver.resolveRun(run, paragraph.styleId, paragraph.lineSpacing));
+    const unknown = formats.length === 0 || formats.some((actual) =>
+      (expected.fontFamily !== undefined && actual.fontFamily === null) ||
+      (expected.fontSize !== undefined && actual.fontSize === null) ||
+      (expected.bold !== undefined && actual.bold === null) ||
+      (expected.italic !== undefined && actual.italic === null));
+    // Unknown fields cannot establish a mismatch; known mismatches still stand.
+    const problems = formats.flatMap((actual) => compareFormatting(actual, {
+      ...expected,
+      fontFamily: actual.fontFamily === null ? undefined : expected.fontFamily,
+      fontSize: actual.fontSize === null ? undefined : expected.fontSize,
+      bold: actual.bold === null ? undefined : expected.bold,
+      italic: actual.italic === null ? undefined : expected.italic,
+    }));
+    if (expected.uppercase && !isUppercase(heading.text)) problems.push("Heading text is not uppercase.");
+    if (problems.length === 0 && unknown) return {
+      state: "undetermined", subject, identity,
+      evidence: { certainty: "missing", reason: "Expected heading formatting is not fully resolved." },
+    };
+    return {
+      state: "confirmed", subject, identity,
+      evidence: { certainty: "sufficient", items: [createHeadingParagraphEvidence(paragraph, heading.paragraphIndex, {
+        actual: problems.length > 0 ? problems.join("; ") : formats.map(formatActualFormatting).join("; "),
+        expected: formatExpected(expected), headingLevel: heading.level + 1,
+      })] },
+      finding: problems.length > 0 ? "violation" : "compliant",
+    };
+  }, missingTargets);
 }
 
 function assertHeadingLevelFormatRule(

@@ -3,6 +3,8 @@ import type { HeadingLevel, NormalizedDocument, RuleDefinition, RuleExpectedValu
 import type { RuleValidator } from "./RuleValidator";
 import { fontFamiliesEqual } from "../fontFamilyComparison";
 import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import type { RuleAssessment } from "../../types/RuleAssessment";
+import { assessHeadingFormatting } from "./HeadingLevelFormatValidator";
 
 const LEVELS: HeadingLevel[] = ["Heading1", "Heading2", "Heading3"];
 const MAX_SAMPLES = 3;
@@ -20,6 +22,13 @@ type LegacyHeadingExpected = Partial<Omit<ExpectedHeadingFormatting, "semanticLe
 };
 
 export class HeadingValidator implements RuleValidator {
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    const expected = getExpected(rule);
+    return assessHeadingFormatting(document, rule,
+      document.headings.filter((heading) => heading.level === expected.semanticLevel),
+      { level: expected.semanticLevel, fontFamily: expected.fontFamily, fontSize: expected.fontSize, bold: expected.bold });
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expected = getExpected(rule);
     const occurrences = document.headings.filter((heading) => heading.level === expected.semanticLevel);

@@ -8,10 +8,32 @@ import type {
 } from "../../types";
 import type { RuleValidator } from "./RuleValidator";
 import { createHeadingEvidence, MAX_RULE_EVIDENCE_ITEMS } from "../ruleEvidence";
+import type { RuleAssessment } from "../../types/RuleAssessment";
+import { assessQualifiedHeadingTargets } from "../semanticQualification";
 
 const MAX_SAMPLES = 3;
 
 export class HeadingAlignmentValidator implements RuleValidator {
+  assess(document: NormalizedDocument, rule: RuleDefinition): RuleAssessment {
+    const expected = getExpected(rule);
+    const headings = document.headings.filter((heading) => expected.levels.includes(heading.level));
+    const resolver = new EffectiveFormattingResolver(document.styles, document.documentDefaults);
+    return assessQualifiedHeadingTargets(document, rule, headings, (heading, identity) => {
+      const paragraph = document.paragraphs.find((item) => item.id === heading.paragraphId);
+      const actual = paragraph ? resolver.resolveParagraphAlignment(paragraph.styleId, paragraph.alignment) : null;
+      const subject = { kind: "paragraph", paragraphId: heading.paragraphId } as const;
+      if (actual === null) return {
+        state: "undetermined", subject, identity,
+        evidence: { certainty: "missing", reason: "Heading alignment evidence is unavailable." },
+      };
+      return {
+        state: "confirmed", subject, identity,
+        evidence: { certainty: "sufficient", items: [createHeadingEvidence(heading, { actual, expected: expected.alignment })] },
+        finding: actual === expected.alignment ? "compliant" : "violation",
+      };
+    });
+  }
+
   validate(document: NormalizedDocument, rule: RuleDefinition): RuleResult {
     const expected = getExpected(rule);
     const headings = document.headings.filter((heading) => expected.levels.includes(heading.level));
