@@ -55,7 +55,7 @@ async function main() {
     assert.equal(rule.type, "REQUIRED_SECTION");
     assert.deepEqual(rule.expected, { section: "Giriş", required: true });
     assert.equal(rule.score, 0);
-    assert.equal(readiness.length, 5);
+    assert.equal(readiness.length, 9);
     assert.equal(pilot.mode, "assessment-only");
   });
   await check("source provenance preserves both exact printed-page references and frozen hash", () => {
@@ -201,8 +201,10 @@ async function main() {
   });
   await check("existing margin policy stays unchanged and cannot admit this separate pilot", () => {
     assert.equal(JSON.stringify(marginPolicy), policyBefore);
-    assert.equal(marginPolicy.find((candidate) => candidate.inventoryId === "SDU-INV-SEC-13").readiness, "deferred");
-    assert.equal(new AssessmentExecutionService(undefined, marginPolicy).run(document(), [rule])[0].kind, "rejected");
+    for (const candidate of pilot.candidates) {
+      assert.equal(marginPolicy.find((record) => record.inventoryId === candidate.inventoryId).readiness, "deferred");
+      assert.equal(new AssessmentExecutionService(undefined, marginPolicy).run(document(), [candidate.rule])[0].kind, "rejected");
+    }
     for (const candidate of marginPolicy.filter((candidate) => candidate.readiness === "assessment-ready")) {
       assert.equal(new AssessmentExecutionService(undefined, readiness).run(document(), [candidate.rule])[0].kind, "rejected");
     }
@@ -225,18 +227,25 @@ async function main() {
       assert.deepEqual(counts("trust"), food ? { HIGH: 45, MEDIUM: 1 } : { HIGH: 33, MEDIUM: 14 });
     }
   });
-  await check("exact five-section mapping and per-candidate source references", () => {
+  await check("exact nine-section mapping and per-candidate source references", () => {
     assert.deepEqual(pilot.candidates.map((candidate) => [candidate.inventoryId, candidate.rule.id, candidate.rule.expected]), [
       ["SDU-INV-SEC-13", "pilot.sdu.2026.section.introduction.presence", { section: "Giriş", required: true }],
       ["SDU-INV-SEC-07", "pilot.sdu.2026.section.summary.presence", { section: "Özet", required: true }],
       ["SDU-INV-SEC-08", "pilot.sdu.2026.section.abstract.presence", { section: "Abstract", required: true }],
       ["SDU-INV-SEC-03", "pilot.sdu.2026.section.thesis-approval.presence", { section: "Tez Onayı", required: true }],
       ["SDU-INV-SEC-05", "pilot.sdu.2026.section.undertaking.presence", { section: "Taahhütname", required: true }],
+      ["SDU-INV-SEC-09", "pilot.sdu.2026.section.acknowledgements.presence", { section: "Teşekkür", required: true }],
+      ["SDU-INV-SEC-14", "pilot.sdu.2026.section.literature-summaries.presence", { section: "Kaynak Özetleri", required: true }],
+      ["SDU-INV-SEC-19", "pilot.sdu.2026.section.impact-value-usability.presence", { section: "Yaygın Etki/Katma Değer/Kullanılabilirlik", required: true }],
+      ["SDU-INV-SEC-22", "pilot.sdu.2026.section.curriculum-vitae.presence", { section: "Özgeçmiş", required: true }],
     ]);
     for (const [index, candidate] of pilot.candidates.entries()) {
-      const item = [13, 7, 8, 3, 5][index];
+      const item = [13, 7, 8, 3, 5, 9, 14, 19, 22][index];
+      const guideSection = ["4.2", "4.1", "4.1", null, null, null, "4.3", "4.8", "4.11"][index];
+      const pages = index === 7 ? [17, 18] : index === 8 ? [19] : [16];
       assert.deepEqual(candidate.references, [{ section: "1", printedPage: 3, item },
-        ...(index < 3 ? [{ section: index === 0 ? "4.2" : "4.1", printedPage: 16 }] : [])]);
+        ...(guideSection ? pages.map((printedPage) => ({ section: guideSection, printedPage })) : [])]);
+      if (guideSection) assert.ok(candidate.rule.description.includes(`section ${guideSection}, printed page${pages.length > 1 ? "s" : ""} ${pages.join("–")}`));
       assert.equal(candidate.readiness, "assessment-ready");
       assert.equal(candidate.rule.type, "REQUIRED_SECTION");
       assert.equal(candidate.rule.score, 0);
@@ -291,7 +300,11 @@ async function main() {
         const gate = new AssessmentReadinessGate(readiness);
         assert.equal(gate.check(target), null);
         assert.equal(gate.check({ ...target, expected: { ...target.expected, wordCount: 100 } }).code, "rule-contract-mismatch");
+        assert.equal(gate.check({ ...target, expected: { ...target.expected, required: false } }).code, "rule-contract-mismatch");
+        assert.equal(gate.check({ ...target, type: "SECTION_ORDER" }).code, "rule-contract-mismatch");
         assert.equal(new AssessmentExecutionService().run(document(), [target])[0].kind, "rejected");
+        const deferred = new AssessmentReadinessGate([{ ...candidate, readiness: "deferred" }]);
+        assert.equal(deferred.check(target).code, "not-assessment-ready");
         for (const id of [candidate.inventoryId, "unknown.section", "pilot.sdu.2026.section.conclusion.presence"]) {
           assert.equal(gate.check({ ...target, id }).code, "unknown-rule");
         }
@@ -299,11 +312,11 @@ async function main() {
     ];
     for (const [label, run] of scenarios) await check(`${candidate.inventoryId}: ${label}`, run);
   }
-  await check("five-section batch preserves independent decisions and explicit subset execution", () => {
+  await check("nine-section batch preserves independent decisions and explicit subset execution", () => {
     const doc = document(p("Giriş", "Heading1") + p("Özet"));
     const entries = runPilot(doc);
     assert.deepEqual(entries.map((entry) => entry.ruleId), pilot.candidates.map((candidate) => candidate.rule.id));
-    assert.deepEqual(entries.map((entry) => entry.decision), ["compliant", "undetermined", "violation", "violation", "violation"]);
+    assert.deepEqual(entries.map((entry) => entry.decision), ["compliant", "undetermined", "violation", "violation", "violation", "violation", "violation", "violation", "violation"]);
     const all = document(pilot.candidates.map((candidate) => p(candidate.rule.expected.section, "Heading1")).join(""));
     assert.deepEqual(runPilot(all).map((entry) => entry.decision), pilot.candidates.map(() => "compliant"));
     assert.deepEqual(runPilot(all, undefined, []).map((entry) => entry.ruleId), []);
@@ -312,7 +325,7 @@ async function main() {
     assert.equal(mixed[0].kind, "rejected");
     assert.deepEqual(mixed.slice(1).map((entry) => entry.decision), pilot.candidates.map(() => "compliant"));
   });
-  await check("five-section batch never invokes legacy validate or changes scoring", () => {
+  await check("nine-section batch never invokes legacy validate or changes scoring", () => {
     const registry = new ValidatorRegistry();
     const target = registry.getValidator(rule);
     const original = target.validate;
@@ -327,7 +340,7 @@ async function main() {
     assert.deepEqual(new ReportBuilder().build(before), report);
     assert.equal(JSON.stringify(marginPolicy), policyBefore);
   });
-  await check("approval and undertaking add no aliases, signature, declaration or order requirements", () => {
+  await check("expanded sections add no aliases, content-quality or order requirements", () => {
     for (const candidate of pilot.candidates.slice(3)) {
       const target = candidate.rule;
       result(document(p(target.expected.section, "Heading1")), "compliant", undefined, target);
@@ -335,6 +348,21 @@ async function main() {
       result(document(p("KABUL VE ONAY", "Heading1") + p("İNTİHAL (AŞIRMA) BEYAN SAYFASI", "Heading1")), "violation", undefined, target);
       assert.deepEqual(Object.keys(target.expected).sort(), ["required", "section"]);
     }
+  });
+  await check("new section names do not admit unsupported aliases or bibliography identity", () => {
+    for (const candidate of pilot.candidates.slice(5)) {
+      for (const name of ["Önsöz", "Acknowledgements", "Literatür Taraması", "Kaynaklar"]) {
+        result(document(p(name, "Heading1")), "violation", undefined, candidate.rule);
+      }
+    }
+  });
+  await check("SEC-19 admits only the full combined name, never slash-separated alternatives", () => {
+    const target = pilot.candidates[7].rule;
+    for (const name of ["Yaygın Etki", "Katma Değer", "Kullanılabilirlik", "Yaygın Etki/Katma Değer", "Katma Değer/Kullanılabilirlik", "Yaygın Etki/Kullanılabilirlik"]) {
+      result(document(p(name, "Heading1")), "violation", undefined, target);
+      assert.equal(new AssessmentReadinessGate(readiness).check({ ...target, expected: { section: name, required: true } }).code, "rule-contract-mismatch");
+    }
+    result(document(p("Yaygın Etki", "Heading1") + p("Katma Değer", "Heading1") + p("Kullanılabilirlik", "Heading1")), "violation", undefined, target);
   });
   const manifest = JSON.parse(fs.readFileSync(path.join(fixtureDirectory, "manifest.json"), "utf8"));
   for (const [filename, numberingSource] of [["full-correct.docx", "text"], ["automatic-heading-numbering-synthetic.docx", "word"]]) {
@@ -346,16 +374,16 @@ async function main() {
       const before = JSON.stringify(doc);
       const entry = result(doc, "compliant");
       const batch = runPilot(doc);
-      assert.deepEqual(batch.map((item) => item.decision), ["compliant", "undetermined", "undetermined", "violation", "violation"]);
+      assert.deepEqual(batch.map((item) => item.decision), ["compliant", "undetermined", "undetermined", "violation", "violation", "undetermined", "violation", "violation", "undetermined"]);
       // Read actual package XML; filenames do not establish section identity.
       const zip = await require("jszip").loadAsync(bytes);
       const xml = await zip.file("word/document.xml").async("string");
-      for (const [index, section] of [[3, "Tez Onayı"], [4, "Taahhütname"]]) {
+      for (const [index, section] of [[3, "Tez Onayı"], [4, "Taahhütname"], [6, "Kaynak Özetleri"], [7, "Yaygın Etki/Katma Değer/Kullanılabilirlik"]]) {
         assert.equal(doc.paragraphs.some((paragraph) => paragraph.text.toLocaleLowerCase("tr-TR") === section.toLocaleLowerCase("tr-TR")), false);
         assert.equal(batch[index].assessment.coverage.population, "closed");
         assert.equal(batch[index].assessment.observations[0].finding, "violation");
       }
-      for (const [index, text, paragraphId] of [[1, "ÖZET", "paragraph-7"], [2, "ABSTRACT", "paragraph-10"]]) {
+      for (const [index, text, paragraphId] of [[1, "ÖZET", "paragraph-7"], [2, "ABSTRACT", "paragraph-10"], [5, "TEŞEKKÜR", "paragraph-5"], [8, "ÖZGEÇMİŞ", "paragraph-46"]]) {
         assert.ok(xml.includes(`<w:t>${text}</w:t>`));
         const raw = doc.paragraphs.find((paragraph) => paragraph.id === paragraphId);
         assert.equal(raw.text, text);

@@ -10,11 +10,11 @@ import { readDocxAnalysisXmlParts } from "../../src/features/analysis/readers/do
 import { markRequiredSectionHeadings } from "../../src/features/analysis/rules/markRequiredSectionHeadings";
 import type { NormalizedDocument, RuleDefinition } from "../../src/features/analysis/types";
 
-function presenceRule(id: string, section: string, item: number, guideSection?: string): RuleDefinition {
+function presenceRule(id: string, section: string, item: number, guideSection?: string, guidePages: readonly number[] = [16]): RuleDefinition {
   return {
     id, type: "REQUIRED_SECTION", category: "structure",
     title: `SDÜ ${section} section presence assessment pilot`,
-    description: `SDÜ 2026 guide: section 1, printed page 3, item ${item}${guideSection ? `; section ${guideSection}, printed page 16` : ""}. Academic section presence only.`,
+    description: `SDÜ 2026 guide: section 1, printed page 3, item ${item}${guideSection ? `; section ${guideSection}, printed page${guidePages.length > 1 ? "s" : ""} ${guidePages.join("–")}` : ""}. Academic section presence only.`,
     expected: { section, required: true }, severity: "error", score: 0,
     message: "Assessment-only academic section presence requirement.", solution: "", enabled: true,
     version: "2026-section-presence-assessment-pilot",
@@ -48,10 +48,22 @@ export const sduSectionPresenceAssessmentPilot = {
     { inventoryId: "SDU-INV-SEC-05", readiness: "assessment-ready",
       references: [{ section: "1", printedPage: 3, item: 5 }],
       rule: presenceRule("pilot.sdu.2026.section.undertaking.presence", "Taahhütname", 5) },
+    { inventoryId: "SDU-INV-SEC-09", readiness: "assessment-ready",
+      references: [{ section: "1", printedPage: 3, item: 9 }],
+      rule: presenceRule("pilot.sdu.2026.section.acknowledgements.presence", "Teşekkür", 9) },
+    { inventoryId: "SDU-INV-SEC-14", readiness: "assessment-ready",
+      references: [{ section: "1", printedPage: 3, item: 14 }, { section: "4.3", printedPage: 16 }],
+      rule: presenceRule("pilot.sdu.2026.section.literature-summaries.presence", "Kaynak Özetleri", 14, "4.3") },
+    { inventoryId: "SDU-INV-SEC-19", readiness: "assessment-ready",
+      references: [{ section: "1", printedPage: 3, item: 19 }, { section: "4.8", printedPage: 17 }, { section: "4.8", printedPage: 18 }],
+      rule: presenceRule("pilot.sdu.2026.section.impact-value-usability.presence", "Yaygın Etki/Katma Değer/Kullanılabilirlik", 19, "4.8", [17, 18]) },
+    { inventoryId: "SDU-INV-SEC-22", readiness: "assessment-ready",
+      references: [{ section: "1", printedPage: 3, item: 22 }, { section: "4.11", printedPage: 19 }],
+      rule: presenceRule("pilot.sdu.2026.section.curriculum-vitae.presence", "Özgeçmiş", 22, "4.11", [19]) },
   ],
 } as const;
 
-/** Only these five section contracts have permission; the margin policy is unchanged. */
+/** Only these nine section contracts have permission; the margin policy is unchanged. */
 export const sduSectionPresencePilotReadiness: readonly AssessmentCandidateReadiness[] = sduSectionPresenceAssessmentPilot.candidates;
 
 /** Read existing package parts without rewriting the DOCX or invoking production analysis. */

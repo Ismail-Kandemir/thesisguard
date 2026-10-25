@@ -76,6 +76,12 @@ function scenarios(section) {
     { name: "open-coverage-present", body: heading + '<w:altChunk/>', styleId: "Heading1", identity: "confirmed", provenance: "confirmed", source: "style-outline", chain: ["Heading1", "Normal"], decision: "undetermined", coverage: "open", extraction: "open" },
     { name: "open-coverage-absent", body: paragraph("Body") + '<w:altChunk/>', count: 0, decision: "undetermined", coverage: "open", extraction: "open" },
     { name: "closed-confirmed-absence", body: paragraph("Body"), count: 0, decision: "violation" },
+    ...(section === "Yaygın Etki/Katma Değer/Kullanılabilirlik" ? [
+      ...["Yaygın Etki", "Katma Değer", "Kullanılabilirlik", "Yaygın Etki/Katma Değer", "Katma Değer/Kullanılabilirlik", "Yaygın Etki/Kullanılabilirlik"].map((name, index) => ({
+        name: `partial-name-${index}`, body: paragraph(name, "Heading1"), count: 0, decision: "violation",
+      })),
+      { name: "split-alternative-headings", body: ["Yaygın Etki", "Katma Değer", "Kullanılabilirlik"].map((name) => paragraph(name, "Heading1")).join(""), count: 0, decision: "violation" },
+    ] : []),
   ];
 }
 
@@ -95,7 +101,7 @@ async function main() {
         const entries = runPilot(doc);
         for (const [index, rule] of rules.entries()) {
           const occurrences = normalized.academicSections.occurrences.filter((item) => item.canonicalName === rule.expected.section);
-          if (index >= 3) {
+          if ([3, 4, 6, 7].includes(index)) {
             assert.equal(occurrences.length, 0);
             assertEntry(entries[index], rule, "violation", "closed");
             assert.equal(doc.sectionExtractionCoverage.population, "closed");
@@ -115,7 +121,7 @@ async function main() {
           const row = evidenceRow(doc, occurrence, entries[index]);
           assertEntry(entries[index], rule, index === 0 ? "compliant" : "undetermined", "closed");
           assert.equal(row.extractionCoverage, "closed");
-          assert.equal(p.id, ["paragraph-21", "paragraph-7", "paragraph-10"][index]);
+          assert.equal(p.id, ["paragraph-21", "paragraph-7", "paragraph-10", null, null, "paragraph-5", null, null, "paragraph-46"][index]);
           assert.equal(p.outlineLevel, undefined);
           assert.equal(p.styleId, index === 0 ? "Heading1" : null);
           assert.equal(occurrence.structuralIdentity.certainty, index === 0 ? "confirmed" : "unresolved");
