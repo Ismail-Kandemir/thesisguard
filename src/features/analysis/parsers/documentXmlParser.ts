@@ -191,17 +191,38 @@ function parseMarginInCentimeters(
 
   const twipsValue = getWordAttribute(pageMarginElement, marginName);
 
-  if (twipsValue === null || twipsValue.trim().length === 0) {
+  if (twipsValue === null) {
     return null;
   }
 
-  const parsedTwips = Number(twipsValue);
-
-  if (!Number.isFinite(parsedTwips)) {
-    return null;
+  // CT_PageMar: top/bottom use ST_SignedTwipsMeasure; left/right use
+  // ST_TwipsMeasure. Integer members collapse XML whitespace and allow a sign
+  // and leading zeros. UniversalMeasure is a string with an exact unit pattern.
+  // See docs/MARGIN_NUMERIC_AND_PRECISION_CONTRACT.md for the schema sources.
+  const signed = marginName === "top" || marginName === "bottom";
+  const integerLexeme = twipsValue.replace(/^[\x20\t\r\n]+|[\x20\t\r\n]+$/g, "");
+  if (/^[+-]?[0-9]+$/.test(integerLexeme)) {
+    const parsedTwips = Number(integerLexeme);
+    // Schema integer ranges exceed JavaScript's exact integer representation.
+    // Unsupported magnitude is unknown evidence, never a rounded numeric fact.
+    if (!Number.isSafeInteger(parsedTwips) || (!signed && parsedTwips < 0)) return null;
+    return roundToTwoDecimals((parsedTwips / TWIPS_PER_INCH) * CENTIMETERS_PER_INCH);
   }
 
-  return roundToTwoDecimals((parsedTwips / TWIPS_PER_INCH) * CENTIMETERS_PER_INCH);
+  const measure = /^(-?[0-9]+(?:\.[0-9]+)?)(mm|cm|in|pt|pc|pi)$/.exec(twipsValue);
+  if (!measure || (!signed && measure[1].startsWith("-"))) return null;
+  const value = Number(measure[1]);
+  const centimetersPerUnit = {
+    mm: 0.1, cm: 1, in: CENTIMETERS_PER_INCH,
+    pt: CENTIMETERS_PER_INCH / 72, pc: CENTIMETERS_PER_INCH / 6, pi: CENTIMETERS_PER_INCH / 6,
+  } as const;
+  const centimeters = value * centimetersPerUnit[measure[2] as keyof typeof centimetersPerUnit];
+  const equivalentTwips = (centimeters / CENTIMETERS_PER_INCH) * TWIPS_PER_INCH;
+  if (!Number.isFinite(equivalentTwips) || Math.abs(equivalentTwips) > Number.MAX_SAFE_INTEGER ||
+    (value === 0 && /[1-9]/.test(measure[1])) || (centimeters === 0 && value !== 0)) return null;
+  // Preserve the existing two-decimal cm policy. No new academic tolerance or
+  // integer-twips quantization is inferred for explicit-unit measures.
+  return roundToTwoDecimals(centimeters);
 }
 
 function roundToTwoDecimals(value: number): number {
