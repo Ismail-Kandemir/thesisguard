@@ -1883,6 +1883,10 @@ function installMinimalXmlDomParser() {
       }
 
       if (token.startsWith("</")) {
+        const closingName = /^<\/([^\s>]+)\s*>$/u.exec(token)?.[1];
+        if (stack.length === 1 || closingName !== current.qualifiedName) {
+          throw new Error("Mismatched XML closing tag in Node harness.");
+        }
         stack.pop();
         continue;
       }
@@ -1916,6 +1920,10 @@ function installMinimalXmlDomParser() {
               value: decodeEntities(attribute.value),
             };
           });
+        const attributeKeys = attributes.map((attribute) => `${attribute.namespaceURI ?? ""}:${attribute.localName}`);
+        if (new Set(attributeKeys).size !== attributeKeys.length) {
+          throw new Error("Duplicate XML attribute in Node harness.");
+        }
         const node = new XmlNode(
           localName,
           namespaceScope[prefix] ?? null,
@@ -1925,12 +1933,13 @@ function installMinimalXmlDomParser() {
         );
         current.node.children.push(node);
 
-        if (!selfClosing) stack.push({ node, namespaces: namespaceScope });
+        if (!selfClosing) stack.push({ node, namespaces: namespaceScope, qualifiedName });
       } else {
         current.node._text += decodeEntities(token);
       }
     }
 
+    if (stack.length !== 1) throw new Error("Unclosed XML element in Node harness.");
     return root;
   }
 
