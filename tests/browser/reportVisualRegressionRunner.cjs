@@ -690,7 +690,12 @@ function assert(condition, message) {
   }
 }
 
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
+module.exports = { CdpSession, createPageSession, findBrowserExecutable, findOpenPort,
+  startVite, startBrowser, stopProcess, waitForHttp, waitForBrowserWebSocket, waitForRuntimeValue };
+
+if (require.main === module) {
+  main().catch((error) => {
+    console.error(error);
+    process.exitCode = 1;
+  });
+}

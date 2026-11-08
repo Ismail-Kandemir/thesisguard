@@ -102,8 +102,15 @@ async function main() {
       const readiness = evaluate(document, rules);
       assert.equal(readiness.kind, scenario.deferred ? "deferred" : "ready", scenario.id);
       exercise(document, scenario.deferred, scenario.id);
-      const report = await analyzeDocx(input, selection); // Production has no gate; never counted as pilot protection.
-      const statuses = marginRules.map((rule) => report.results.find((item) => item.ruleId === rule.id).status);
+      // Historical raw-less pilot remains intentionally distinct from production.
+      let report;
+      try { report = await analyzeDocx(input, selection); }
+      catch (error) {
+        const { AnalysisReadinessDeferredError } = require("../../src/features/analysis/engine/AnalysisReadinessGate.ts");
+        assert.ok(error instanceof AnalysisReadinessDeferredError, scenario.id);
+        assert.ok(scenario.deferred, scenario.id);
+      }
+      const statuses = report ? marginRules.map((rule) => report.results.find((item) => item.ruleId === rule.id).status) : "DEFER";
       rows.push({ id: scenario.id, candidate: readiness, productionMarginStatuses: statuses,
         extraction: document.sectionExtractionCoverage.population, sources: document.pageSections.map((item) => item.source),
         compatibilityRisk: scenario.compatibilityRisk ?? false });

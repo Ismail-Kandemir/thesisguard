@@ -1,28 +1,19 @@
 import { RuleEngine } from "./engine/RuleEngine";
 import { buildAnalysisDiagnostics } from "./diagnostics/academicObjectDiagnostics";
-import { parseDocumentXml } from "./parsers/documentXmlParser";
-import { normalizeDocumentNumbering } from "./parsers/documentNumberingNormalizer";
-import { parseNumberingXml } from "./parsers/numberingXmlParser";
+import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
+import { normalizeDocxParts } from "./normalizeDocxParts";
+import { readReadyDocxDocument } from "./engine/AnalysisReadinessGate";
 import { normalizeDocumentAbbreviations } from "./parsers/documentAbbreviationsNormalizer";
+import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
+import { normalizeDocumentHeadings } from "./parsers/documentHeadingsNormalizer";
 import { normalizeAcademicDocumentScopes } from "./parsers/academicDocumentScopeNormalizer";
 import { normalizeAcademicSections } from "./parsers/academicSectionsNormalizer";
 import { normalizeBibliographySemantics } from "./parsers/bibliographySemanticsNormalizer";
-import {
-  normalizeCitationBibliographyLinkSemantics,
-} from "./parsers/citationBibliographyLinkSemanticsNormalizer";
-import { normalizeCitationSemantics } from "./parsers/citationSemanticsNormalizer";
-import { normalizeDirectQuotationSemantics } from "./parsers/directQuotationSemanticsNormalizer";
-import { normalizeFigureListSemantics } from "./parsers/figureListSemanticsNormalizer";
 import { normalizeTableListSemantics } from "./parsers/tableListSemanticsNormalizer";
-import { normalizeCoverSemantics } from "./parsers/coverSemanticsNormalizer";
-import { parseHeaderFooterPageNumbering } from "./parsers/headerFooterXmlParser";
-import { normalizePageNumberingSemantics } from "./parsers/pageNumberingSemantics";
-import { EffectiveFormattingResolver } from "./parsers/effectiveFormattingResolver";
-import { parseStylesXml } from "./parsers/stylesXmlParser";
-import { parseThemeFontsXml } from "./parsers/themeFontsXmlParser";
-import { normalizeDocumentObjectReferences } from "./parsers/documentObjectReferencesNormalizer";
-import { normalizeDocumentHeadings } from "./parsers/documentHeadingsNormalizer";
-import { readDocxAnalysisXmlParts } from "./readers/docxPackageReader";
+import { normalizeFigureListSemantics } from "./parsers/figureListSemanticsNormalizer";
+import { normalizeCitationSemantics } from "./parsers/citationSemanticsNormalizer";
+import { normalizeCitationBibliographyLinkSemantics } from "./parsers/citationBibliographyLinkSemanticsNormalizer";
+import { normalizeDirectQuotationSemantics } from "./parsers/directQuotationSemanticsNormalizer";
 import { ReportBuilder } from "./report/ReportBuilder";
 import { loadRuleSets } from "./rules/RuleLoader";
 import { RuleResolver } from "./rules/RuleResolver";
@@ -41,59 +32,7 @@ import type {
 export async function createNormalizedDocumentFromDocx(file: File): Promise<NormalizedDocument> {
   assertValidUploadFile(file);
 
-  const {
-    documentXml,
-    documentRelationshipsXml,
-    stylesXml,
-    numberingXml,
-    themeXml,
-    headerFooterXmlParts,
-  } =
-    await readDocxAnalysisXmlParts(file);
-  const normalizedDocument = parseDocumentXml(documentXml);
-  const parsedStyles = stylesXml ? parseStylesXml(stylesXml) : null;
-  const styles = parsedStyles?.styles ?? [];
-  const documentDefaults =
-    parsedStyles?.documentDefaults ?? normalizedDocument.documentDefaults;
-  const themeFonts = themeXml ? parseThemeFontsXml(themeXml) : null;
-  const formattingResolver = new EffectiveFormattingResolver(
-    styles,
-    documentDefaults,
-    themeFonts,
-  );
-
-  const documentWithFormatting: NormalizedDocument = {
-    ...normalizedDocument,
-    styles,
-    documentDefaults,
-    themeFonts,
-    numberingDefinitions: numberingXml ? parseNumberingXml(numberingXml) : [],
-    pageNumbering: normalizePageNumberingSemantics(
-      {
-        ...parseHeaderFooterPageNumbering(
-          headerFooterXmlParts,
-          (paragraphStyleId, directAlignment) =>
-            formattingResolver.resolveParagraphAlignment(
-              paragraphStyleId,
-              directAlignment,
-            ),
-        ),
-        sections: normalizedDocument.pageNumbering.sections,
-      },
-      documentRelationshipsXml,
-    ),
-  };
-
-  const documentWithNumbering = normalizeCoverSemantics(
-    normalizeDocumentNumbering(documentWithFormatting),
-    documentXml,
-  );
-
-  return {
-    ...documentWithNumbering,
-    abbreviations: normalizeDocumentAbbreviations(documentWithNumbering),
-    objectReferences: normalizeDocumentObjectReferences(documentWithNumbering),
-  };
+  return normalizeDocxParts(await readDocxAnalysisXmlParts(file));
 }
 
 export async function analyzeDocx(
@@ -102,11 +41,11 @@ export async function analyzeDocx(
 ): Promise<AnalysisReport> {
   assertValidUploadFile(file);
 
-  const normalizedDocument = await createNormalizedDocumentFromDocx(file);
   const ruleSets = selection
     ? new RuleSetSelector().select(selection)
     : loadRuleSets();
   const rules = new RuleResolver().resolve(ruleSets);
+  const normalizedDocument = await readReadyDocxDocument(file, rules);
   const documentWithMarkedSectionHeadings = markRequiredSectionHeadings(
     normalizedDocument,
     rules,

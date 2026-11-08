@@ -102,7 +102,19 @@ async function measure(bytes, name) {
     return sides.map((side) => pgMar?.getAttributeNS(word, side) ?? null);
   });
   const document = await createNormalizedDocumentFromDocx(data);
-  const report = await analyzeDocx(data, selection);
+  let report;
+  try { report = await analyzeDocx(data, selection); }
+  catch (error) {
+    const { AnalysisReadinessDeferredError } = require("../../src/features/analysis/engine/AnalysisReadinessGate.ts");
+    const { classifySectionEvidence } = require("./sectionEvidenceClassifier.ts");
+    assert.ok(error instanceof AnalysisReadinessDeferredError, name);
+    const evidence = classifySectionEvidence(document, await zip.file("word/document.xml").async("string"));
+    assert.ok(evidence.sectionCoverage !== "closed" || evidence.marginEvidence !== "complete", name);
+  }
+  // Historical legacy statuses are an independent oracle, never a production report.
+  const { RuleEngine } = require("../../src/features/analysis/engine/RuleEngine.ts");
+  const { ReportBuilder } = require("../../src/features/analysis/report/ReportBuilder.ts");
+  const legacy = new ReportBuilder().build(new RuleEngine().run(document, marginRules));
   const v1 = await batch(data, { admissionPolicy: "synthetic-pilot", guardEnabled: true });
   assert.equal(v1.status, "completed", name);
   assert.equal(v1.originalReport.records.length, 11);
@@ -128,14 +140,16 @@ async function measure(bytes, name) {
       evidence: first.evidenceReference, provenance: first.originalProvenance, intervals: second.intervals };
   });
   const margins = document.pageSections.map((section) => sides.map((side) => section.pageMargins[side]));
-  const comu = marginRules.map((rule) => report.results.find((result) => result.ruleId === rule.id).status);
+  const comu = marginRules.map((rule) => legacy.results.find((result) => result.ruleId === rule.id).status);
+  if (report) assert.deepEqual(marginRules.map((rule) => report.results.find((result) => result.ruleId === rule.id).status), comu, name);
   // Missing numeric evidence in ANY section may never be a legacy PASS.
   for (const [sideIndex, status] of comu.entries()) {
     if (!margins.length || margins.some((values) => values[sideIndex] === null)) assert.notEqual(status, "PASSED", name);
   }
   return { name, rawMargins, margins, comu, guards, sectionSources: document.pageSections.map((section) => section.source),
     extractionCoverage: document.sectionExtractionCoverage.population,
-    counts: [report.totalRules, report.passedRules, report.failedRules, report.notApplicableRules] };
+    production: report ? "ACCEPT" : "DEFER",
+    counts: report ? [report.totalRules, report.passedRules, report.failedRules, report.notApplicableRules] : null };
 }
 
 async function main() {

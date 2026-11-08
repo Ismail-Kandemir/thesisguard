@@ -1,4 +1,5 @@
-import { useState, type ChangeEvent, type ReactNode } from 'react'
+import { useRef, useState, type ChangeEvent, type ReactNode } from 'react'
+import { AnalysisReadinessDeferredError } from '../features/analysis/engine/AnalysisReadinessGate'
 import { analyzeDocx } from '../features/analysis/analysisService'
 import {
   ACADEMIC_CATALOG,
@@ -23,6 +24,7 @@ import { ReportPage } from './ReportPage'
 import './UploadPage.css'
 
 export function UploadPage() {
+  const analysisRequest = useRef(0)
   const [errorMessage, setErrorMessage] = useState('')
   const [selectedFile, setSelectedFile] = useState<SelectedUploadFile | null>(null)
   const [analysisReport, setAnalysisReport] = useState<AnalysisReport | null>(null)
@@ -64,6 +66,7 @@ export function UploadPage() {
   })
 
   function handleFileSelect(file: File) {
+    analysisRequest.current++
     const validation = validateUploadFile(file)
 
     setAnalysisReport(null)
@@ -98,21 +101,24 @@ export function UploadPage() {
       return
     }
 
+    const request = ++analysisRequest.current
     try {
       setErrorMessage('')
       setAnalysisReport(null)
       setIsAnalyzing(true)
       const report = await analyzeDocx(selectedFile.file, academicSelection)
-      setAnalysisReport(report)
+      if (request === analysisRequest.current) setAnalysisReport(report)
     } catch (error) {
+      if (request !== analysisRequest.current) return
       setAnalysisReport(null)
       setErrorMessage(createUserFriendlyAnalysisErrorMessage(error))
     } finally {
-      setIsAnalyzing(false)
+      if (request === analysisRequest.current) setIsAnalyzing(false)
     }
   }
 
   function handleChooseAnotherFile() {
+    analysisRequest.current++
     setAnalysisReport(null)
     setSelectedFile(null)
     setIsAnalyzing(false)
@@ -352,6 +358,10 @@ function createReadinessItems(state: ReadinessState): ReadinessItem[] {
 
 function createUserFriendlyAnalysisErrorMessage(error: unknown): string {
   if (error instanceof UploadFileValidationError) {
+    return error.message
+  }
+
+  if (error instanceof AnalysisReadinessDeferredError) {
     return error.message
   }
 

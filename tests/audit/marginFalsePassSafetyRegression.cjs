@@ -84,6 +84,7 @@ async function main() {
   const base = fs.readFileSync(baseFile);
   const before = hash(base);
   const safetyFailures = [];
+  let remediatedAssertions = 0;
   const rows = [];
   try {
     for (const scenario of scenarios) {
@@ -98,7 +99,27 @@ async function main() {
       const document = await createNormalizedDocumentFromDocx(bytes);
       assert.deepEqual(document.pageSections, parsed.pageSections, scenario.id);
       assert.deepEqual(document.sectionExtractionCoverage, parsed.sectionExtractionCoverage, scenario.id);
-      const report = await analyzeDocx(bytes, selection);
+      const engineRun = RuleEngine.prototype.run;
+      const build = ReportBuilder.prototype.build;
+      let engineCalls = 0; let builderCalls = 0; let productionReport; let productionError;
+      RuleEngine.prototype.run = function (...args) { engineCalls++; return engineRun.apply(this, args); };
+      ReportBuilder.prototype.build = function (...args) { builderCalls++; return build.apply(this, args); };
+      try { productionReport = await analyzeDocx(bytes, selection); }
+      catch (error) { productionError = error; }
+      finally { RuleEngine.prototype.run = engineRun; ReportBuilder.prototype.build = build; }
+      const { AnalysisReadinessDeferredError } = require("../../src/features/analysis/engine/AnalysisReadinessGate.ts");
+      assert.equal(engineCalls, scenario.blocked ? 0 : 1, scenario.id);
+      assert.equal(builderCalls, scenario.blocked ? 0 : 1, scenario.id);
+      if (scenario.blocked) {
+        assert.ok(productionError instanceof AnalysisReadinessDeferredError, scenario.id);
+        assert.equal(productionReport, undefined);
+        for (const field of ["report", "score", "status", "passed"]) assert.equal(Object.hasOwn(productionError, field), false);
+      } else {
+        assert.equal(productionError, undefined);
+        assert.equal(productionReport.totalRules, 46);
+      }
+      // Preserve the historical validator oracle independently of production readiness.
+      const report = builder.build(engine.run(document, rules));
       const statuses = margins.map((rule) => report.results.find((item) => item.ruleId === rule.id).status);
       assert.deepEqual(statuses, scenario.legacy, `${scenario.id}: legacy behavior changed; review evidence`);
       const assessments = margins.map((rule) => registry.getValidator(rule).assess(document, rule));
@@ -118,18 +139,24 @@ async function main() {
         assert.equal(proposed.report, null);
         for (const field of ["status", "passed", "score"]) assert.equal(Object.hasOwn(proposed, field), false);
       } else assert.deepEqual(proposed.report, marginReport, "Reliable report and score must remain identical");
-      for (const [index, status] of statuses.entries()) {
+      const productionStatuses = productionReport ? margins.map((rule) => productionReport.results.find((item) => item.ruleId === rule.id).status) : [];
+      if (!scenario.blocked) assert.deepEqual(productionStatuses, scenario.legacy, scenario.id);
+      for (const [index, legacyStatus] of statuses.entries()) {
+        const status = productionStatuses[index];
         const incomplete = assessments[index].coverage.population !== "closed" ||
           scenario.assessment[index] === "undetermined" || scenario.extraction !== "closed";
         if (incomplete) {
+          assert.equal(productionReport, undefined, scenario.id);
+          assert.ok(productionError instanceof AnalysisReadinessDeferredError, scenario.id);
+          if (legacyStatus === "PASSED") remediatedAssertions++;
           try { assert.notEqual(status, "PASSED", `${scenario.id}: ${margins[index].id} incomplete evidence must not PASS`); }
           catch (error) { safetyFailures.push(error.message); }
         }
       }
       rows.push({ scenario: scenario.id, sectionSources: document.pageSections.map((item) => item.source),
         extraction: scenario.extraction, marginCoverage: scenario.marginCoverage, assessments: scenario.assessment,
-        legacyBefore: statuses, legacyAfter: statuses, marginScore: marginReport.score,
-        productionCounts: [report.totalRules, report.passedRules, report.failedRules, report.notApplicableRules],
+        legacyBefore: statuses, productionAfter: productionReport ? productionStatuses : "DEFER", historicalMarginScore: marginReport.score,
+        productionCounts: productionReport ? [productionReport.totalRules, productionReport.passedRules, productionReport.failedRules, productionReport.notApplicableRules] : null,
         proposedReadiness: proposed.kind, proposedScore: proposed.report?.score ?? null });
     }
     // The generic validator also serves base bachelor and engineering rules.
@@ -149,12 +176,13 @@ async function main() {
       assert.ok(selected.every((rule) => registry.getValidator(rule).assess(document, rule).coverage.population === "open"));
       affected.push({ scope, marginRuleIds: selected.map((rule) => rule.id), falsePassed: results.length });
     }
+    assert.equal(remediatedAssertions, 12, "All 12 original false-PASS assertions must be exercised in production");
     console.log(JSON.stringify({ cases: rows, otherScopes: affected }));
     console.log(JSON.stringify({ mode: audit ? "contract-audit" : "safety-acceptance", scenarios: scenarios.length,
       contractChecks: "PASS", prototypeChecks: "PASS", productionSafety: safetyFailures.length ? "FAIL" : "PASS",
-      falsePasses: safetyFailures.length, productionChanged: false, fixtureWrites: 0 }));
+      falsePasses: safetyFailures.length, remediatedAssertions, productionChanged: true, fixtureWrites: 0 }));
     for (const failure of safetyFailures) console.error(`SAFETY FAIL ${failure}`);
-    if (!audit) assert.equal(safetyFailures.length, 0, "Production false-PASS remains unresolved; see Sprint 43 report. --audit-contract records the defect and tests the test-only proposal; it is not a fix.");
+    if (!audit) assert.equal(safetyFailures.length, 0, "Production must defer incomplete evidence before generating results or score.");
   } finally {
     assert.equal(hash(fs.readFileSync(baseFile)), before, "Base DOCX changed");
   }
