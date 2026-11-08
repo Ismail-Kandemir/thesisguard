@@ -2,7 +2,7 @@ const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { inventory, observe, admit, validate, sha256, fingerprintDeclaration } = require('./realWorldDocxValidation.cjs');
+const { inventory, observe, admit, validate, sha256, fingerprintDeclaration, sourceIdentity } = require('./realWorldDocxValidation.cjs');
 
 async function main() {
   const temporary = fs.mkdtempSync(path.join(os.tmpdir(), 'thesisguard-s49-intake-'));
@@ -13,7 +13,7 @@ async function main() {
     fs.writeFileSync(path.join(temporary, 'sample.docx'), original);
     fs.writeFileSync(path.join(temporary, 'support.txt'), 'MECHANISM REHEARSAL ONLY. Not a Word/LibreOffice session.');
     const submission = { id: 'rehearsal', file: 'sample.docx', sha256: sha256(original), byteSize: original.length,
-      source: { origin: 'programmatic', application: 'Microsoft Word', version: 'REHEARSAL-NOT-REAL', creatorId: 'test-generator', creationMethod: 'mechanism rehearsal; no editor execution' },
+      source: { origin: 'programmatic', application: 'Microsoft Word Desktop', version: 'REHEARSAL-NOT-REAL', creatorId: 'test-generator', creationMethod: 'mechanism rehearsal; no editor execution' },
       expected: { fields: { pageSections: [{ top: 3, bottom: 2.5, left: 3, right: 2.5 }, { top: 3, bottom: 2.5, left: 3, right: 2.5 }] },
         rules: [{ ruleId: 'comu.bachelor.margin.left', status: 'PASSED' }] } };
     const review = item => ({ id: item.id, sha256: item.sha256, declarationSha256: fingerprintDeclaration(item),
@@ -22,8 +22,26 @@ async function main() {
     check('no review / embedded self-approval cannot authorize', () => {
       assert.equal(admit(temporary, { ...submission, review: review(submission) }, []).accepted, false);
     });
+    check('Desktop, Online, LibreOffice, programmatic and unknown remain distinct', () => {
+      const desktop = sourceIdentity({ origin: 'word-native', application: 'Microsoft Word Desktop' });
+      const online = sourceIdentity({ origin: 'word-online', application: 'Microsoft Word Online' });
+      assert.equal(desktop.scope, 'word-desktop-native'); assert.equal(desktop.nativeEligible, true);
+      assert.equal(online.scope, 'word-online'); assert.equal(online.nativeEligible, false);
+      assert.equal(sourceIdentity({ origin: 'libreoffice-generated', application: 'LibreOffice' }).category, 'LibreOffice');
+      assert.equal(sourceIdentity(submission.source).category, 'Programmatic DOCX');
+      assert.equal(sourceIdentity({ origin: 'programmatic', application: 'python-docx' }).category, 'Programmatic DOCX');
+      assert.equal(sourceIdentity({ origin: 'programmatic', application: 'python-docx' }).scope, 'unverified');
+      assert.equal(sourceIdentity({ origin: 'programmatic', application: 'Microsoft Word Online' }).nativeEligible, false);
+      assert.equal(sourceIdentity({ origin: 'unknown', application: 'Microsoft Word Desktop' }).scope, 'unverified');
+      assert.equal(sourceIdentity({ origin: 'word-native', application: 'Microsoft Word Online' }).scope, 'unverified');
+      assert.equal(sourceIdentity({ origin: 'word-online', application: 'Microsoft Word Desktop' }).scope, 'unverified');
+      assert.equal(sourceIdentity({ origin: 'word-native', application: 'Microsoft Word' }).scope, 'unverified');
+    });
     const variants = [
       ['unknown source', item => { item.source.origin = 'unknown'; }],
+      ['ambiguous Word application cannot imply Desktop', item => { item.source.application = 'Microsoft Word'; }],
+      ['Online cannot claim Desktop-native', item => { item.source.origin = 'word-native'; item.source.application = 'Microsoft Word Online'; }],
+      ['Desktop cannot claim Online', item => { item.source.origin = 'word-online'; }],
       ['missing version', item => { item.source.version = ''; }],
       ['hash mismatch', item => { item.sha256 = '0'.repeat(64); }],
       ['path traversal', item => { item.file = '../outside.docx'; }],

@@ -32,7 +32,7 @@ export class BibliographyReferencesValidator implements RuleValidator {
     const hasAmbiguousSection = !hasSection && ambiguousOccurrences.length > 0;
 
     if (!expected.required) {
-      return createPassedResult(rule, expected, `${expected.section} bÃ¶lÃ¼mÃ¼ zorunlu deÄŸil.`);
+      return createPassedResult(rule, expected, `${expected.section} bölümü zorunlu değil.`);
     }
 
     if (!hasSection) {
@@ -42,11 +42,11 @@ export class BibliographyReferencesValidator implements RuleValidator {
         status: "FAILED",
         passed: false,
         severity: rule.severity,
-        expected: `${expected.section} bÃ¶lÃ¼mÃ¼ ve en az bir kaynak girdisi bulunmalÄ±`,
+        expected: `${expected.section} bölümü ve en az bir kaynak girdisi bulunmalı`,
         actual: hasAmbiguousSection ? "Belirsiz" : "Tespit edilmedi",
         message: hasAmbiguousSection
-          ? `${expected.section} bÃ¶lÃ¼mÃ¼ belirsiz eÅŸleÅŸme nedeniyle gÃ¼venle doÄŸrulanamadÄ±.`
-          : `${expected.section} bÃ¶lÃ¼mÃ¼ tespit edilemedi.`,
+          ? `${expected.section} bölümü belirsiz eşleşme nedeniyle güvenle doğrulanamadı.`
+          : `${expected.section} bölümü tespit edilemedi.`,
         evidence: hasAmbiguousSection
           ? ambiguousOccurrences.map((occurrence) =>
               createAcademicSectionEvidence(occurrence, {
@@ -58,7 +58,7 @@ export class BibliographyReferencesValidator implements RuleValidator {
           : [
               createMissingSectionEvidence(expected.section, {
                 actual: "Tespit edilmedi",
-                expected: "BÃ¶lÃ¼m ve kaynak girdisi bulunmalÄ±",
+                expected: "Bölüm ve kaynak girdisi bulunmalı",
               }),
             ],
         evidenceTotal: hasAmbiguousSection ? ambiguousOccurrences.length : 1,
@@ -74,12 +74,12 @@ export class BibliographyReferencesValidator implements RuleValidator {
         status: "FAILED",
         passed: false,
         severity: rule.severity,
-        expected: `${expected.section} bÃ¶lÃ¼mÃ¼nde en az bir kaynak girdisi bulunmalÄ±`,
+        expected: `${expected.section} bölümünde en az bir kaynak girdisi bulunmalı`,
         actual: bibliography.status,
-        message: `${expected.section} bÃ¶lÃ¼mÃ¼ bulundu ancak gÃ¶rÃ¼nÃ¼r kaynak girdisi tespit edilemedi.`,
+        message: `${expected.section} bölümü bulundu ancak görünür kaynak girdisi tespit edilemedi.`,
         evidence: declaredOccurrences.map((occurrence) =>
           createAcademicSectionEvidence(occurrence, {
-            actual: "BÃ¶lÃ¼m boÅŸ",
+            actual: "Bölüm boş",
             expected: "En az bir kaynak girdisi",
             sectionName: expected.section,
           }),
@@ -94,9 +94,9 @@ export class BibliographyReferencesValidator implements RuleValidator {
       status: "PASSED",
       passed: true,
       severity: rule.severity,
-      expected: `${expected.section} bÃ¶lÃ¼mÃ¼ ve kaynak girdileri bulunmalÄ±`,
+      expected: `${expected.section} bölümü ve kaynak girdileri bulunmalı`,
       actual: `${bibliography.entries.length} kaynak girdisi`,
-      message: `${expected.section} bÃ¶lÃ¼mÃ¼nde ${bibliography.entries.length} kaynak girdisi bulundu.`,
+      message: `${expected.section} bölümünde ${bibliography.entries.length} kaynak girdisi bulundu.`,
     };
   }
 }
@@ -112,8 +112,8 @@ function createPassedResult(
     status: "PASSED",
     passed: true,
     severity: rule.severity,
-    expected: `${expected.section} bÃ¶lÃ¼mÃ¼ zorunlu deÄŸil`,
-    actual: "Zorunlu deÄŸil",
+    expected: `${expected.section} bölümü zorunlu değil`,
+    actual: "Zorunlu değil",
     message,
   };
 }
@@ -123,7 +123,7 @@ function assertRequiredSectionRule(
 ): asserts rule is RuleDefinition & { type: "REQUIRED_SECTION" } {
   if (rule.type !== "REQUIRED_SECTION") {
     throw new Error(
-      "BibliographyReferencesValidator yalnÄ±zca REQUIRED_SECTION tipindeki kurallarÄ± Ã§alÄ±ÅŸtÄ±rÄ±r.",
+      "BibliographyReferencesValidator yalnızca REQUIRED_SECTION tipindeki kuralları çalıştırır.",
     );
   }
 }
@@ -144,7 +144,7 @@ function getRequiredSectionExpected(
         !expected.aliases.every((alias) => typeof alias === "string")))
   ) {
     throw new Error(
-      "REQUIRED_SECTION kuralÄ± section, optional aliases ve boolean required deÄŸerlerini iÃ§ermelidir.",
+      "REQUIRED_SECTION kuralı section, optional aliases ve boolean required değerlerini içermelidir.",
     );
   }
 

@@ -15,6 +15,18 @@ const text = value => typeof value === 'string' && value.trim().length > 0;
 const equal = (a, b) => fingerprintDeclaration(a) === fingerprintDeclaration(b);
 const knownSyntheticHashes = new Set(manifest.fixtures.map(record => sha256(fs.readFileSync(path.join(root, fixtureDirectory, record.file)))));
 
+// Editor identity is explicit reviewed metadata, never inferred from DOCX XML.
+function sourceIdentity(source) {
+  const applications = { 'word-native': 'Microsoft Word Desktop', 'word-online': 'Microsoft Word Online', 'libreoffice-generated': 'LibreOffice' };
+  const unknown = { category: 'Unknown/unverified DOCX', scope: 'unverified', nativeEligible: false };
+  const knownApplication = source && ['Microsoft Word Desktop', 'Microsoft Word Online', 'LibreOffice'].includes(source.application);
+  if (source?.origin === 'programmatic') return { category: 'Programmatic DOCX', scope: knownApplication ? 'controlled-application-automation-only' : 'unverified', nativeEligible: false };
+  if (!knownApplication) return unknown;
+  if (!Object.hasOwn(applications, source.origin) || applications[source.origin] !== source.application) return unknown;
+  return { category: source.application, scope: source.origin === 'word-native' ? 'word-desktop-native' : source.origin,
+    nativeEligible: source.origin === 'word-native' || source.origin === 'libreoffice-generated' };
+}
+
 function scan(directory) {
   const excluded = new Set(['.git', 'node_modules', 'dist', '.codex', '.agents', '.aws']);
   return fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
@@ -89,11 +101,9 @@ function admit(directory, submission, reviews) {
   const hash = sha256(bytes);
   if (submission.sha256 !== hash || submission.byteSize !== bytes.length) return blocked('artifact-mismatch');
   const source = submission.source;
-  if (!source || !['word-native', 'libreoffice-generated', 'programmatic'].includes(source.origin) ||
-      !['Microsoft Word', 'LibreOffice'].includes(source.application) || !text(source.version) || !text(source.creationMethod) || !text(source.creatorId)) return blocked('unverified-source');
-  if ((source.origin === 'word-native' && source.application !== 'Microsoft Word') ||
-      (source.origin === 'libreoffice-generated' && source.application !== 'LibreOffice')) return blocked('application-origin-conflict');
-  if (source.origin !== 'programmatic' && knownSyntheticHashes.has(hash)) return blocked('known-synthetic-cannot-be-native');
+  const identity = sourceIdentity(source);
+  if (identity.scope === 'unverified' || !text(source.version) || !text(source.creationMethod) || !text(source.creatorId)) return blocked('unverified-source');
+  if (source.origin !== 'programmatic' && knownSyntheticHashes.has(hash)) return blocked('known-synthetic-origin-conflict');
   const matches = reviews.filter(review => review.id === submission.id);
   if (matches.length !== 1) return blocked('missing-or-ambiguous-independent-review');
   const review = matches[0];
@@ -118,7 +128,7 @@ function admit(directory, submission, reviews) {
       expected.fields.pageSections.some(section => ['top', 'bottom', 'left', 'right'].some(side => !Number.isFinite(section[side]))))) return blocked('invalid-section-ground-truth');
   if (Object.hasOwn(expected.fields, 'tableCount') && (!Number.isSafeInteger(expected.fields.tableCount) || expected.fields.tableCount < 0)) return blocked('invalid-table-ground-truth');
   if (Object.hasOwn(expected.fields, 'tocPresent') && typeof expected.fields.tocPresent !== 'boolean') return blocked('invalid-toc-ground-truth');
-  return { accepted: true, file, bytes, hash, review, compatibilityScope: source.origin === 'programmatic' ? 'controlled-application-automation-only' : source.origin };
+  return { accepted: true, file, bytes, hash, review, compatibilityScope: identity.scope, sourceCategory: identity.category, nativeEligible: identity.nativeEligible };
 }
 
 async function validate(directory, submissions, reviews) {
@@ -152,8 +162,9 @@ async function validate(directory, submissions, reviews) {
       applicationVerifiedValues: submission.expected.fields, expectedAcademicDecision: submission.expected.rules,
       thesisGuardValues: actual.fields, actualAcademicDecision: actual.rules.filter(rule => submission.expected.rules.some(expected => expected.ruleId === rule.ruleId)),
       analysis: actual.analysis, differences, compatibilityScope: admission.compatibilityScope,
+      sourceCategory: admission.sourceCategory,
       comparison: differences.length ? 'MISMATCH' : 'MATCH', verifiedCompatibility: verified,
-      nativeCompatibilityVerified: verified && admission.compatibilityScope !== 'controlled-application-automation-only' });
+      nativeCompatibilityVerified: verified && admission.nativeEligible });
   }
   return { schemaVersion: 1, productionAuthorization: 'not-granted',
     realWorldValidation: 'NOT_ESTABLISHED_BY_BATCH',
@@ -173,5 +184,5 @@ async function main() {
       (args.includes('--require-native') && (!data.records.length || data.records.some(record => !record.nativeCompatibilityVerified))))) process.exitCode = 1;
 }
 
-module.exports = { inventory, observe, admit, validate, sha256, fingerprintDeclaration };
+module.exports = { inventory, observe, admit, validate, sha256, fingerprintDeclaration, sourceIdentity };
 if (require.main === module) main().catch(error => { console.error(error); process.exitCode = 1; });

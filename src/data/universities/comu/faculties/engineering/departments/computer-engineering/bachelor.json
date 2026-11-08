@@ -1071,20 +1071,20 @@
         "targetId": "computer-engineering",
         "targetSlug": "computer-engineering"
       },
-      "title": "DoÄŸrudan AlÄ±ntÄ± Sayfa LokatÃ¶rÃ¼",
-      "description": "2007 Bilgisayar MÃ¼hendisliÄŸi bitirme projesi kÄ±lavuzunda doÄŸrudan alÄ±ntÄ±larda kaynak gÃ¶steriminde sayfa numarasÄ± verilmesini doÄŸrular.",
+      "title": "Doğrudan Alıntı Sayfa Lokatörü",
+      "description": "2007 Bilgisayar Mühendisliği bitirme projesi kılavuzunda doğrudan alıntılarda kaynak gösteriminde sayfa numarası verilmesini doğrular.",
       "category": "citation",
       "expected": true,
       "severity": "error",
       "score": 10,
-      "message": "DoÄŸrudan alÄ±ntÄ± atfÄ±nda desteklenen sayfa lokatÃ¶rÃ¼ gÃ¼venilir biÃ§imde doÄŸrulanamadÄ±.",
-      "solution": "DoÄŸrudan alÄ±ntÄ± atfÄ±nda aÃ§Ä±k sayfa lokatÃ¶rÃ¼nÃ¼ s. veya ss. gÃ¶sterimiyle belirtin.",
+      "message": "Doğrudan alıntı atfında desteklenen sayfa lokatörü güvenilir biçimde doğrulanamadı.",
+      "solution": "Doğrudan alıntı atfında açık sayfa lokatörünü s. veya ss. gösterimiyle belirtin.",
       "enabled": true,
       "version": "1.6.0",
       "validationEvidence": {
         "coverage": "PARTIAL",
         "trust": "MEDIUM",
-        "note": "YalnÄ±z gÃ¼venilir inline doÄŸrudan alÄ±ntÄ± semantic occurrence'larÄ± ile deterministik olarak iliÅŸkilendirilen mevcut atÄ±flarda s./ss. sayfa lokatÃ¶rÃ¼ doÄŸrulanÄ±r; belirsiz iliÅŸkiler, blok alÄ±ntÄ±lar ve source metinden kanÄ±tlanamayan alÄ±ntÄ± kimlikleri kapsam dÄ±ÅŸÄ±dÄ±r."
+        "note": "Yalnız güvenilir inline doğrudan alıntı semantic occurrence'ları ile deterministik olarak ilişkilendirilen mevcut atıflarda s./ss. sayfa lokatörü doğrulanır; belirsiz ilişkiler, blok alıntılar ve source metinden kanıtlanamayan alıntı kimlikleri kapsam dışıdır."
       }
     },
     {
