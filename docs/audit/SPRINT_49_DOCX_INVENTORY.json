@@ -1,0 +1,2809 @@
+{
+  "schemaVersion": 1,
+  "scope": "existing-workspace-fixtures",
+  "nativeCompatibilityVerified": false,
+  "summary": {
+    "total": 44,
+    "wordNativeVerified": 0,
+    "libreOfficeGeneratedVerified": 0,
+    "programmatic": 42,
+    "unknown": 2
+  },
+  "records": [
+    {
+      "file": "tests/audit/manual-fixtures/ThesisGuard_3cm_YENI_TEST.docx",
+      "sha256": "8c39e1c67a23701410dadba7105d2b12055052fccd68048a5de66d79101ebda5",
+      "byteSize": 36747,
+      "classification": "Unknown/unverified",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": null,
+      "provenanceReference": "docs/audit/SPRINT_41_DOCX_MARGIN_COMPARISON.md",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 3,
+            "top": 3,
+            "bottom": 3
+          }
+        ],
+        "tableCount": 0,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 4,
+        "failed": 24,
+        "notApplicable": 18
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/audit/manual-fixtures/ThesisGuard_margin_2_5cm_synthetic.docx",
+      "sha256": "74a16a551ded44192127ec8ca2cc9178c74f0f7e564cf76b603c065173071732",
+      "byteSize": 36859,
+      "classification": "Unknown/unverified",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": null,
+      "provenanceReference": "docs/audit/SPRINT_41_DOCX_MARGIN_COMPARISON.md",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3.18,
+            "right": 3.18,
+            "top": 2.5,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 0,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "FAILED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 3,
+        "failed": 26,
+        "notApplicable": 17
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/alternate-content-figure-synthetic.docx",
+      "sha256": "e990302942ff903be742a3f71ed3d74daa5b7b9145993927d60236e30c584afc",
+      "byteSize": 850956,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/alternate-content-semantic-collision-synthetic.docx",
+      "sha256": "4ddea79ac371c4105df3cae0d015aed6b7ba5b3164206d9c5995ffcdc3202828",
+      "byteSize": 850228,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/alternate-content-text-synthetic.docx",
+      "sha256": "6c4ce987bb83a50399ab6120a46577650f2a53545929b52012360ad2d4edc8dc",
+      "byteSize": 850903,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/alternateContentAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/automatic-heading-numbering-synthetic.docx",
+      "sha256": "2e5facb00087f18b2b45e86eeec356b88044d8e5e79f81b3869915d89d8b7f50",
+      "byteSize": 39493,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/chart-object-synthetic.docx",
+      "sha256": "6234f1f1e991dda0130406fda1dc1e6a70ebff3da6dcea6d083a969ae480ab8f",
+      "byteSize": 851584,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/complex-field-cached-result-synthetic.docx",
+      "sha256": "a6346dba4fc7bb1693959b71a8cd9d258175c4ec5f485a0406d262ec84c8f5c9",
+      "byteSize": 39553,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü complex REF field mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/docdefaults-theme-synthetic.docx",
+      "sha256": "441443f2e4432bbecfe74df21e5885812ab726da82b5653f8374574c720adde2",
+      "byteSize": 39373,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/drawingml-textbox-font-size-synthetic.docx",
+      "sha256": "cc1357fa6605ff6e305294908fadfd1408cd56ff973b8fbde61a23e7e9dadb07",
+      "byteSize": 851320,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/drawingml-textbox-ownership-synthetic.docx",
+      "sha256": "bf719f85c4fa24931b38e226666037880fbdc5c89db1294ba9f2895e16c29123",
+      "byteSize": 851315,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/drawingml-textbox-semantic-collision-synthetic.docx",
+      "sha256": "a2c737f3d5b8a225125a24802f0ff0e62f2424848cbb233906f6f348a2b93919",
+      "byteSize": 851288,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML DrawingML WordprocessingShape textbox mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/endnote-visible-content-synthetic.docx",
+      "sha256": "4c64b0fbe6d6d8e400b390b44e07bdd4861fdc1b8d362df870b4a8e41fb60faf",
+      "byteSize": 851288,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/equation-object-synthetic.docx",
+      "sha256": "bed79628008d70c7ddc1efdc4d07f94e560e713a06dc9dc648bdc3d1cf085510",
+      "byteSize": 850203,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-indentation-fail.docx",
+      "sha256": "d949dd52a2f32ef0b603c452bd569362b1e9fcf060df9c05015b6233deaf7acf",
+      "byteSize": 39528,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.applied-sciences.food-technology.bachelor.paragraph-indentation"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-margin-fail.docx",
+      "sha256": "74eb7066f6c441e9d87d584b235cdd1ba23bc054399920a62b9d340a455b5878",
+      "byteSize": 39534,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.bachelor.margin.right"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-object-alignment-fail.docx",
+      "sha256": "f426b714fe1bbf6aacf0bcdf7ecc3938bb53f54603ff25226bf4227fa07f6ef3",
+      "byteSize": 39521,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.applied-sciences.food-technology.bachelor.table-object-alignment"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-page-number-fail.docx",
+      "sha256": "8380ba26b4882bd58855a5769cf9ac43861ecfd6b4002942e2f0d40dba1c9d97",
+      "byteSize": 39525,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.applied-sciences.food-technology.bachelor.page-number"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-page-sequence-fail.docx",
+      "sha256": "bfa83b4d5300ce844a55d7fac3619d42a2865cec0cdd5e51d72f87af5659ebd4",
+      "byteSize": 39527,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.applied-sciences.food-technology.bachelor.page-number-sequence"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-paragraph-format-fail.docx",
+      "sha256": "bb34cf213f81f69deb7ac71cbdf63f79416edf4805d8a3b0d9d848cf9171bfe0",
+      "byteSize": 39443,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.bachelor.spacing.line-height"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/experimental-typography-fail.docx",
+      "sha256": "10fb318e84d2e61c13653c9507f12dbc0fe2086ca891b101fe632948776acede",
+      "byteSize": 39445,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.bachelor.typography.font-size"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/footnote-section-collision-synthetic.docx",
+      "sha256": "9234269271dc86c8804902650874a75681ca47703cc51cb879e700444171fe32",
+      "byteSize": 851305,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/footnote-visible-content-synthetic.docx",
+      "sha256": "3a5e940fb803008e4f97c87b0d31f7167ac7a0006f20c2d5db39ee583d3a3850",
+      "byteSize": 851307,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/footnoteEndnoteAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/full-correct.docx",
+      "sha256": "4a009611b6d7a5a6fe76039dc3aa9f47259b7d078019fd033aa79ff69a76c9d5",
+      "byteSize": 39439,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "python-docx",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/grouped-drawing-object-synthetic.docx",
+      "sha256": "5fb02f3011ba18adab6c188b5b24d3d526ac50fc8e1eb0a6bf964cc786ac723c",
+      "byteSize": 850617,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/multi-section-final-margin-fail-synthetic.docx",
+      "sha256": "f8683807a887680a3ed97b472997d4049a8461d02ffc3501b9ac09cae86cb7a9",
+      "byteSize": 850363,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML section mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.bachelor.margin.left",
+          "comu.bachelor.margin.right"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 1.76,
+            "right": 1.76,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/multi-section-margin-all-correct-synthetic.docx",
+      "sha256": "49547a55f420a016abed9a19e5740eef1871c917e77f4612d83ff0e1c900168f",
+      "byteSize": 850363,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML section mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/multi-section-margin-synthetic.docx",
+      "sha256": "2b08e6b0b028108dfe6ea7fd3718b54ebbe848bf92a651e26c979ee9028d3b74",
+      "byteSize": 850363,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML section mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0,
+        "failedRuleIds": [
+          "comu.bachelor.margin.left",
+          "comu.bachelor.margin.right"
+        ],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 1.76,
+            "right": 1.76,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "FAILED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 44,
+        "failed": 2,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/ole-object-synthetic.docx",
+      "sha256": "a6a2d2d7b04d488924b47aea5653af38a8215d2b21a6ef6b37f657d4c9ceb50d",
+      "byteSize": 851191,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/smartart-caption-collision-synthetic.docx",
+      "sha256": "05673b1735a8079c4c03570d67a9e08e72cc8dcad000c19bd65b03121fdc1556",
+      "byteSize": 851754,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 45,
+        "failed": 1,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/smartart-object-synthetic.docx",
+      "sha256": "7c16acaf799b3906fab1cdfbb1f7811f6af5d63e5aa6a18ab8338c81826d61da",
+      "byteSize": 851489,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/split-runs-synthetic.docx",
+      "sha256": "facb8b90d5f24e0624923c415656f605a1b2392f358d9ec91f187bac1d52c756",
+      "byteSize": 39554,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML run fragmentation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/style-inheritance-synthetic.docx",
+      "sha256": "ac963889e81c8f65bd731eab09c78ec244d0ede89529b4728930f0b2c39324e2",
+      "byteSize": 39660,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/textbox-font-size-synthetic.docx",
+      "sha256": "a467d3f8a03c68d7533d266010f78bc8c5211c8b53fa17660c057cfb33f43757",
+      "byteSize": 850779,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML VML textbox mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/textbox-semantic-collision-synthetic.docx",
+      "sha256": "bcecaf192e30c2c8d669ab9433e9ea797aeff3d0d4a53b63f2a23eb7c247a7e6",
+      "byteSize": 850762,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML VML textbox mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/toc-field-marked-synthetic.docx",
+      "sha256": "38ad19c5e500f983d05d82a0c35b09548b55a4402b53806289c4714e93dd2f36",
+      "byteSize": 39638,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü marked complex TOC field mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": true
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/toc-field-unmarked-synthetic.docx",
+      "sha256": "1ea948754ea925579ec578f3883a92c540f682abc19b5134e5bd1e349fabb98d",
+      "byteSize": 39645,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx üzerinde kontrollü complex TOC OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": true
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/tracked-deleted-reference-synthetic.docx",
+      "sha256": "729803abd6a39ca96a9b31969f217409b0ab9790e08887fa9265509fc0222335",
+      "byteSize": 850275,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML tracked-change mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/tracked-deleted-run-font-size-synthetic.docx",
+      "sha256": "303c5a6c2cc4452abd9648460bf8e6538ebf16d15139d8cfe15f4fd70a437b84",
+      "byteSize": 850292,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML tracked-change mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/tracked-inserted-run-synthetic.docx",
+      "sha256": "256c8604796e9feda0bb03e2dd361e46676fd25c760cae6c44842b238f7b6ac9",
+      "byteSize": 850287,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "full-correct.docx controlled OOXML tracked-change mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/tracked-move-semantic-collision-synthetic.docx",
+      "sha256": "8ca4a048b0eb2e324a37bdf9beea17e56d9fc6d4bffb266df5bbe8cd55a49978",
+      "byteSize": 850295,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/remainingRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/tracked-move-synthetic.docx",
+      "sha256": "db5ae0c6a3e872fd2f0fafe6186509fcd58732b1d089f30fbd433ce03f1a4e62",
+      "byteSize": 850555,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/remainingRepresentationAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0,
+        "failedRuleIds": [],
+        "notApplicableRuleIds": []
+      },
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/unknown-drawing-object-synthetic.docx",
+      "sha256": "bac6bbe589a2b5540f07a952f484f1db63e4a573df76a4e02b71b6a6f280a83a",
+      "byteSize": 850446,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    },
+    {
+      "file": "tests/fixtures/comu/food-technology/experimental/vml-image-object-synthetic.docx",
+      "sha256": "1b25cec73b68285a2eab3cd78d4d68ae416a3dbd2ae1a472ccf9095e48eaf987",
+      "byteSize": 850292,
+      "classification": "Programmatic/synthetic",
+      "application": null,
+      "applicationVersion": null,
+      "creationMethod": "tests/audit/objectSemanticCoverageReadinessAudit.cjs from full-correct.docx controlled OOXML mutation",
+      "provenanceReference": "tests/fixtures/comu/food-technology/experimental/manifest.json",
+      "applicationVerifiedValues": null,
+      "expectedAcademicDecision": null,
+      "syntheticRegressionOracle": null,
+      "thesisGuardValues": {
+        "pageSections": [
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          },
+          {
+            "left": 3,
+            "right": 2.5,
+            "top": 3,
+            "bottom": 2.5
+          }
+        ],
+        "tableCount": 1,
+        "tocPresent": false
+      },
+      "actualAcademicDecision": [
+        {
+          "ruleId": "comu.bachelor.margin.left",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.right",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.bachelor.margin.bottom",
+          "status": "PASSED"
+        },
+        {
+          "ruleId": "comu.applied-sciences.food-technology.bachelor.margin.top",
+          "status": "PASSED"
+        }
+      ],
+      "analysis": "COMPLETED",
+      "counts": {
+        "total": 46,
+        "passed": 46,
+        "failed": 0,
+        "notApplicable": 0
+      },
+      "comparison": "NOT_RUN",
+      "reason": "No reviewed Word/LibreOffice ground truth; parser observations are not ground truth"
+    }
+  ]
+}
